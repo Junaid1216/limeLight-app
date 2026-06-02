@@ -30,15 +30,51 @@ const chartData2 = staffComparisonInvoiceData.map(point => ({
   value: point.value,
 }));
 
-const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPressFrom, onPressTo }) => {
-  let peakRate = 0;
-  let peakTime = '00:00';
-  chartData.forEach(point => {
-    if (point.customData.rate > peakRate && point.label) {
-      peakRate = point.customData.rate;
-      peakTime = point.label;
+const getPeakMetrics = data => {
+  if (!data || data.length === 0) {
+    return { peakRate: 0, peakTime: '00:00' };
+  }
+
+  const peakIndex = data.reduce((currentPeakIndex, point, index) => {
+    const currentRate = point?.customData?.rate || 0;
+    const peakRate = data[currentPeakIndex]?.customData?.rate || 0;
+    return currentRate > peakRate ? index : currentPeakIndex;
+  }, 0);
+
+  const labelAtPeak = data[peakIndex]?.label;
+  if (labelAtPeak) {
+    return {
+      peakRate: data[peakIndex]?.customData?.rate || 0,
+      peakTime: labelAtPeak,
+    };
+  }
+
+  // Some chart points intentionally hide x-axis labels; fallback to nearest visible label.
+  let nearestLabel = '';
+  for (let leftIndex = peakIndex - 1; leftIndex >= 0; leftIndex -= 1) {
+    if (data[leftIndex]?.label) {
+      nearestLabel = data[leftIndex].label;
+      break;
     }
-  });
+  }
+
+  if (!nearestLabel) {
+    for (let rightIndex = peakIndex + 1; rightIndex < data.length; rightIndex += 1) {
+      if (data[rightIndex]?.label) {
+        nearestLabel = data[rightIndex].label;
+        break;
+      }
+    }
+  }
+
+  return {
+    peakRate: data[peakIndex]?.customData?.rate || 0,
+    peakTime: nearestLabel || '00:00',
+  };
+};
+
+const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPressFrom, onPressTo }) => {
+  const { peakRate, peakTime } = getPeakMetrics(chartData);
 
   return (
     <View style={styles.chartSection}>
@@ -48,13 +84,13 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
       <View style={styles.dateRangeCard}>
         <Text style={styles.dateRangeLabel}>{labels.dateRange}</Text>
 
-        <TouchableOpacity activeOpacity={0.85} onPress={onPressFrom} style={styles.dateButton}>
+        <TouchableOpacity activeOpacity={0.86} onPress={onPressFrom} style={styles.dateButton}>
           <Text style={[styles.dateButtonText, !fromDate && styles.datePlaceholder]}>
             {fromDate ? formatDate(fromDate) : labels.from}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity activeOpacity={0.85} onPress={onPressTo} style={styles.dateButton}>
+        <TouchableOpacity activeOpacity={0.86} onPress={onPressTo} style={styles.dateButton}>
           <Text style={[styles.dateButtonText, !toDate && styles.datePlaceholder]}>
             {toDate ? formatDate(toDate) : labels.to}
           </Text>

@@ -270,7 +270,7 @@ export const staffComparisonRankData = [
   {
     id: '3',
     rank: 3,
-    name: 'Ayesha',
+    name: 'Usman',
     target: 60,
     achieved: 42,
     commission: 'Rs. 658',
