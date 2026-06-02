@@ -12,10 +12,50 @@ import { Fonts } from '../Constants/Fonts';
 const chartWidth = wp(78);
 const chartHeight = hp(20);
 const chartMaxValue = 250;
-
 const chartData = staffComparisonFootfallData.map((point, index) => ({
   value: point.value,
-  label: point.label,
+  label:
+    index === 0
+      ? '10:00'
+      : index === 2
+        ? '02:00'
+        : index === 4
+          ? '06:00'
+          : index === 6
+            ? '10:00'
+            : index === 8
+              ? '12:00'
+              : '',
+  labelComponent: () => {
+    const label =
+      index === 0
+        ? '10:00'
+        : index === 2
+          ? '02:00'
+          : index === 4
+            ? '06:00'
+            : index === 6
+              ? '10:00'
+              : index === 8
+                ? '12:00'
+                : '';
+
+    if (!label) {
+      return null;
+    }
+
+    return (
+      <View
+        style={[
+          styles.axisLabelContainer,
+          index === 0 && styles.firstXAxisLabel,
+          index === 8 && styles.lastXAxisLabel,
+        ]}
+      >
+        <Text style={styles.axisText}>{label}</Text>
+      </View>
+    );
+  },
   customData: {
     footfall: point.value,
     invoices: staffComparisonInvoiceData[index]?.value || 0,
@@ -30,6 +70,40 @@ const chartData2 = staffComparisonInvoiceData.map(point => ({
   value: point.value,
 }));
 
+const getNearestLabelByIndex = (data, index) => {
+  if (!data || data.length === 0) {
+    return '00:00';
+  }
+
+  if (data[index]?.label) {
+    return data[index].label;
+  }
+
+  for (let leftIndex = index - 1; leftIndex >= 0; leftIndex -= 1) {
+    if (data[leftIndex]?.label) {
+      return data[leftIndex].label;
+    }
+  }
+
+  for (let rightIndex = index + 1; rightIndex < data.length; rightIndex += 1) {
+    if (data[rightIndex]?.label) {
+      return data[rightIndex].label;
+    }
+  }
+
+  return '00:00';
+};
+
+const getPointIndex = (data, selectedPoint) => {
+  const providedIndex = selectedPoint?.index ?? selectedPoint?.dataPointIndex;
+  if (typeof providedIndex === 'number' && providedIndex >= 0) {
+    return providedIndex;
+  }
+
+  const resolvedIndex = data.indexOf(selectedPoint);
+  return resolvedIndex >= 0 ? resolvedIndex : 0;
+};
+
 const getPeakMetrics = data => {
   if (!data || data.length === 0) {
     return { peakRate: 0, peakTime: '00:00' };
@@ -41,40 +115,62 @@ const getPeakMetrics = data => {
     return currentRate > peakRate ? index : currentPeakIndex;
   }, 0);
 
-  const labelAtPeak = data[peakIndex]?.label;
-  if (labelAtPeak) {
-    return {
-      peakRate: data[peakIndex]?.customData?.rate || 0,
-      peakTime: labelAtPeak,
-    };
-  }
-
-  // Some chart points intentionally hide x-axis labels; fallback to nearest visible label.
-  let nearestLabel = '';
-  for (let leftIndex = peakIndex - 1; leftIndex >= 0; leftIndex -= 1) {
-    if (data[leftIndex]?.label) {
-      nearestLabel = data[leftIndex].label;
-      break;
-    }
-  }
-
-  if (!nearestLabel) {
-    for (let rightIndex = peakIndex + 1; rightIndex < data.length; rightIndex += 1) {
-      if (data[rightIndex]?.label) {
-        nearestLabel = data[rightIndex].label;
-        break;
-      }
-    }
-  }
-
   return {
     peakRate: data[peakIndex]?.customData?.rate || 0,
-    peakTime: nearestLabel || '00:00',
+    peakTime: getNearestLabelByIndex(data, peakIndex),
   };
 };
 
 const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPressFrom, onPressTo }) => {
-  const { peakRate, peakTime } = getPeakMetrics(chartData);
+  const peakMetrics = getPeakMetrics(chartData);
+  const [activePointerIndex, setActivePointerIndex] = React.useState(null);
+  const [isPointerActive, setIsPointerActive] = React.useState(false);
+  const activePointerIndexRef = React.useRef(null);
+
+  const headerMetrics =
+    !isPointerActive || activePointerIndex === null
+      ? peakMetrics
+      : {
+          peakRate: chartData[activePointerIndex]?.customData?.rate || 0,
+          peakTime: getNearestLabelByIndex(chartData, activePointerIndex),
+        };
+
+  const resetHeaderToPeak = () => {
+    setIsPointerActive(false);
+    activePointerIndexRef.current = null;
+    setActivePointerIndex(null);
+  };
+
+  const syncHeaderWithPointer = pointerInfo => {
+    if (typeof pointerInfo?.pointerIndex !== 'number' || pointerInfo.pointerIndex < 0) {
+      return;
+    }
+    const pointerIndex = pointerInfo.pointerIndex;
+
+    if (activePointerIndexRef.current === pointerIndex) {
+      return;
+    }
+
+    activePointerIndexRef.current = pointerIndex;
+    setActivePointerIndex(pointerIndex);
+  };
+
+  const activatePointerSync = () => {
+    setIsPointerActive(true);
+  };
+
+  const activePoint = activePointerIndex !== null ? chartData[activePointerIndex] : null;
+  const activeTooltipData = activePoint?.customData || null;
+  const activeTooltipTime =
+    activePointerIndex !== null ? getNearestLabelByIndex(chartData, activePointerIndex) : '';
+  const activeTooltipPositionStyle =
+    activePointerIndex === null
+      ? null
+      : activePointerIndex <= 1
+        ? styles.externalTooltipRight
+        : activePointerIndex >= chartData.length - 2
+          ? styles.externalTooltipLeft
+          : styles.externalTooltipCenter;
 
   return (
     <View style={styles.chartSection}>
@@ -99,8 +195,10 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
 
       <View style={styles.chartCard}>
         <View style={styles.chartHeaderRow}>
-          <Text style={styles.chartHeading}>{labels.conversionRate}</Text>
-          <Text style={styles.peakText}>{`Peak: ${peakTime} - ${peakRate}%`}</Text>
+          <Text style={styles.chartHeading} numberOfLines={1}>
+            {labels.conversionRate}
+          </Text>
+          <Text style={styles.peakText}>{`Peak: ${headerMetrics.peakTime} - ${headerMetrics.peakRate}%`}</Text>
         </View>
 
         <View style={styles.legendRow}>
@@ -115,6 +213,21 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
         </View>
 
         <View style={styles.chartBody}>
+          {isPointerActive && activeTooltipData && activeTooltipPositionStyle ? (
+            <View style={[styles.externalTooltipCard, activeTooltipPositionStyle]} pointerEvents="none">
+              <View style={styles.tooltipTopRow}>
+                <Text style={styles.tooltipTime}>{activeTooltipTime}</Text>
+                <Text style={styles.tooltipRate}>{`${activeTooltipData.rate}%`}</Text>
+              </View>
+              <Text style={styles.tooltipValue}>
+                {labels.footfall}: {activeTooltipData.footfall}
+              </Text>
+              <Text style={styles.tooltipValue}>
+                {labels.invoices}: {activeTooltipData.invoices}
+              </Text>
+            </View>
+          ) : null}
+
           <LineChart
             areaChart
             curved
@@ -139,16 +252,19 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
             noOfSections={4}
             maxValue={chartMaxValue}
             rulesColor={Colors.lightPeriwinkle}
-            rulesType="solid"
+            rulesType="dashed"
             yAxisColor={Colors.surfaceBorder}
             xAxisColor={Colors.surfaceBorder}
-            yAxisTextStyle={styles.axisText}
+            yAxisTextStyle={styles.yAxisText}
             xAxisLabelTextStyle={styles.axisText}
-            yAxisLabelWidth={wp(8)}
+            yAxisLabelWidth={wp(7)}
             spacing={chartWidth / (chartData.length - 1)}
-            initialSpacing={0}
-            endSpacing={0}
+            initialSpacing={wp(3.2)}
+            endSpacing={wp(4.2)}
+            disableScroll
+            adjustToWidth
             hideDataPoints
+            getPointerProps={syncHeaderWithPointer}
             pointerConfig={{
               pointerStripHeight: chartHeight,
               pointerStripColor: Colors.coolGrey,
@@ -156,32 +272,11 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
               pointerColor: Colors.graphite,
               radius: 4,
               activatePointersOnLongPress: true,
-              autoAdjustPointerLabelPosition: true,
-              pointerLabelWidth: wp(30),
-              pointerLabelHeight: hp(7.5),
-              pointerLabelComponent: items => {
-                if (!items || items.length === 0) {
-                  return null;
-                }
-                const selected = items[0];
-                const customData = selected.customData
-                  ? selected.customData
-                  : { footfall: 0, invoices: 0, rate: 0 };
-                return (
-                  <View style={styles.tooltipCard}>
-                    <View style={styles.tooltipTopRow}>
-                      <Text style={styles.tooltipTime}>{selected.label || '--:--'}</Text>
-                      <Text style={styles.tooltipRate}>{`${customData.rate}%`}</Text>
-                    </View>
-                    <Text style={styles.tooltipValue}>
-                      {labels.footfall}: {customData.footfall}
-                    </Text>
-                    <Text style={styles.tooltipValue}>
-                      {labels.invoices}: {customData.invoices}
-                    </Text>
-                  </View>
-                );
-              },
+              autoAdjustPointerLabelPosition: false,
+              onTouchEnd: resetHeaderToPeak,
+              onTouchStart: activatePointerSync,
+              onResponderMove: activatePointerSync,
+              onResponderGrant: activatePointerSync,
             }}
           />
         </View>
@@ -207,10 +302,10 @@ const styles = StyleSheet.create({
     color: Colors.blueGrey,
   },
   dateRangeCard: {
-    backgroundColor: Colors.lightGrey,
+    backgroundColor: Colors.white,
     borderRadius: wp(3.8),
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
+    borderWidth: wp(0.25),
+    borderColor: Colors.silver,
     paddingHorizontal: wp(2.2),
     paddingVertical: hp(0.9),
     flexDirection: 'row',
@@ -224,7 +319,7 @@ const styles = StyleSheet.create({
     color: Colors.graphite,
   },
   dateButton: {
-    width: wp(20),
+    width: wp(24),
     borderRadius: wp(3.1),
     borderWidth: 1,
     borderColor: Colors.fieldBorder,
@@ -243,12 +338,12 @@ const styles = StyleSheet.create({
   },
   chartCard: {
     backgroundColor: Colors.white,
-    borderRadius: wp(4),
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
-    paddingHorizontal: wp(3),
-    paddingTop: hp(1.3),
-    paddingBottom: hp(1.8),
+    borderRadius: wp(4.4),
+    borderWidth: wp(0.25),
+    borderColor: Colors.silver,
+    paddingHorizontal: wp(3.6),
+    paddingTop: hp(1.6),
+    paddingBottom: hp(1.9),
   },
   chartHeaderRow: {
     flexDirection: 'row',
@@ -256,50 +351,82 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   chartHeading: {
-    fontFamily: Fonts.poppinsSemiBold,
-    fontSize: wp(3.9),
+    flex: 1,
+    fontFamily: Fonts.poppinsBold,
+    fontSize: wp(4.2),
     color: Colors.graphite,
   },
   peakText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: wp(2.8),
+    fontSize: wp(3.7),
     color: Colors.green,
   },
   legendRow: {
     flexDirection: 'row',
-    gap: wp(3),
-    marginTop: hp(0.6),
-    marginBottom: hp(0.6),
+    gap: wp(2.6),
+    marginTop: hp(0.55),
+    marginBottom: hp(0.8),
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   legendDot: {
-    width: wp(2),
-    height: wp(2),
+    width: wp(1.8),
+    height: wp(1.8),
     borderRadius: wp(2),
-    marginRight: wp(1.2),
+    marginRight: wp(1),
   },
   legendLabel: {
     fontFamily: Fonts.poppinsMedium,
-    fontSize: wp(2.5),
+    fontSize: wp(2.8),
     color: Colors.steelGray,
   },
   chartBody: {
     marginTop: hp(0.4),
-    marginLeft: -wp(1),
+    marginLeft: 0,
+    position: 'relative',
+  },
+  axisLabelContainer: {
+    width: wp(12),
+    alignItems: 'center',
   },
   axisText: {
     fontFamily: Fonts.poppinsMedium,
-    fontSize: wp(2.15),
+    fontSize: wp(2.5),
     color: Colors.coolGrey,
   },
-  tooltipCard: {
+  yAxisText: {
+    fontFamily: Fonts.poppinsSemiBold,
+    fontSize: wp(2.35),
+    color: Colors.graphite,
+  },
+  firstXAxisLabel: {
+    marginLeft: wp(4.2),
+    alignItems: 'flex-start',
+  },
+  lastXAxisLabel: {
+    alignItems: 'flex-start',
+    marginLeft:wp(-4.7),
+  },
+  externalTooltipCard: {
     backgroundColor: Colors.graphite,
-    borderRadius: wp(3),
-    paddingVertical: hp(0.6),
-    paddingHorizontal: wp(2.4),
+    borderRadius: wp(2.5),
+    paddingVertical: hp(0.55),
+    paddingHorizontal: wp(2.2),
+    minWidth: wp(24),
+    position: 'absolute',
+    top: hp(0.8),
+    zIndex: 10,
+  },
+  externalTooltipRight: {
+    left: wp(9),
+  },
+  externalTooltipCenter: {
+    alignSelf: 'center',
+  },
+  externalTooltipLeft: {
+    right: wp(9),
   },
   tooltipTime: {
     fontFamily: Fonts.poppinsSemiBold,

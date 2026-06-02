@@ -4,28 +4,31 @@ import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 
+const ACHIEVED_COLOR_MAP = {
+  1: Colors.successTeal,
+  2: Colors.royalCobalt,
+  3: Colors.warmAmber,
+};
+
+const getAchievedColor = rank => ACHIEVED_COLOR_MAP[rank] || Colors.steelGray;
+
+const getRankBadgeColors = (rank, rankColor) => {
+  const isTopThree = rank <= 3;
+  return {
+    backgroundColor: isTopThree ? `${rankColor}1A` : Colors.lightGrey,
+    borderColor: isTopThree ? rankColor : Colors.platinum,
+    textColor: isTopThree ? rankColor : Colors.ashGray,
+  };
+};
+
 const RankItem = ({ item, index, totalItems, achievedSuffix }) => {
-  const isTopThree = item.rank <= 3;
-  const achievedColor =
-    item.rank === 1
-      ? Colors.successTeal
-      : item.rank === 2
-      ? Colors.royalCobalt
-      : item.rank === 3
-      ? Colors.warmAmber
-      : Colors.steelGray;
+  const achievedColor = getAchievedColor(item.rank);
+  const badgeColors = getRankBadgeColors(item.rank, item.rankColor);
 
   return (
     <View style={[styles.rankRow, index !== totalItems - 1 && styles.rankRowBorder]}>
-      <View
-        style={[
-          styles.rankBadge,
-          {
-            backgroundColor: isTopThree ? `${item.rankColor}1A` : Colors.lightGrey,
-            borderColor: isTopThree ? item.rankColor : Colors.platinum,
-          },
-        ]}>
-        <Text style={[styles.rankBadgeText, { color: isTopThree ? item.rankColor : Colors.ashGray }]}>
+      <View style={[styles.rankBadge, { backgroundColor: badgeColors.backgroundColor, borderColor: badgeColors.borderColor }]}>
+        <Text style={[styles.rankBadgeText, { color: badgeColors.textColor }]}>
           {item.rank}
         </Text>
       </View>
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
   performanceCard: {
     backgroundColor: Colors.white,
     borderRadius: wp(5),
-    borderWidth: 1,
+    borderWidth: wp(0.25),
     borderColor: Colors.appBorder,
     paddingHorizontal: wp(3.4),
     paddingTop: hp(1.35),
@@ -124,15 +127,18 @@ const styles = StyleSheet.create({
   },
   meInfoWrap: {
     flex: 1,
+    marginLeft: wp(6),
   },
   meName: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: wp(3.65),
     color: Colors.graphite,
     marginLeft: wp(2),
+    marginBottom: hp(0.05),
   },
   meAchievement: {
-    marginTop: hp(0.15),
+    marginTop: 0,
+    marginLeft: wp(2),
     fontFamily: Fonts.poppinsMedium,
     fontSize: wp(2.6),
     color: Colors.green,
@@ -141,20 +147,21 @@ const styles = StyleSheet.create({
     width: wp(10),
     textAlign: 'left',
     paddingLeft: 0,
+    marginRight: wp(9.5),
     fontFamily: Fonts.poppinsRegular,
-    fontSize: 14,
-    color: Colors.mutedSlate,
+    fontSize: wp(3.9),
+    color: Colors.black,
   },
   meCommission: {
     width: wp(18),
     textAlign: 'right',
     fontFamily: Fonts.poppinsBold,
-    fontSize: 14,
+    fontSize: wp(3.9),
     color: Colors.graphite,
   },
   sectionHeading: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: 16,
+    fontSize: wp(4.4),
     color: Colors.graphite,
     marginBottom: hp(0.8),
   },
@@ -165,7 +172,7 @@ const styles = StyleSheet.create({
   },
   tableHeaderText: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: 10,
+    fontSize: wp(2.8),
     color: Colors.blueGrey,
   },
   rankCol: {
@@ -199,7 +206,7 @@ const styles = StyleSheet.create({
     width: wp(6.5),
     height: wp(6.5),
     borderRadius: wp(3.25),
-    borderWidth: 1,
+    borderWidth: wp(0.25),
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: wp(2.3),
@@ -216,10 +223,10 @@ const styles = StyleSheet.create({
   },
   rankName: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: 12.7,
+    fontSize: wp(3.5),
     color: Colors.graphite,
     marginBottom: hp(0.2),
-    lineHeight: 15,
+    lineHeight: wp(4.2),
   },
   achievedText: {
     marginTop: 0,
@@ -232,14 +239,14 @@ const styles = StyleSheet.create({
     paddingLeft: 0,
     marginRight: wp(5.9),
     fontFamily: Fonts.poppinsRegular,
-    fontSize: 13,
-    color: Colors.mutedSlate,
+    fontSize: wp(3.6),
+    color: Colors.black,
   },
   rankCommission: {
     width: wp(20),
     textAlign: 'right',
     fontFamily: Fonts.poppinsBold,
-    fontSize: 14,
+    fontSize: wp(3.9),
     color: Colors.graphite,
     marginRight: wp(1.7),
   },

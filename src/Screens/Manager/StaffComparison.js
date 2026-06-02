@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { hp, wp } from '../../Assets/Responsive';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import StaffComparisonTabs from '../../Components/StaffComparisonTabs';
@@ -51,9 +50,16 @@ const StaffComparison = () => {
   };
 
   return (
-    <SafeAreaView style={[MyStyling.container2, styles.safeArea]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.container}>
-        <MainHeaderComponent title={Strings.staffComparisonHeader} notificationCount={1} />
+    <View style={MyStyling.container2}>
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled">
+        <MainHeaderComponent
+          title={Strings.staffComparisonHeader}
+          notificationCount={5}
+        />
 
         <StaffComparisonTabs
           selectedTab={selectedTab}
@@ -88,15 +94,11 @@ const StaffComparison = () => {
           />
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.white,
-  },
   container: {
     paddingHorizontal: wp(4),
     paddingVertical: hp(1.8),
