@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Pressable,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
@@ -26,11 +20,17 @@ const Login = () => {
     <View style={[MyStyling.container1, styles.content]}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.mint} />
 
-      <Text style={styles.welcomeText} numberOfLines={1}>{Strings.welcomeBack}</Text>
-      <Text style={styles.subtitle} numberOfLines={1}>{Strings.loginSubtitle}</Text>
+      <Text style={styles.welcomeText} numberOfLines={1}>
+        {Strings.welcomeBack}
+      </Text>
+      <Text style={styles.subtitle} numberOfLines={1}>
+        {Strings.loginSubtitle}
+      </Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle} numberOfLines={1}>{Strings.login}</Text>
+        <Text style={styles.cardTitle} numberOfLines={1}>
+          {Strings.login}
+        </Text>
 
         <Customtextinput
           label={Strings.emailLabel}
@@ -55,8 +55,11 @@ const Login = () => {
 
         <Pressable
           style={styles.forgotWrap}
-          onPress={() => navigation.navigate('ForgotPassword')}>
-          <Text style={styles.forgotText} numberOfLines={1}>{Strings.forgotPassword}</Text>
+          onPress={() => navigation.navigate('ForgotPassword')}
+        >
+          <Text style={styles.forgotText} numberOfLines={1}>
+            {Strings.forgotPassword}
+          </Text>
         </Pressable>
       </View>
 
@@ -83,7 +86,7 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.ml,
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.black,
-    marginTop:wp(10),
+    marginTop: wp(10),
   },
   subtitle: {
     fontSize: Fontsize.s,
@@ -98,7 +101,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(5),
     paddingTop: hp(2.5),
     paddingBottom: hp(2.2),
-    elevation: 2,
+    elevation: wp(0.2),
+    borderColor: Colors.dividerBlue,
+    borderWidth: wp(0.3),
   },
   cardTitle: {
     fontSize: Fontsize.m,
@@ -114,7 +119,7 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.s,
     fontFamily: Fonts.poppinsBold,
     color: Colors.blue,
-    maxWidth:wp(28),
+    maxWidth: wp(28),
   },
 });
 

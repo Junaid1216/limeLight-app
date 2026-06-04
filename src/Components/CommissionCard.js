@@ -59,12 +59,14 @@ const CommissionCard = () => {
             style={[
               styles.achievedSegment,
               { flex: fill, backgroundColor: Colors.emerald },
-            ]}>
+            ]}
+          >
             <Text
               style={[styles.barText, styles.barTextLeft]}
               numberOfLines={1}
               adjustsFontSizeToFit
-              minimumFontScale={0.75}>
+              minimumFontScale={0.75}
+            >
               {achieved}
               {Strings.percentAchieved}
             </Text>
@@ -74,7 +76,8 @@ const CommissionCard = () => {
               style={[styles.barText, styles.barTextRight]}
               numberOfLines={1}
               adjustsFontSizeToFit
-              minimumFontScale={0.75}>
+              minimumFontScale={0.75}
+            >
               {remaining}
               {Strings.percentRemaining}
             </Text>
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
   },
   barRow: {
     flexDirection: 'row',
-    width: '100%',
+    width: wp(78),
     height: hp(3.1),
   },
   achievedSegment: {

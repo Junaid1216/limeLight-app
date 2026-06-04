@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
@@ -55,7 +50,7 @@ const ResetPassword = () => {
 
         <Btn
           title={Strings.continue}
-          onPress={() => {}}
+          onPress={() => navigation.navigate('Login')}
           style={styles.continueBtn}
         />
       </View>

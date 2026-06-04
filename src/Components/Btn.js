@@ -7,11 +7,11 @@ import { Fonts } from '../Constants/Fonts';
 
 const Btn = props => {
   return (
-    <Pressable style={[styles.btn, props.style]} onPress={props.onPress}>
+    <Pressable style={[styles.btn, props?.style]} onPress={props?.onPress}>
       <View style={styles.content}>
         {props?.icon ? (
           <Image
-            source={props.icon}
+            source={props?.icon}
             style={styles.icon}
             resizeMode="contain"
           />
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     marginRight: wp(2),
   },
   btnText: {
-    fontSize: wp(4),
+    fontSize: Fontsize.sm,
     fontFamily: Fonts.poppinsMedium,
     color: Colors.white,
   },

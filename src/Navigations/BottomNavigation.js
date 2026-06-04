@@ -16,47 +16,55 @@ import Survey from '../Screens/CommonScreens/Survey';
 
 const BOTTOM_STACK = createBottomTabNavigator();
 
-const tabBarIcon = (iconName, label, wrapStyle) => ({ focused }) => (
-  <View style={[styles.tabIconWrap, wrapStyle]}>
-    <View style={styles.tabContent}>
-      {focused && <View style={styles.tabContentActive} />}
-      <Icon
-        name={iconName}
-        size={wp(6)}
-        color={focused ? Colors.green : Colors.mediumGrey}
-        style={styles.tabIcon}
-      />
-      <Text
-        style={[styles.tabLabel, focused && styles.tabLabelActive]}
-        numberOfLines={1}
-        allowFontScaling={false}>
-        {label}
-      </Text>
-    </View>
-  </View>
-);
+const tabBarIcon =
+  (iconName, label, wrapStyle) =>
+  ({ focused }) =>
+    (
+      <View style={[styles.tabIconWrap, wrapStyle]}>
+        <View style={styles.tabContent}>
+          {focused && <View style={styles.tabContentActive} />}
+          <Icon
+            name={iconName}
+            size={wp(6)}
+            color={focused ? Colors.green : Colors.mediumGrey}
+            style={styles.tabIcon}
+          />
+          <Text
+            style={[styles.tabLabel, focused && styles.tabLabelActive]}
+            numberOfLines={1}
+            allowFontScaling={false}
+          >
+            {label}
+          </Text>
+        </View>
+      </View>
+    );
 
-const tabBarImageIcon = (imageSource, label, wrapStyle) => ({ focused }) => (
-  <View style={[styles.tabIconWrap, wrapStyle]}>
-    <View style={styles.tabContent}>
-      {focused && <View style={styles.tabContentActive} />}
-      <Image
-        source={imageSource}
-        style={[
-          styles.tabIcon,
-          { tintColor: focused ? Colors.green : Colors.mediumGrey },
-        ]}
-        resizeMode="contain"
-      />
-      <Text
-        style={[styles.tabLabel, focused && styles.tabLabelActive]}
-        numberOfLines={1}
-        allowFontScaling={false}>
-        {label}
-      </Text>
-    </View>
-  </View>
-);
+const tabBarImageIcon =
+  (imageSource, label, wrapStyle) =>
+  ({ focused }) =>
+    (
+      <View style={[styles.tabIconWrap, wrapStyle]}>
+        <View style={styles.tabContent}>
+          {focused && <View style={styles.tabContentActive} />}
+          <Image
+            source={imageSource}
+            style={[
+              styles.tabIcon,
+              { tintColor: focused ? Colors.green : Colors.mediumGrey },
+            ]}
+            resizeMode="contain"
+          />
+          <Text
+            style={[styles.tabLabel, focused && styles.tabLabelActive]}
+            numberOfLines={1}
+            allowFontScaling={false}
+          >
+            {label}
+          </Text>
+        </View>
+      </View>
+    );
 
 const BottomNavigation = () => {
   return (
@@ -74,7 +82,8 @@ const BottomNavigation = () => {
         tabBarButton: props => (
           <TouchableOpacity {...props} activeOpacity={1} />
         ),
-      }}>
+      }}
+    >
       <BOTTOM_STACK.Screen
         name="Home"
         component={RoleNavigator}
@@ -170,10 +179,10 @@ const styles = StyleSheet.create({
   },
   tabContentActive: {
     position: 'absolute',
-    top: 0,
-    right: 3,
-    bottom: 0,
-    left: 3,
+    top: wp(0),
+    right: wp(0.8),
+    bottom: wp(0),
+    left: wp(0.8),
     backgroundColor: Colors.lightGreen,
     borderRadius: wp(4),
   },

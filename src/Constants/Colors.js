@@ -78,4 +78,7 @@ export const Colors = {
   successTeal: '#21B579',
   royalCobalt: '#2D6FE4',
   warmAmber: '#D99227',
+  darkblue: '#111827',
+  darkgreen: '#20C9971A',
+  dividerBlue: '#D8E4F5',
 };

@@ -5,8 +5,7 @@ export const Strings = {
   asm: 'ASM',
   staffDescription:
     'Track your sales and compare\nperformance with other staff.',
-  branchOperation:
-    'Leads branch operations and\ndistributes targets to staff.',
+  branchOperation: 'Leads branch operations and\ndistributes targets to staff.',
   asmDescription:
     'Track and compare performance\nof all staff and branches in your\nregion',
   welcomeBack: 'Welcome Back',
@@ -59,8 +58,7 @@ export const Strings = {
   branchLabel: 'Branch',
   yourFeedbackLabel: 'Your Feedback',
   required: 'Required',
-  feedbackNote:
-    'Be specific about customer needs or product issues',
+  feedbackNote: 'Be specific about customer needs or product issues',
   announcementHeader: 'Announcement',
   readMore: 'Read More',
   notificationHeader: 'Notifications',
@@ -139,4 +137,5 @@ export const Strings = {
   peakLabel: 'Peak: 06:00 - 58%',
   footfall: 'Footfall',
   invoices: 'Invoices',
+  TargetAssignment: 'Target Assignment',
 };

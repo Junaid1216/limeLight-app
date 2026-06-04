@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import { hp, wp } from '../../Assets/Responsive';
@@ -24,7 +18,8 @@ const AnnouncementDetail = ({ route }) => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}>
+        contentContainerStyle={styles.content}
+      >
         <MainHeaderComponent title={Strings.announcementHeader} />
 
         <View style={styles.card}>
@@ -35,11 +30,15 @@ const AnnouncementDetail = ({ route }) => {
 
             <View style={styles.dateRow}>
               <Icon name="calendar" size={wp(3.5)} color={Colors.mediumGrey} />
-              <Text style={styles.dateText}>{item?.date}</Text>
+              <Text style={styles.dateText} numberOfLines={1}>
+                {item?.date}
+              </Text>
             </View>
           </View>
 
-          <Text style={styles.title} numberOfLines={1}>{item?.title}</Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {item?.title}
+          </Text>
           <Text style={styles.description}>{item?.description}</Text>
         </View>
       </ScrollView>

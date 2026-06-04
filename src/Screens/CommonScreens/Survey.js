@@ -1,12 +1,6 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import {
-  Image,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
@@ -130,8 +124,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   questionIcon: {
-    width: 16,
-    height: 16,
+    width: wp(5),
+    height: wp(5),
   },
   questionsText: {
     fontSize: Fontsize.xs2,

@@ -30,7 +30,8 @@ const FeedBack = () => {
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+      >
         <MainHeaderComponent
           title={Strings.feedbackHeader}
           notificationCount={5}
@@ -85,7 +86,11 @@ const FeedBack = () => {
           />
 
           <View style={[styles.noteRow, styles.inputSideSpace]}>
-            <Image source={Images.Info} style={styles.infoIcon} resizeMode="contain" />
+            <Image
+              source={Images.Info}
+              style={styles.infoIcon}
+              resizeMode="contain"
+            />
             <Text style={styles.noteText} numberOfLines={2}>
               {Strings.feedbackNote}
             </Text>
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   subtitle: {
-    fontSize: wp(3.2),
+    fontSize: Fontsize.xs1,
     fontFamily: Fonts.poppinsRegular,
     color: Colors.mediumGrey,
     marginBottom: hp(2),

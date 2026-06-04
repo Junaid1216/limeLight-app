@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Images } from '../Assets';
 import { hp, wp } from '../Assets/Responsive';
@@ -22,7 +16,8 @@ const MainHeaderComponent = props => {
     <View style={[styles.header, props.style]}>
       <TouchableOpacity
         style={styles.backBtn}
-        onPress={() => navigation.goBack()}>
+        onPress={() => navigation.goBack()}
+      >
         <Image
           source={Images.LeftArrow}
           style={styles.arrowIcon}
@@ -31,13 +26,14 @@ const MainHeaderComponent = props => {
       </TouchableOpacity>
 
       <Text style={styles.title} numberOfLines={1}>
-        {props.title}
+        {props?.title}
       </Text>
 
       {showNotification ? (
         <TouchableOpacity
           style={styles.notification}
-          onPress={() => navigation.navigate('Notification')}>
+          onPress={() => navigation.navigate('Notification')}
+        >
           <Image
             source={Images.NotificationBell}
             resizeMode="contain"

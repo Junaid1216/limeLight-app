@@ -24,7 +24,7 @@ const CustomDrawer = ({ navigation }) => {
   const { role } = useRole();
 
   const goToScreen = screenName => {
-    navigation.navigate(DRAWER_BOTTOM_ROUTE, { screen: screenName });
+    navigation.navigate('BottomNavigation', { screen: screenName });
     navigation.closeDrawer();
   };
 
@@ -48,7 +48,8 @@ const CustomDrawer = ({ navigation }) => {
         onPress={() => {
           navigation.closeDrawer();
           navigation.getParent()?.navigate('Profile');
-        }}>
+        }}
+      >
         <View style={styles.avatar}>
           <Image
             source={Images.Avatar}
@@ -72,13 +73,15 @@ const CustomDrawer = ({ navigation }) => {
       <ScrollView
         style={styles.menuScroll}
         contentContainerStyle={styles.menuContent}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         <Pressable
           style={({ pressed }) => [
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={() => goToScreen('Training')}>
+          onPress={() => goToScreen('Training')}
+        >
           <Icon name="headphones" size={wp(5)} color={Colors.slateGrey} />
           <Text style={styles.menuLabel} numberOfLines={1}>
             {Strings.customerServiceTraining}
@@ -90,7 +93,8 @@ const CustomDrawer = ({ navigation }) => {
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={() => goToScreen('Training')}>
+          onPress={() => goToScreen('Training')}
+        >
           <Icon name="package" size={wp(5)} color={Colors.slateGrey} />
           <Text style={styles.menuLabel} numberOfLines={1}>
             {Strings.productTraining}
@@ -102,7 +106,8 @@ const CustomDrawer = ({ navigation }) => {
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={() => goToScreen('Training')}>
+          onPress={() => goToScreen('Training')}
+        >
           <Icon name="grid" size={wp(5)} color={Colors.slateGrey} />
           <Text style={styles.menuLabel} numberOfLines={1}>
             {Strings.displayTraining}
@@ -114,7 +119,8 @@ const CustomDrawer = ({ navigation }) => {
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={goToAnnouncement}>
+          onPress={goToAnnouncement}
+        >
           <Image
             source={Images.MegaAssignment}
             style={styles.menuIcon}
@@ -130,7 +136,8 @@ const CustomDrawer = ({ navigation }) => {
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={() => goToScreen('FeedBack')}>
+          onPress={() => goToScreen('FeedBack')}
+        >
           <Icon name="message-square" size={wp(5)} color={Colors.slateGrey} />
           <Text style={styles.menuLabel} numberOfLines={1}>
             {Strings.feedback}
@@ -142,7 +149,8 @@ const CustomDrawer = ({ navigation }) => {
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={() => goToDrawerScreen('StaffComparison')}>
+          onPress={() => goToDrawerScreen('StaffComparison')}
+        >
           <Icon name="users" size={wp(5)} color={Colors.slateGrey} />
           <Text style={styles.menuLabel} numberOfLines={1}>
             Staff Comparison
@@ -154,7 +162,8 @@ const CustomDrawer = ({ navigation }) => {
             styles.menuItem,
             pressed && styles.menuItemPressed,
           ]}
-          onPress={() => goToScreen('Survey')}>
+          onPress={() => goToScreen('Survey')}
+        >
           <Image
             source={Images.Note}
             style={styles.menuIcon}
@@ -240,7 +249,7 @@ const styles = StyleSheet.create({
   menuLabel: {
     flex: 1,
     marginLeft: wp(3),
-    fontSize:wp(3.5),
+    fontSize: Fontsize.xs3,
     fontFamily: Fonts.poppinsMedium,
     color: Colors.black,
   },

@@ -9,8 +9,6 @@ import { Colors } from '../../Constants/Colors';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 
-const NOTIFICATION_COUNT = 5;
-
 const Profile = () => {
   return (
     <View style={MyStyling.container2}>
@@ -19,13 +17,14 @@ const Profile = () => {
       <View style={styles.headerWrap}>
         <MainHeaderComponent
           title={Strings.profileHeader}
-          notificationCount={NOTIFICATION_COUNT}
+          notificationCount={5}
         />
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}>
+        contentContainerStyle={styles.content}
+      >
         <ProfileSummaryCard />
         <ProfileInformationCard />
         <ProfileChangePasswordCard />
