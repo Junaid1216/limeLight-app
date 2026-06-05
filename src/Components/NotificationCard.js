@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { Images } from '../Assets';
 import { hp, wp } from '../Assets/Responsive';
@@ -20,7 +14,8 @@ const NotificationCard = ({ item, onPress }) => {
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.7}
-      onPress={() => onPress?.(item)}>
+      onPress={() => onPress?.(item)}
+    >
       <View style={styles.iconBox}>
         {iconSource ? (
           <Image
@@ -68,7 +63,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(3.5),
     paddingVertical: hp(1.8),
     marginBottom: hp(1.2),
-    elevation:1,
+    elevation: 1,
   },
   iconBox: {
     width: wp(12),
@@ -83,7 +78,7 @@ const styles = StyleSheet.create({
     width: wp(5),
     height: wp(8),
     tintColor: Colors.mediumGrey,
-    resizeMode:'contain',
+    resizeMode: 'contain',
   },
   content: {
     flex: 1,
@@ -97,7 +92,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(0.4),
   },
   description: {
-    fontSize: Fontsize.sm,
+    fontSize: 11.92,
     fontFamily: Fonts.poppinsRegular,
     color: Colors.zinc,
     lineHeight: hp(2.2),

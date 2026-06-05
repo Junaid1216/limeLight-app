@@ -6,20 +6,26 @@ import Role from '../Screens/StartScreens/Role';
 import AuthNavigation from './AuthNavigation';
 import AppNavigator from './AppNavigator';
 import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
+import SurveyResponse from '../Screens/CommonScreens/SurveyResponse';
+import SurveyReport from '../Screens/CommonScreens/SurveyReport';
 
 const MAIN_STACK = createNativeStackNavigator();
 
 const MainNavigation = () => {
   return (
     <NavigationContainer>
-      <MAIN_STACK.Navigator
+      {/* <MAIN_STACK.Navigator
         initialRouteName="SplashScreen"
         screenOptions={{ headerShown: false }}
-      >
-        {/* <MAIN_STACK.Navigator
+      > */}
+      {/* <MAIN_STACK.Navigator
         initialRouteName="TargetAssignment"
         screenOptions={{ headerShown: false }}
       > */}
+      <MAIN_STACK.Navigator
+        initialRouteName="SurveyReport"
+        screenOptions={{ headerShown: false }}
+      >
         <MAIN_STACK.Screen name="SplashScreen" component={SplashScreen} />
         <MAIN_STACK.Screen name="Role" component={Role} />
         <MAIN_STACK.Screen name="AuthNavigation" component={AuthNavigation} />
@@ -28,6 +34,8 @@ const MainNavigation = () => {
           name="TargetAssignment"
           component={TargetAssignment}
         />
+        <MAIN_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
+        <MAIN_STACK.Screen name="SurveyReport" component={SurveyReport} />
       </MAIN_STACK.Navigator>
     </NavigationContainer>
   );

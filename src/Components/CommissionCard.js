@@ -7,13 +7,22 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
-const StatBox = ({ label, value, backgroundColor, borderColor }) => (
-  <View style={[styles.statBox, { backgroundColor, borderColor }]}>
+const StatBox = props => (
+  <View
+    style={[
+      styles.statBox,
+      {
+        backgroundColor: props?.backgroundColor,
+        borderColor: props?.borderColor,
+      },
+    ]}
+  >
     <Text style={styles.statLabel} numberOfLines={1}>
-      {label}
+      {props?.label}
     </Text>
+
     <Text style={styles.statValue} numberOfLines={1}>
-      {value}
+      {props?.value}
     </Text>
   </View>
 );
@@ -117,7 +126,7 @@ const styles = StyleSheet.create({
   statBox: {
     flex: 1,
     borderRadius: wp(2.5),
-    borderWidth: 1,
+    borderWidth: wp(0.5),
     paddingVertical: hp(0.4),
     paddingHorizontal: wp(1.5),
     alignItems: 'center',
@@ -163,7 +172,6 @@ const styles = StyleSheet.create({
     paddingVertical: hp(0.4),
   },
   barText: {
-    width: '100%',
     fontFamily: Fonts.poppinsMedium,
     fontSize: Fontsize.xxm,
     color: Colors.white,

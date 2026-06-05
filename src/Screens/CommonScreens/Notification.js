@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  FlatList,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
 import NotificationCard from '../../Components/NotificationCard';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import { hp, wp } from '../../Assets/Responsive';
@@ -34,8 +28,12 @@ const Notification = () => {
               notificationCount={5}
             />
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle} numberOfLines={1}>{Strings.recent}</Text>
-              <Text style={styles.unreadText} numberOfLines={1}>{Strings.unreadCount}</Text>
+              <Text style={styles.sectionTitle} numberOfLines={1}>
+                {Strings.recent}
+              </Text>
+              <Text style={styles.unreadText} numberOfLines={1}>
+                {Strings.unreadCount}
+              </Text>
             </View>
           </View>
         }
@@ -57,13 +55,13 @@ const styles = StyleSheet.create({
     marginBottom: hp(1.5),
   },
   sectionTitle: {
-    fontSize: Fontsize.m,
+    fontSize: Fontsize.xs2,
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.black,
     width: wp(40),
   },
   unreadText: {
-    fontSize: Fontsize.sm,
+    fontSize: Fontsize.xmm,
     fontFamily: Fonts.poppinsRegular,
     color: Colors.mediumGrey,
     width: wp(14),

@@ -138,4 +138,9 @@ export const Strings = {
   footfall: 'Footfall',
   invoices: 'Invoices',
   TargetAssignment: 'Target Assignment',
+  TotalStaff: 'Total Staff',
+  Completed: 'Completed',
+  Pending: 'Pending',
+  SurveyReport: 'Survey Report',
+  Detailed: 'Detailed responses & analytics',
 };

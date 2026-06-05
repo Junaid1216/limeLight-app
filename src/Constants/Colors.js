@@ -6,7 +6,7 @@ export const Colors = {
   scarlet: '#E53935',
 
   lightGrey: '#F5F5F5',
-  offWhite: '#F5F6F8',
+  White: '#F5F6F8',
   grey: '#666666',
   mediumGrey: '#9F9F9F',
   zinc: '#71717B',
@@ -23,7 +23,7 @@ export const Colors = {
   slateGrey: '#475569',
   coolGrey: '#94A3B8',
   inputGrey: '#F2F2F2',
-
+  mintLight: '#EAFBF5',
   mint: '#F2F7F4',
   lightGreen: '#E6F5F1',
   mintCream: '#E8F8F0',
@@ -44,7 +44,7 @@ export const Colors = {
   cerulean: '#3498DB',
   cornflowerBlue: '#5DADE2',
   aliceBlue: '#EBF5FB',
-
+  whiteOrange: '#FFEDD4',
   orange: '#E8A832',
   lightOrange: '#FFF4E0',
   amber: '#F39C12',
@@ -81,4 +81,7 @@ export const Colors = {
   darkblue: '#111827',
   darkgreen: '#20C9971A',
   dividerBlue: '#D8E4F5',
+  lightGray: '#E4E4E7',
+  darkgrey: '#555',
+  mediumgreen: '#0F8B6D',
 };
