@@ -5,6 +5,7 @@ import { slabStyleMap } from '../Constants/CategoryColors';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
+import { Fontsize } from '../Constants/Fontsize';
 
 const ID_VISIBLE_CHARS = 8;
 
@@ -176,14 +177,14 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: wp(2.67),
+    fontSize: Fontsize.xm3,
     color: Colors.blueGrey,
     textAlign: 'center',
     width: wp(20),
   },
   dateDay: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: 10,
+    fontSize: wp(2.7),
     color: Colors.black,
     textAlign: 'center',
     width: wp(20),
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   },
   dateYear: {
     fontFamily: Fonts.poppinsRegular,
-    fontSize: 9,
+    fontSize: wp(2.4),
     color: Colors.ashGray,
     marginTop: hp(0.15),
     textAlign: 'center',
@@ -211,11 +212,11 @@ const styles = StyleSheet.create({
   },
   slabText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: 10,
+    fontSize: wp(2.7),
   },
   cellValue: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: 10,
+    fontSize: wp(2.7),
     color: Colors.black,
     textAlign: 'center',
   },

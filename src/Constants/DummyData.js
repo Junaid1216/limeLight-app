@@ -339,3 +339,30 @@ export const staffComparisonInvoiceData = [
   { value: 20 },
   { value: 42 },
 ];
+
+export const surveyReportBranchOptions = [
+  { label: 'All Branches', value: 'all' },
+  { label: 'Limelight Downtown', value: 'downtown' },
+  { label: 'Limelight Gulberg', value: 'gulberg' },
+  { label: 'DHA', value: 'dha' },
+  { label: 'Limelight Johar Town', value: 'johar_town' },
+];
+
+export const surveyReportSummary = {
+  responses: 6,
+  total: 8,
+  rate: '75%',
+};
+
+export const surveyReportDetail = {
+  reportTitle: 'Price Satisfaction Survey',
+  title: 'Monthly Employee Satisfaction Survey',
+  questions: 2,
+  responseRate: '75%',
+  responses: '8 responses',
+  breakdown: [
+    { label: 'High', value: 25, color: '#2F6FED' },
+    { label: 'Fair', value: 60, color: '#2BC48A' },
+    { label: 'Low', value: 15, color: '#F4A11A' },
+  ],
+};

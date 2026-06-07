@@ -11,7 +11,7 @@ import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { Colors } from '../../Constants/Colors';
 
-const StaffComparison = () => {
+const StaffComparison = ({ title = Strings.staffComparisonHeader }) => {
   const [selectedTab, setSelectedTab] = useState(Strings.weekly);
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -56,10 +56,7 @@ const StaffComparison = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled">
-        <MainHeaderComponent
-          title={Strings.staffComparisonHeader}
-          notificationCount={5}
-        />
+        <MainHeaderComponent title={title} notificationCount={5} />
 
         <StaffComparisonTabs
           selectedTab={selectedTab}

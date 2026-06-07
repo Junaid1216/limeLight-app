@@ -4,6 +4,7 @@ import { FlatList, StyleSheet, Text, View, Image } from 'react-native';
 import { Colors } from '../Constants/Colors';
 import { hp, wp } from '../Assets/Responsive';
 import { Fonts } from '../Constants/Fonts';
+import { Fontsize } from '../Constants/Fontsize';
 
 const staffData = [
   {
@@ -183,12 +184,12 @@ const styles = StyleSheet.create({
   },
 
   heading: {
-    fontSize: 14,
+    fontSize: wp(3.5),
     fontFamily: Fonts.poppinsBold,
   },
 
   subHeading: {
-    fontSize: 11,
+    fontSize: wp(2.9),
     color: '#9CA3AF',
 
     fontFamily: Fonts.poppinsRegular,
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
 
   countText: {
     color: Colors.white,
-    fontSize: 11,
+    fontSize: wp(2.9),
     fontFamily: Fonts.poppinsRegular,
   },
 
@@ -223,9 +224,9 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
     textAlign: 'center',
-    fontSize: wp(2.4),
+    fontSize: Fontsize.x0,
     color: '#9CA3AF',
-    fontWeight: '600',
+    // fontWeight: '600',
   },
 
   row: {
@@ -252,15 +253,14 @@ const styles = StyleSheet.create({
   },
 
   avatarText: {
-    fontSize: wp(2.5),
-    fontWeight: '700',
+    fontSize: Fontsize.xm0,
     color: '#10B981',
   },
 
   name: {
-    fontSize: wp(3.5),
+    fontSize: Fontsize.xs4,
     color: '#111827',
-    fontWeight: '500',
+ 
   },
 
   inputBox: {
@@ -275,8 +275,7 @@ const styles = StyleSheet.create({
   },
 
   inputText: {
-    fontSize: wp(3.2),
-    fontWeight: '600',
+    fontSize: Fontsize.xs1,
     color: '#111827',
   },
   titleContainer: {

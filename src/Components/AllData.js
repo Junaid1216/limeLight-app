@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
   },
 
   avatarText: {
-    fontSize: 13,
-    fontWeight: '600',
+
+    fontSize: wp(3.5)
     color: '#17B794',
   },
 
@@ -130,8 +130,7 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: wp(4.3)
     color: '#222',
     marginRight: 8,
   },
@@ -145,25 +144,25 @@ const styles = StyleSheet.create({
 
   statusText: {
     color: '#17B794',
-    fontSize: 10,
+    fontSize: wp(2.7) ,
     fontWeight: '500',
   },
 
   code: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: wp(3.2),
     color: '#777',
   },
 
   date: {
     marginTop: 8,
-    fontSize: 12,
+    fontSize: wp(3.2),
     color: '#777',
   },
 
   time: {
     marginTop: 4,
-    fontSize: 12,
+    fontSize: wp(3.2),
     color: '#777',
   },
 });

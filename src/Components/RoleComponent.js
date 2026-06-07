@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginTop: -hp(0.8),
   },
   roleTitle: {
-    fontSize: wp(4.5),
+    fontSize: Fontsize.m,
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.black,
   },

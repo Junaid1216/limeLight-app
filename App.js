@@ -3,7 +3,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RoleProvider } from './src/Context/RoleContext';
 import MainNavigation from './src/Navigations/MainNavigation';
-import TargetAssignment from './src/Screens/AppFlow/TargetAssignment';
 
 const App = () => {
   return (
@@ -14,7 +13,6 @@ const App = () => {
         </RoleProvider>
       </SafeAreaProvider>
 
-      {/* <TargetAssignment /> */}
     </GestureHandlerRootView>
   );
 };

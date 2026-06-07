@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
+import { Fontsize } from '../Constants/Fontsize';
 
 const StaffComparisonTabs = ({ selectedTab, weeklyLabel, monthlyLabel, onPressWeekly, onPressMonthly }) => {
   return (
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontFamily: Fonts.poppinsMedium,
-    fontSize: wp(2.9),
+    fontSize: Fontsize.xm1,
     color: Colors.slateBlue,
   },
   tabTextActive: {

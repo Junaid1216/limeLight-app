@@ -14,15 +14,12 @@ import SlipBoundIncentiveItem, {
 } from '../../Components/SlipBoundIncentive';
 import TargetVsAchievementCard from '../../Components/TargetVsAchievementCard';
 import { hp, wp } from '../../Assets/Responsive';
-import { ROLES } from '../../Constants/roleConfig';
 import { Colors } from '../../Constants/Colors';
 import { slipBoundIncentiveData } from '../../Constants/DummyData';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import { useRole } from '../../Context/RoleContext';
-import BranchManagerHome from '../Manager/BranchManagerHome';
 
 const renderIncentiveItem = ({ item }) => (
   <SlipBoundIncentiveItem item={item} />
@@ -56,26 +53,15 @@ const StaffHomeContent = () => (
   />
 );
 
-const Home = () => {
-  const { role } = useRole();
-
-  if (role === ROLES.MANAGER) {
-    return <BranchManagerHome />;
-  }
-
-  return (
-    <View style={MyStyling.container2}>
-      <View style={styles.headerArea}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={Colors.darkNavy}
-        />
-        <HomeHeaderComponent />
-      </View>
-      <StaffHomeContent />
+const Home = () => (
+  <View style={MyStyling.container2}>
+    <View style={styles.headerArea}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.darkNavy} />
+      <HomeHeaderComponent />
     </View>
-  );
-};
+    <StaffHomeContent />
+  </View>
+);
 
 const styles = StyleSheet.create({
   headerArea: {

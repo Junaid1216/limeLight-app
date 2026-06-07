@@ -8,6 +8,7 @@ import {
   staffComparisonInvoiceData,
 } from '../Constants/DummyData';
 import { Fonts } from '../Constants/Fonts';
+import { Fontsize } from '../Constants/Fontsize';
 
 const chartWidth = wp(78);
 const chartHeight = hp(20);
@@ -291,14 +292,14 @@ const styles = StyleSheet.create({
   },
   chartTitle: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: 18,
+    fontSize: wp(5.1),
     color: Colors.graphite,
   },
   chartSubTitle: {
     marginTop: hp(0.2),
     marginBottom: hp(1.2),
     fontFamily: Fonts.poppinsBold,
-    fontSize: 12,
+    fontSize: wp(3.2),
     color: Colors.blueGrey,
   },
   dateRangeCard: {
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
   dateRangeLabel: {
     flex: 1,
     fontFamily: Fonts.poppinsBold,
-    fontSize: 12,
+    fontSize: wp(3.2),
     color: Colors.graphite,
   },
   dateButton: {
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontFamily: Fonts.poppinsMedium,
-    fontSize: wp(2.85),
+    fontSize: Fontsize.xmm0,
     color: Colors.slateText,
   },
   datePlaceholder: {
@@ -353,12 +354,12 @@ const styles = StyleSheet.create({
   chartHeading: {
     flex: 1,
     fontFamily: Fonts.poppinsBold,
-    fontSize: wp(4.2),
+    fontSize: Fontsize.sm1,
     color: Colors.graphite,
   },
   peakText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: wp(3.7),
+    fontSize: Fontsize.xs5,
     color: Colors.green,
   },
   legendRow: {
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
   },
   axisText: {
     fontFamily: Fonts.poppinsMedium,
-    fontSize: wp(2.5),
+    fontSize: Fontsize.xm0,
     color: Colors.coolGrey,
   },
   yAxisText: {
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
   },
   tooltipTime: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: wp(2.5),
+    fontSize: Fontsize.xm0,
     color: Colors.white,
   },
   tooltipTopRow: {
@@ -441,7 +442,7 @@ const styles = StyleSheet.create({
   },
   tooltipRate: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: wp(2.5),
+    fontSize: Fontsize.xm0,
     color: Colors.coolGrey,
   },
   tooltipValue: {

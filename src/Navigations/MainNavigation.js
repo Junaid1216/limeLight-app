@@ -7,23 +7,13 @@ import AuthNavigation from './AuthNavigation';
 import AppNavigator from './AppNavigator';
 import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
 import SurveyResponse from '../Screens/CommonScreens/SurveyResponse';
-import SurveyReport from '../Screens/CommonScreens/SurveyReport';
-
 const MAIN_STACK = createNativeStackNavigator();
 
 const MainNavigation = () => {
   return (
     <NavigationContainer>
-      {/* <MAIN_STACK.Navigator
-        initialRouteName="SplashScreen"
-        screenOptions={{ headerShown: false }}
-      > */}
-      {/* <MAIN_STACK.Navigator
-        initialRouteName="TargetAssignment"
-        screenOptions={{ headerShown: false }}
-      > */}
       <MAIN_STACK.Navigator
-        initialRouteName="SurveyReport"
+        initialRouteName="SplashScreen"
         screenOptions={{ headerShown: false }}
       >
         <MAIN_STACK.Screen name="SplashScreen" component={SplashScreen} />
@@ -35,7 +25,6 @@ const MainNavigation = () => {
           component={TargetAssignment}
         />
         <MAIN_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
-        <MAIN_STACK.Screen name="SurveyReport" component={SurveyReport} />
       </MAIN_STACK.Navigator>
     </NavigationContainer>
   );

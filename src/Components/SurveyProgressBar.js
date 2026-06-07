@@ -75,7 +75,6 @@
 
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import * as Progress from 'react-native-progress';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
@@ -121,23 +120,21 @@ const SurveyProgressBar = props => {
         </Text>
       </View>
 
-      <Progress.Bar
-        progress={progress}
-        width={null}
-        height={8}
-        borderWidth={0}
-        borderRadius={20}
-        color={color}
-        unfilledColor="#E5E7EB"
-        animated
-      />
+      <View style={styles.track}>
+        <View
+          style={[
+            styles.fill,
+            { width: `${progress * 100}%`, backgroundColor: color },
+          ]}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: hp(2),
+    marginBottom: hp(1.5),
   },
 
   // topRow: {
@@ -149,8 +146,9 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    // justifyContent: 'space-between',
+    justifyContent: 'space-between',
     width: '100%',
+    marginBottom: hp(0.8),
   },
 
   // surveyName: {
@@ -192,6 +190,17 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     marginRight: 10,
+  },
+  track: {
+    height: 8,
+    width: '100%',
+    backgroundColor: '#E5E7EB',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: '100%',
+    borderRadius: 10,
   },
 });
 

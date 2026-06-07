@@ -3,6 +3,8 @@ import React from 'react';
 import { wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
+import { Strings } from '../Constants/Strings';
+import { Fontsize } from '../Constants/Fontsize';
 
 const MonthlyTargetCalculator = () => {
   return (
@@ -16,18 +18,24 @@ const MonthlyTargetCalculator = () => {
         </View>
 
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Monthly Target Calculator</Text>
-          <Text style={styles.subtitle}>Category-wise distribution</Text>
+          <Text style={styles.title}>{Strings.monthlyTargetCalculator}</Text>
+          <Text style={styles.subtitle}>{Strings.categoryWiseDistribution}</Text>
         </View>
       </View>
       <View style={styles.tableHeader}>
-        <Text style={[styles.headerText, styles.categoryText]}>CATEGORY</Text>
+        <Text style={[styles.headerText, styles.categoryText]}>
+          {Strings.categoryHeader}
+        </Text>
 
-        <Text style={styles.headerText}>TARGET</Text>
+        <Text style={styles.headerText}>{Strings.targetHeader}</Text>
 
-        <Text style={[styles.headerText, { marginLeft: wp(1) }]}>ASSIGNED</Text>
+        <Text style={[styles.headerText, { marginLeft: wp(1) }]}>
+          {Strings.assignedHeader}
+        </Text>
 
-        <Text style={[styles.headerText, { paddingLeft: wp(2) }]}>LEFT</Text>
+        <Text style={[styles.headerText, { paddingLeft: wp(2) }]}>
+          {Strings.leftHeader}
+        </Text>
       </View>
 
       <View style={styles.divider} />
@@ -41,7 +49,9 @@ const MonthlyTargetCalculator = () => {
             />
           </View>
 
-          <Text style={styles.categoryName}>Garments</Text>
+          <Text style={styles.categoryName} numberOfLines={1}>
+            {Strings.garments}
+          </Text>
         </View>
 
         <View style={styles.targetBox}>
@@ -66,7 +76,9 @@ const MonthlyTargetCalculator = () => {
             />
           </View>
 
-          <Text style={styles.categoryName}>Garments</Text>
+          <Text style={styles.categoryName} numberOfLines={1}>
+            {Strings.unstitched}
+          </Text>
         </View>
 
         <View style={styles.targetBox}>
@@ -91,7 +103,9 @@ const MonthlyTargetCalculator = () => {
             />
           </View>
 
-          <Text style={styles.categoryName}>Garments</Text>
+          <Text style={styles.categoryName} numberOfLines={1}>
+            {Strings.accessories}
+          </Text>
         </View>
 
         <View style={styles.targetBox}>
@@ -109,7 +123,7 @@ const MonthlyTargetCalculator = () => {
       <View style={styles.dividertwo} />
 
       <View style={styles.totalRow}>
-        <Text style={styles.totalAssignedText}>Total Assigned</Text>
+        <Text style={styles.totalAssignedText}>{Strings.totalAssigned}</Text>
 
         <Text style={styles.totalValue}>660</Text>
       </View>
@@ -159,7 +173,7 @@ const styles = StyleSheet.create({
 
   title: {
     color: Colors.white,
-    fontSize: wp(4),
+    fontSize: Fontsize.sm,
     fontFamily: Fonts.poppinsRegular,
   },
   textContainer: {
@@ -168,7 +182,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     color: Colors.white,
-    fontSize: wp(3),
+    fontSize: Fontsize.xs0,
     fontFamily: Fonts.poppinsRegular,
     marginTop: wp(0),
   },
@@ -190,7 +204,7 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1,
     color: '#8A94B3',
-    fontSize: wp(2.5), // thoda chhota
+    fontSize: Fontsize.xm0, // thoda chhota
     fontFamily: Fonts.poppinsRegular,
     textAlign: 'center',
   },
@@ -239,7 +253,7 @@ const styles = StyleSheet.create({
 
   categoryName: {
     color: Colors.white,
-    fontSize: wp(3.2),
+    fontSize: Fontsize. xs1,
     fontFamily: Fonts.poppinsRegular,
     marginLeft: wp(2),
   },
@@ -290,19 +304,19 @@ const styles = StyleSheet.create({
 
   targetText: {
     color: '#20C997',
-    fontSize: 12,
+    fontSize: wp(3.2),
     fontFamily: Fonts.poppinsRegular,
   },
 
   assignedText: {
     color: '#4D8DFF',
-    fontSize: 12,
+    fontSize: wp(3.2),
     fontFamily: Fonts.poppinsRegular,
   },
 
   leftText: {
     color: '#F4B942',
-    fontSize: 12,
+    fontSize: wp(3.2),
     fontFamily: Fonts.poppinsRegular,
   },
   totalRow: {
@@ -316,12 +330,12 @@ const styles = StyleSheet.create({
   totalAssignedText: {
     color: Colors.white,
     fontFamily: Fonts.poppinsRegular,
-    fontSize: 11,
+    fontSize: wp(2.9),
   },
 
   totalValue: {
     color: Colors.white,
     fontFamily: Fonts.poppinsRegular, // agar hai
-    fontSize: 11,
+    fontSize: wp(2.9),
   },
 });

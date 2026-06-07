@@ -1,36 +1,22 @@
 import React from 'react';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { wp } from '../Assets/Responsive';
-import CustomDrawer from './CustomDrawer';
-import BottomNavigation from './BottomNavigation';
-import StaffComparison from '../Screens/Manager/StaffComparison';
+import { ROLES } from '../Constants/roleConfig';
+import { useRole } from '../Context/RoleContext';
+import ASMDrawerNavigator from './ASM/ASMDrawerNavigator';
+import BranchManagerDrawerNavigator from './BranchManager/BranchManagerDrawerNavigator';
+import SalesStaffDrawerNavigator from './SalesStaff/SalesStaffDrawerNavigator';
 
-const DrawerNav = createDrawerNavigator();
+const DrawerNavigator = () => {
+  const { role } = useRole();
 
-const Drawer = () => {
-  return (
-    <DrawerNav.Navigator
-      drawerContent={props => <CustomDrawer {...props} />}
-      initialRouteName="BottomNavigation"
-      screenOptions={{
-        headerShown: false,
-        drawerStyle: {
-          width: wp(75),
-        },
-        swipeEnabled: false,
-      }}>
-      <DrawerNav.Screen
-        name="BottomNavigation"
-        component={BottomNavigation}
-        options={{ headerShown: false }}
-      />
-      <DrawerNav.Screen
-        name="StaffComparison"
-        component={StaffComparison}
-        options={{ headerShown: false }}
-      />
-    </DrawerNav.Navigator>
-  );
+  if (role === ROLES.MANAGER) {
+    return <BranchManagerDrawerNavigator />;
+  }
+
+  if (role === ROLES.ASM) {
+    return <ASMDrawerNavigator />;
+  }
+
+  return <SalesStaffDrawerNavigator />;
 };
 
-export default Drawer;
+export default DrawerNavigator;

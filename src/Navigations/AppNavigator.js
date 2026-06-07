@@ -1,11 +1,13 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DrawerNavigator from './DrawerNavigator';
+import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
 import ChangePassword from '../Screens/CommonScreens/ChangePassword';
 import SurveyProgress from '../Screens/CommonScreens/SurveyProgress';
 import Announcement from '../Screens/CommonScreens/Announcement';
 import AnnouncementDetail from '../Screens/CommonScreens/AnnouncementDetail';
 import Profile from '../Screens/CommonScreens/Profile';
+import SurveyResponse from '../Screens/CommonScreens/SurveyResponse';
 
 const APP_STACK = createNativeStackNavigator();
 
@@ -23,6 +25,8 @@ const AppNavigator = () => {
         component={AnnouncementDetail}
       />
       <APP_STACK.Screen name="Profile" component={Profile} />
+      <APP_STACK.Screen name="TargetAssignment" component={TargetAssignment} />
+      <APP_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
     </APP_STACK.Navigator>
   );
 };

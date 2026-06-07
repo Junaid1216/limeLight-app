@@ -10,6 +10,7 @@ export const Images = {
   LowImage: require('./Images/LowImage.png'),
   DrawerIcon: require('./Images/DrawerIcon.png'),
   Avatar: require('./Images/Avator.png'),
+  TotalResponse: require('./Images/TotalResponse.png'),
 
   LeftArrow: require('./Icons/leftArrow.png'),
   RightArrow: require('./Icons/rightArrow.png'),

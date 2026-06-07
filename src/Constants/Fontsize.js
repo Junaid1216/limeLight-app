@@ -1,21 +1,30 @@
 import { hp, wp } from '../Assets/Responsive';
 
 export const Fontsize = {
+  mm1:wp(8)
   ml: wp(5.5),
   l: wp(5.3),
   mm: wp(5),
   m: wp(4.5),
+  sm1:wp(4.2),
   sm: wp(4),
+  xx1:wp(3.8),
   xx0: wp(3.75),
+  xs5:wp(3.7),
+  xs4:wp(3.5),
   xs3: wp(3.47),
   xs2: wp(3.4),
   xs1: wp(3.2),
   xs0: wp(3),
   s: wp(3),
   xm1: wp(2.9),
+  xmm0:wp(2.85),
   xmm: wp(2.8),
   xs: wp(2.7),
+  xm3:wp(2.67),
+  xm2:wp(2.6),
   xm0: wp(2.5),
+  x0:wp(2.4),
   xxxxs: wp(1.25),
 
   xu: hp(2.6),

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
@@ -19,6 +20,7 @@ const surveyOptions = [
 ];
 
 const SurveyProgress = () => {
+  const navigation = useNavigation();
   const [answers, setAnswers] = useState({});
 
   let answeredCount = 0;
@@ -69,7 +71,15 @@ const SurveyProgress = () => {
         <Btn
           title={Strings.submitSurvey}
           icon={Images.SubmitArrow}
-          onPress={() => {}}
+          onPress={() =>
+            navigation.navigate('BottomNavigation', {
+              screen: 'BottomNavigation',
+              params: {
+                screen: 'Survey',
+                params: { screen: 'SurveyReport' },
+              },
+            })
+          }
           style={styles.submitBtn}
         />
       </View>

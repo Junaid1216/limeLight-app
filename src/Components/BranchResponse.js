@@ -1,46 +1,44 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, View, Text } from 'react-native';
-import Customtextinput from '../Components/Customtextinput';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 import { Images } from '../Assets';
+import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
+import { surveyReportBranchOptions } from '../Constants/DummyData';
+import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
+import { Strings } from '../Constants/Strings';
 
 const BranchResponse = () => {
   const [branch, setBranch] = useState(' ');
 
   return (
     <View style={styles.container}>
-      <Customtextinput
-        label="Branch"
+      <Text style={styles.label}>{Strings.branchLabel}</Text>
+
+      <Dropdown
+        style={styles.dropdown}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        itemTextStyle={styles.itemTextStyle}
+        containerStyle={styles.dropdownContainer}
+        iconStyle={styles.dropdownIcon}
+        data={surveyReportBranchOptions}
+        labelField="label"
+        valueField="value"
+        placeholder={`Select ${Strings.branchLabel.toLowerCase()}`}
         value={branch}
-        onChangeText={setBranch}
-        icon={Images.Branch}
-        iconBg={'red'}
-        iconTint
-        inputBoxStyle={{
-          backgroundColor: '#FFFFFF',
-          borderColor: '#E5E7EB',
-        }}
-      />
-      <View style={styles.responseCard}>
-        <View style={styles.leftContent}>
-          <Text style={styles.title}>Total Responses</Text>
-
-          <View style={styles.countRow}>
-            <Text style={styles.count}>6</Text>
-            <Text style={styles.total}> / 8</Text>
+        onChange={item => setBranch(item.value)}
+        renderLeftIcon={() => (
+          <View style={styles.iconWrap}>
+            <Image
+              source={Images.Branch}
+              style={styles.branchIcon}
+              resizeMode="contain"
+            />
           </View>
-
-          <Text style={styles.rate}>↗ 75% response rate</Text>
-        </View>
-
-        <View style={styles.iconContainer}>
-          <Image
-            source={require('../Assets/Icons/Assignment.png')}
-            style={{ width: 15, height: 15 }}
-          />
-        </View>
-      </View>
+        )}
+      />
     </View>
   );
 };
@@ -49,62 +47,60 @@ export default BranchResponse;
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
+    marginTop: hp(1.5),
   },
-  responseCard: {
-    marginTop: 1.3,
-    borderRadius: 7,
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#1FAF9A',
+  label: {
+    fontSize: Fontsize.s,
+    fontFamily: Fonts.poppinsMedium,
+    color: Colors.slateGrey,
+    marginBottom: hp(0.8),
   },
-
-  leftContent: {
-    // flex: 1,
+  dropdown: {
+    height: hp(6.5),
+    borderWidth: 1,
+    borderColor: Colors.fieldBorder,
+    borderRadius: wp(3.5),
+    paddingHorizontal: wp(3),
+    backgroundColor: Colors.white,
   },
-
-  title: {
-    color: '#E8F8F5',
-    fontSize: 11,
-    fontWeight: '500',
-    marginBottom: 7,
+  placeholderStyle: {
+    fontSize: Fontsize.sm,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.grey,
+    marginLeft: wp(1),
   },
-
-  countRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+  selectedTextStyle: {
+    fontSize: Fontsize.sm,
+    fontFamily: Fonts.poppinsSemiBold,
+    color: Colors.graphite,
+    marginLeft: wp(1),
   },
-
-  count: {
-    color: '#FFFFFF',
-    fontSize: 30,
-    fontWeight: '700',
-    lineHeight: 35,
+  itemTextStyle: {
+    fontSize: Fontsize.s,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.black,
   },
-
-  total: {
-    color: '#D8F3EE',
-    fontSize: 16,
-    marginBottom: 6,
-    fontFamily: Fonts.regular,
+  dropdownContainer: {
+    borderRadius: wp(3),
+    overflow: 'hidden',
   },
-
-  rate: {
-    color: '#E8F8F5',
-    fontSize: 11,
-    marginTop: 7,
+  dropdownIcon: {
+    width: wp(5),
+    height: wp(5),
+    tintColor: Colors.mediumGrey,
   },
-
-  iconContainer: {
-    width: 84,
-    height: 84,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+  iconWrap: {
+    width: wp(9),
+    height: wp(9),
+    borderRadius: wp(4.5),
+    backgroundColor: Colors.mintBadge,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: wp(2),
+  },
+  branchIcon: {
+    width: wp(4.5),
+    height: wp(4.5),
+    tintColor: Colors.branchGreen,
   },
 });

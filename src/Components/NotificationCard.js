@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     marginBottom: hp(0.4),
   },
   description: {
-    fontSize: 11.92,
+    fontSize: wp(3.18),
     fontFamily: Fonts.poppinsRegular,
     color: Colors.zinc,
     lineHeight: hp(2.2),

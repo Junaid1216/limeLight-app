@@ -1,91 +1,90 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import SurveyProgressBar from './SurveyProgressBar';
+import { Images } from '../Assets';
+import { hp, wp } from '../Assets/Responsive';
+import { Colors } from '../Constants/Colors';
+import { surveyReportDetail } from '../Constants/DummyData';
 import { Fonts } from '../Constants/Fonts';
-import { wp } from '../Assets/Responsive';
+import { Fontsize } from '../Constants/Fontsize';
 
-const SatisficationSurveyComponent = props => {
+const SatisficationSurveyComponent = ({
+  reportTitle = surveyReportDetail.reportTitle,
+  title = surveyReportDetail.title,
+  questions = surveyReportDetail.questions,
+  responseRate = surveyReportDetail.responseRate,
+  responses = surveyReportDetail.responses,
+  breakdown = surveyReportDetail.breakdown,
+  status = 'Active',
+}) => {
   return (
     <View style={styles.card}>
-      {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.leftHeader}>
           <View style={styles.iconBox}>
-            {/* <Text style={{ fontSize: 16 }}>📊</Text> */}
             <Image
               source={require('../Assets/Icons/ReportSurvey.png')}
-              style={{ width: 18, height: 18 }}
+              style={styles.reportIcon}
+              resizeMode="contain"
             />
           </View>
 
-          <View>
-            <Text style={styles.report}>{props?.reportText ?? 'REPORT'}</Text>
-
-            <Text style={styles.mainTitle}>
-              {props?.reportTitle ?? 'Price Satisfaction Survey'}
+          <View style={styles.headerTextWrap}>
+            <Text style={styles.report} numberOfLines={1}>REPORT</Text>
+            <Text style={styles.mainTitle} numberOfLines={1}>
+              {reportTitle}
             </Text>
           </View>
         </View>
 
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{props?.status ?? 'Active'}</Text>
+          <Text style={styles.badgeText}>{status}</Text>
         </View>
       </View>
 
       <View style={styles.divider} />
 
-      {/* TITLE */}
-      <Text style={styles.label} numberOfLines={1}>
-        TITLE
-      </Text>
-
-      <Text style={styles.title} numberOfLines={1}>
-        {props?.title ?? 'Monthly Employee Satisfaction Survey'}
+      <Text style={styles.label}>TITLE</Text>
+      <Text style={styles.title} numberOfLines={2}>
+        {title}
       </Text>
 
       <View style={styles.statsRow}>
         <View style={styles.statsCard}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Image
-              source={require('../Assets/Icons/Question.png')}
-              style={{ width: 12, height: 12, marginRight: 5 }}
-            />
+          <View style={styles.statsCardHeader}>
+            <Image source={Images.Question} style={styles.statsIcon} />
             <Text style={styles.statsLabel}>Questions</Text>
           </View>
-
-          <Text style={styles.statsValue}>{props?.questions ?? 2}</Text>
+          <Text style={styles.statsValue}>{questions}</Text>
         </View>
 
         <View style={styles.statsCard}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={styles.statsCardHeader}>
             <Image
               source={require('../Assets/Icons/ResponseRate.png')}
-              style={{ width: 12, height: 12, marginRight: 5 }}
+              style={styles.statsIcon}
             />
             <Text style={styles.statsLabel}>Response Rate</Text>
           </View>
-
-          <Text style={[styles.statsValue, { color: '#F59E0B' }]}>
-            {props?.responseRate ?? '75%'}
+          <Text style={[styles.statsValue, styles.rateValue]}>
+            {responseRate}
           </Text>
         </View>
       </View>
 
-      {/* BREAKDOWN */}
       <View style={styles.breakRow}>
         <Text style={styles.breakTitle}>Response Breakdown</Text>
-
-        <Text style={styles.breakCount}>
-          {props?.responses ?? '8 responses'}
-        </Text>
+        <Text style={styles.breakCount}>{responses}</Text>
       </View>
 
-      {/* PROGRESS */}
-      <SurveyProgressBar title="High" current={25} color="#2F6FED" />
-
-      <SurveyProgressBar title="Fair" current={60} color="#2BC48A" />
-
-      <SurveyProgressBar title="Low" current={15} color="#F4A11A" />
+      {breakdown.map(item => (
+        <SurveyProgressBar
+          key={item.label}
+          title={item.label}
+          current={item.value}
+          color={item.color}
+        />
+      ))}
     </View>
   );
 };
@@ -93,138 +92,135 @@ const SatisficationSurveyComponent = props => {
 export default SatisficationSurveyComponent;
 
 const styles = StyleSheet.create({
-  //   card: {
-  //     margin: 16,
-  //     padding: 16,
-  //     borderRadius: 18,
-  //     backgroundColor: '#FFFFFF',
-  //     borderWidth: 1,
-  //     borderColor: '#E5E7EB',
-  //   },
   card: {
-    margin: 16,
-    marginTop: 0, // 👈 yaha value kam karo (upar move hoga)
-    padding: 16,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    marginTop: hp(2),
+    padding: wp(4),
+    borderRadius: wp(4.5),
+    backgroundColor: Colors.white,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.fieldBorder,
   },
-
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-
   leftHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+    marginRight: wp(2),
   },
-
+  headerTextWrap: {
+    flex: 1,
+  },
   iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#E9FBF3',
+    width: wp(9),
+    height: wp(9),
+    borderRadius: wp(3),
+    backgroundColor: Colors.mintBadge,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: wp(2.5),
   },
-
+  reportIcon: {
+    width: wp(4.5),
+    height: wp(4.5),
+  },
   report: {
-    fontSize: 10,
-    color: '#9CA3AF',
-    fontWeight: '600',
+    fontSize: Fontsize.xm0,
+    color: Colors.ashGray,
+    fontFamily: Fonts.poppinsMedium,
     letterSpacing: 0.5,
   },
-
   mainTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: Fontsize.xx1,
+    fontFamily: Fonts.poppinsSemiBold,
+    color: Colors.graphite,
+    marginTop: hp(0.2),
   },
-
   badge: {
-    backgroundColor: '#E9FBF3',
-
-    borderRadius: 20,
-    width: 46,
-    height: 28,
+    backgroundColor: Colors.mintBadge,
+    borderRadius: wp(5),
+    paddingHorizontal: wp(2.5),
+    paddingVertical: hp(0.5),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-
   badgeText: {
-    color: '#10B981',
-    fontSize: 10,
-    fontFamily: Fonts.poppinsRegular,
-    marginLeft: wp(2),
-    marginTop: wp(1.7),
+    color: Colors.limeGreen,
+    fontSize: Fontsize.xm0,
+    fontFamily: Fonts.poppinsMedium,
   },
-
   divider: {
     height: 1,
-    backgroundColor: '#E5E7EB',
-    marginVertical: 14,
+    backgroundColor: Colors.fieldBorder,
+    marginVertical: hp(1.8),
   },
-
   label: {
-    fontSize: 10,
-    color: '#9CA3AF',
-    fontFamily: Fonts.poppinsRegular,
-    letterSpacing: 1,
+    fontSize: Fontsize.xm0,
+    color: Colors.ashGray,
+    fontFamily: Fonts.poppinsMedium,
+    letterSpacing: 0.8,
   },
-
   title: {
-    fontSize: 14,
-    // fontWeight: '700',
-    marginTop: 4,
+    fontSize: Fontsize.xs4,
+    marginTop: hp(0.5),
     fontFamily: Fonts.poppinsSemiBold,
-    color: '#111827',
+    color: Colors.graphite,
+    lineHeight: wp(5),
   },
-
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 8,
+    marginTop: hp(1.5),
+    gap: wp(2.5),
   },
-
   statsCard: {
-    width: '48%',
-    backgroundColor: '#F3F4F6',
-    // padding: 7,
-    borderRadius: 11,
-    height: wp(17),
+    flex: 1,
+    backgroundColor: Colors.cloudGray,
+    borderRadius: wp(2.8),
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(1.2),
   },
-
+  statsCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: hp(0.5),
+  },
+  statsIcon: {
+    width: wp(3),
+    height: wp(3),
+    marginRight: wp(1.5),
+  },
   statsLabel: {
-    fontSize: 10,
-    color: '#6B7280',
+    fontSize: Fontsize.xm0,
+    color: Colors.steelGray,
     fontFamily: Fonts.poppinsRegular,
-
-    marginTop: wp(5),
   },
-
   statsValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    // marginTop: 6,
-    color: '#111827',
+    fontSize: Fontsize.m,
+    fontFamily: Fonts.poppinsSemiBold,
+    color: Colors.graphite,
   },
-
+  rateValue: {
+    color: Colors.vividAmber,
+  },
   breakRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 18,
-    marginBottom: 12,
+    alignItems: 'center',
+    marginTop: hp(2),
+    marginBottom: hp(1),
   },
-
   breakTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: Fontsize.xs4,
+    fontFamily: Fonts.poppinsSemiBold,
+    color: Colors.graphite,
   },
-
   breakCount: {
-    fontSize: 12,
-    color: '#9CA3AF',
+    fontSize:Fontsize.xs0,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.ashGray,
   },
 });

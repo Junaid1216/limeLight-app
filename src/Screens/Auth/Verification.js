@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     paddingTop: hp(3),
   },
   heading: {
-    fontSize: wp(5.3),
+    fontSize: Fontsize.l,
     fontFamily: Fonts.poppinsMedium,
     color: Colors.black,
   },

@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
 
   tabBarLabel: {
-    fontSize: 12,
+    fontSize: wp(3.2),
     textTransform: 'none',
     fontFamily: Fonts.poppinsRegular,
   },
