@@ -1,7 +1,7 @@
 import { hp, wp } from '../Assets/Responsive';
 
 export const Fontsize = {
-  mm1:wp(8)
+  mm1:wp(8),
   ml: wp(5.5),
   l: wp(5.3),
   mm: wp(5),

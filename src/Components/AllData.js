@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
 
   avatarText: {
 
-    fontSize: wp(3.5)
+    fontSize: wp(3.5),
     color: '#17B794',
   },
 
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: wp(4.3)
+    fontSize: wp(4.3),
     color: '#222',
     marginRight: 8,
   },
