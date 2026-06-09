@@ -170,4 +170,7 @@ export const Strings = {
   tableUnstitched: 'UNSTITCHED',
   tableAccessShort: 'ACCESS.',
   staffMembers: count => `${count} staff members`,
+  achievedLabel: 'Achieved',
+  remainingLabel: 'Remaining',
+  contribution: 'Contribution',
 };

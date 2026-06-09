@@ -407,6 +407,57 @@ export const branchesData = [
   },
 ];
 
+export const branchStaffComparisonData = [
+  {
+    id: 1,
+    name: 'DHA',
+    staff: [
+      { id: 1, rank: 1, name: 'Zain', achieved: 80, remaining: 19, commission: 'Rs. 878' },
+      { id: 2, rank: 2, name: 'Saleem', achieved: 79, remaining: 21, commission: 'Rs. 856' },
+      { id: 3, rank: 3, name: 'Ayesha', achieved: 66, remaining: 34, commission: 'Rs. 658' },
+      { id: 4, rank: 4, name: 'Haris', achieved: 61, remaining: 39, commission: 'Rs. 550' },
+      { id: 5, rank: 5, name: 'Zain', achieved: 54, remaining: 46, commission: 'Rs. 459' },
+      { id: 6, rank: 6, name: 'Saleem', achieved: 51, remaining: 49, commission: 'Rs. 388' },
+      { id: 7, rank: 7, name: 'Ayesha', achieved: 47, remaining: 53, commission: 'Rs. 310' },
+    ],
+  },
+  {
+    id: 2,
+    name: 'MM Alam',
+    staff: [
+      { id: 1, rank: 1, name: 'Mudassar', achieved: 72, remaining: 28, commission: 'Rs. 710' },
+      { id: 2, rank: 2, name: 'Atique', achieved: 65, remaining: 35, commission: 'Rs. 640' },
+      { id: 3, rank: 3, name: 'Zain', achieved: 58, remaining: 42, commission: 'Rs. 590' },
+      { id: 4, rank: 4, name: 'Komal', achieved: 52, remaining: 48, commission: 'Rs. 520' },
+      { id: 5, rank: 5, name: 'Ayesha', achieved: 46, remaining: 54, commission: 'Rs. 460' },
+      { id: 6, rank: 6, name: 'Azhar', achieved: 38, remaining: 62, commission: 'Rs. 380' },
+      { id: 7, rank: 7, name: 'Rizwan', achieved: 30, remaining: 70, commission: 'Rs. 310' },
+    ],
+  },
+  {
+    id: 3,
+    name: 'Packages',
+    staff: [
+      { id: 1, rank: 1, name: 'Ali', achieved: 78, remaining: 22, commission: 'Rs. 800' },
+      { id: 2, rank: 2, name: 'Fatima', achieved: 70, remaining: 30, commission: 'Rs. 720' },
+      { id: 3, rank: 3, name: 'Hamza', achieved: 63, remaining: 37, commission: 'Rs. 660' },
+      { id: 4, rank: 4, name: 'Hina', achieved: 56, remaining: 44, commission: 'Rs. 580' },
+      { id: 5, rank: 5, name: 'Imran', achieved: 49, remaining: 51, commission: 'Rs. 500' },
+      { id: 6, rank: 6, name: 'Sana', achieved: 42, remaining: 58, commission: 'Rs. 420' },
+    ],
+  },
+  {
+    id: 4,
+    name: 'Emporium',
+    staff: [
+      { id: 1, rank: 1, name: 'Danish', achieved: 74, remaining: 26, commission: 'Rs. 750' },
+      { id: 2, rank: 2, name: 'Maria', achieved: 66, remaining: 34, commission: 'Rs. 680' },
+      { id: 3, rank: 3, name: 'Omar', achieved: 59, remaining: 41, commission: 'Rs. 610' },
+      { id: 4, rank: 4, name: 'Rabia', achieved: 51, remaining: 49, commission: 'Rs. 530' },
+    ],
+  },
+];
+
 export const surveyReportDetail = {
   reportTitle: 'Price Satisfaction Survey',
   title: 'Monthly Employee Satisfaction Survey',

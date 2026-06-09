@@ -86,7 +86,7 @@ const BranchManagerDrawerContent = ({ navigation }) => {
         <MenuItem
           iconName="git-branch"
           label={Strings.branchComparison}
-          onPress={() => goToDrawerScreen('BranchComparison')}
+          onPress={() => {}}
         />
         <MenuItem
           iconName="target"

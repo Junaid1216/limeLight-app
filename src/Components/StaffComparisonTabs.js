@@ -37,8 +37,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: Colors.tabTrack,
     borderRadius: wp(7),
+    borderWidth: wp(0.25),
+    borderColor: Colors.paleSlate,
     padding: wp(0.9),
-    marginBottom: hp(1.7),
+    marginBottom: hp(2),
   },
   tabButton: {
     paddingVertical: hp(0.7),

@@ -91,7 +91,7 @@ const ASMDrawerContent = ({ navigation }) => {
         <MenuItem
           iconName="trending-up"
           label={Strings.salesStaffPerformance}
-          onPress={() => goToDrawerScreen('SalesStaffPerformance')}
+          onPress={() => goToAppScreen('BranchStaffComparison')}
         />
         <MenuItem
           iconName="eye"
