@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: Fontsize.xm1,
+    fontSize: Fontsize.m,
     color: Colors.black,
   },
   subtitle: {

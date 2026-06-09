@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: Fontsize.xxxs,
+    fontSize: wp(4.6),
     color: Colors.blueGrey,
     textAlign: 'center',
     width: wp(55),
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   },
   cellText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: Fontsize.xsss,
+    fontSize:Fontsize.xs0,
     color: Colors.deepSlate,
     textAlign: 'center',
     width: wp(55),
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   categoryName: {
-    fontSize: 11,
+    fontSize: Fontsize.xs0,
     width: wp(19),
     fontFamily: Fonts.poppinsBold,
     marginTop: hp(0.3),

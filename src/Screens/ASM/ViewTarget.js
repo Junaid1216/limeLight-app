@@ -1,6 +1,6 @@
 import React from 'react';
-import TargetAssignment from '../AppFlow/TargetAssignment';
+import BranchTargets from '../AppFlow/BranchTargets';
 
-const ViewTarget = () => <TargetAssignment />;
+const ViewTarget = () => <BranchTargets />;
 
 export default ViewTarget;

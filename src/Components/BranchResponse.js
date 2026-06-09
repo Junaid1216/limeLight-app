@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   placeholderStyle: {
-    fontSize: Fontsize.sm,
+    fontSize: Fontsize.xmm,
     fontFamily: Fonts.poppinsRegular,
     color: Colors.grey,
     marginLeft: wp(1),

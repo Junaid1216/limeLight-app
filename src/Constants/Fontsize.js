@@ -15,6 +15,7 @@ export const Fontsize = {
   xs3: wp(3.47),
   xs2: wp(3.4),
   xs1: wp(3.2),
+  xs00:wp(3.1),
   xs0: wp(3),
   s: wp(3),
   xm1: wp(2.9),
@@ -25,14 +26,7 @@ export const Fontsize = {
   xm2:wp(2.6),
   xm0: wp(2.5),
   x0:wp(2.4),
+  x00:wp(2.3),
   xxxxs: wp(1.25),
 
-  xu: hp(2.6),
-  xm1: hp(2),
-  xxs0: hp(1.7),
-  xxs1: hp(1.6),
-  xsss: hp(1.55),
-  xm: hp(1.5),
-  xxxs: hp(1.45),
-  xxm: hp(1.35),
 };

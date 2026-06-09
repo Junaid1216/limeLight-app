@@ -84,4 +84,12 @@ export const Colors = {
   lightGray: '#E4E4E7',
   darkgrey: '#555',
   mediumgreen: '#0F8B6D',
+  expandedHeaderBg: '#F4F4F599',
+  cardBorderGray: '#D9D9D9',
+  avatarMintBg: '#E6F6F2',
+  jadeGreen: '#17B794',
+  charcoalText: '#222222',
+  statusMintBg: '#E7F8F2',
+  warmGray: '#777777',
+  surveyProgressTrack: '#FDF2E9',
 };

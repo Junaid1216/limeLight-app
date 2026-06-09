@@ -162,4 +162,12 @@ export const Strings = {
   assignedHeader: 'ASSIGNED',
   leftHeader: 'LEFT',
   totalAssigned: 'Total Assigned',
+  branchTargets: 'Branch Targets',
+  tapToViewTargets: 'Tap to view targets',
+  total: 'Total',
+  tableName: 'NAME',
+  tableGarments: 'GARMENTS',
+  tableUnstitched: 'UNSTITCHED',
+  tableAccessShort: 'ACCESS.',
+  staffMembers: count => `${count} staff members`,
 };

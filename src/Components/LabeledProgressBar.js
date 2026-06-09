@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   barRow: {
     flexDirection: 'row',
-    width: '100%',
+    flex: 1,
     height: hp(3.8),
   },
   fill: {
@@ -93,15 +93,15 @@ const styles = StyleSheet.create({
     borderRadius: hp(1.9),
   },
   fillText: {
-    width: '100%',
+    flex: 1,
     fontFamily: Fonts.poppinsMedium,
-    fontSize: Fontsize.xxm,
+    fontSize: Fontsize.xxs0,
     color: Colors.white,
   },
   remaining: {
     flexShrink: 0,
     fontFamily: Fonts.poppinsRegular,
-    fontSize: Fontsize.xxm,
+    fontSize: Fontsize.xxs0,
     textAlign: 'right',
     paddingRight: wp(5),
     maxWidth: wp(28),

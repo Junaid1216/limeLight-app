@@ -354,6 +354,59 @@ export const surveyReportSummary = {
   rate: '75%',
 };
 
+export const branchesData = [
+  {
+    id: 1,
+    name: 'MM Alam',
+    staff: [
+      { id: 1, name: 'Mudassar', garments: 40, unstitched: 20, accessories: 30 },
+      { id: 2, name: 'Atique', garments: 10, unstitched: 30, accessories: 0 },
+      { id: 3, name: 'Zain', garments: 50, unstitched: 0, accessories: 20 },
+      { id: 4, name: 'Komal', garments: 50, unstitched: 0, accessories: 0 },
+      { id: 5, name: 'Ayesha', garments: 30, unstitched: 50, accessories: 0 },
+      { id: 6, name: 'Azhar', garments: 30, unstitched: 20, accessories: 30 },
+      { id: 7, name: 'Rizwan', garments: 20, unstitched: 30, accessories: 20 },
+    ],
+    totals: { garments: 200, unstitched: 150, accessories: 100 },
+  },
+  {
+    id: 2,
+    name: 'DHA',
+    staff: [
+      { id: 1, name: 'Hassan', garments: 18, unstitched: 14, accessories: 9 },
+      { id: 2, name: 'Sara', garments: 22, unstitched: 18, accessories: 11 },
+      { id: 3, name: 'Bilal', garments: 24, unstitched: 19, accessories: 12 },
+      { id: 4, name: 'Nida', garments: 20, unstitched: 16, accessories: 10 },
+      { id: 5, name: 'Usman', garments: 26, unstitched: 21, accessories: 13 },
+    ],
+    totals: { garments: 110, unstitched: 88, accessories: 55 },
+  },
+  {
+    id: 3,
+    name: 'Packages',
+    staff: [
+      { id: 1, name: 'Ali', garments: 22, unstitched: 17, accessories: 11 },
+      { id: 2, name: 'Fatima', garments: 25, unstitched: 19, accessories: 12 },
+      { id: 3, name: 'Hamza', garments: 28, unstitched: 21, accessories: 14 },
+      { id: 4, name: 'Hina', garments: 24, unstitched: 18, accessories: 12 },
+      { id: 5, name: 'Imran', garments: 27, unstitched: 20, accessories: 13 },
+      { id: 6, name: 'Sana', garments: 23, unstitched: 17, accessories: 11 },
+    ],
+    totals: { garments: 149, unstitched: 112, accessories: 73 },
+  },
+  {
+    id: 4,
+    name: 'Emporium',
+    staff: [
+      { id: 1, name: 'Danish', garments: 19, unstitched: 15, accessories: 10 },
+      { id: 2, name: 'Maria', garments: 21, unstitched: 16, accessories: 11 },
+      { id: 3, name: 'Omar', garments: 23, unstitched: 18, accessories: 12 },
+      { id: 4, name: 'Rabia', garments: 20, unstitched: 15, accessories: 10 },
+    ],
+    totals: { garments: 83, unstitched: 64, accessories: 43 },
+  },
+];
+
 export const surveyReportDetail = {
   reportTitle: 'Price Satisfaction Survey',
   title: 'Monthly Employee Satisfaction Survey',

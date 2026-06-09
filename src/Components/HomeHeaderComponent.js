@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   userBranch: {
     fontFamily: Fonts.poppinsRegular,
-    fontSize: Fontsize.xxs1,
+    fontSize: Fontsize.xxs0,
     color: Colors.ashGray,
     marginTop: hp(0.2),
   },

@@ -96,7 +96,7 @@ const ASMDrawerContent = ({ navigation }) => {
         <MenuItem
           iconName="eye"
           label={Strings.viewTarget}
-          onPress={() => goToDrawerScreen('ViewTarget')}
+          onPress={() => goToAppScreen('BranchTargets')}
         />
         <MenuItem
           iconName="headphones"

@@ -6,6 +6,7 @@ import Role from '../Screens/StartScreens/Role';
 import AuthNavigation from './AuthNavigation';
 import AppNavigator from './AppNavigator';
 import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
+import BranchTargets from '../Screens/AppFlow/BranchTargets';
 import SurveyResponse from '../Screens/CommonScreens/SurveyResponse';
 const MAIN_STACK = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ const MainNavigation = () => {
           name="TargetAssignment"
           component={TargetAssignment}
         />
+        <MAIN_STACK.Screen name="BranchTargets" component={BranchTargets} />
         <MAIN_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
       </MAIN_STACK.Navigator>
     </NavigationContainer>

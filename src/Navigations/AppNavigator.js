@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DrawerNavigator from './DrawerNavigator';
 import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
+import BranchTargets from '../Screens/AppFlow/BranchTargets';
 import ChangePassword from '../Screens/CommonScreens/ChangePassword';
 import SurveyProgress from '../Screens/CommonScreens/SurveyProgress';
 import Announcement from '../Screens/CommonScreens/Announcement';
@@ -26,6 +27,7 @@ const AppNavigator = () => {
       />
       <APP_STACK.Screen name="Profile" component={Profile} />
       <APP_STACK.Screen name="TargetAssignment" component={TargetAssignment} />
+      <APP_STACK.Screen name="BranchTargets" component={BranchTargets} />
       <APP_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
     </APP_STACK.Navigator>
   );

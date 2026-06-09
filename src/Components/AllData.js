@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import { wp } from '../Assets/Responsive';
+import { Fontsize } from '../Constants/Fontsize';
+import { Fonts } from '../Constants/Fonts';
+import { Colors } from '../Constants/Colors';
 
 const data = [
   {
@@ -76,9 +79,9 @@ const AllData = () => {
       data={data}
       renderItem={renderItem}
       keyExtractor={item => item.id}
-      style={{ backgroundColor: '#FFFFFF' }}
+      style={styles.list}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ padding: 14, marginLeft: wp(1) }}
+      contentContainerStyle={styles.listContent}
     />
   );
 };
@@ -88,81 +91,76 @@ export default AllData;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
   },
-
+  list: {
+    backgroundColor: Colors.white,
+  },
+  listContent: {
+    padding: wp(3.5),
+    marginLeft: wp(1),
+  },
   card: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
-    padding: 14,
-    marginBottom: 8,
-    minHeight: 105,
+    backgroundColor: Colors.white,
+    borderColor: Colors.cardBorderGray,
+    borderRadius: wp(2.9),
+    borderWidth: wp(0.2),
+    padding: wp(3.4),
+    marginBottom: wp(1.9),
+    minHeight: wp(25.4),
     elevation: 0.5,
   },
-
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#E6F6F2',
+    backgroundColor: Colors.avatarMintBg,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 6,
+    width: wp(9.7),
+    height: wp(9.7),
+    borderRadius: wp(4.8),
+    marginTop: wp(1.4),
   },
-
   avatarText: {
-
     fontSize: wp(3.5),
-    color: '#17B794',
+    color: Colors.jadeGreen,
   },
-
   details: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: wp(3),
   },
-
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   name: {
     fontSize: wp(4.3),
-    color: '#222',
-    marginRight: 8,
+    color: Colors.charcoalText,
+    marginRight: wp(1.9),
   },
-
   statusBadge: {
-    backgroundColor: '#E7F8F2',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    backgroundColor: Colors.statusMintBg,
+    borderRadius: wp(2.4),
+    paddingHorizontal: wp(1.9),
+    paddingVertical: wp(0.7),
   },
-
   statusText: {
-    color: '#17B794',
-    fontSize: wp(2.7) ,
-    fontWeight: '500',
+    color: Colors.jadeGreen,
+    fontSize: wp(2.7),
+    fontFamily: Fonts.poppinsMedium,
   },
-
   code: {
-    marginTop: 4,
+    marginTop: wp(1.0),
     fontSize: wp(3.2),
-    color: '#777',
+    color: Colors.warmGray,
   },
-
   date: {
-    marginTop: 8,
-    fontSize: wp(3.2),
-    color: '#777',
+    fontSize: Fontsize.xs0,
+    color: Colors.warmGray,
+    marginTop: wp(1.9),
   },
-
   time: {
-    marginTop: 4,
-    fontSize: wp(3.2),
-    color: '#777',
+    marginTop: wp(1.0),
+    fontSize: Fontsize.xs1,
+    color: Colors.warmGray,
   },
 });
