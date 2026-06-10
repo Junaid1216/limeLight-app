@@ -35,6 +35,10 @@ export const Images = {
   MegaAssignment: require('./Icons/megaAssignment.png'),
   Feedback: require('./Icons/feedback.png'),
   MultiplePeople: require('./Icons/MultiplePeople.png'),
+  Garments: require('./Icons/Garments.png'),
+  unstiched: require('./Icons/unstiched.png'),
+  Accesories: require('./Icons/Accesories.png'),
+  Location: require('./Icons/location.png'),
   tickCircle: require('../Assets/Icons/tickCircle.png'),
   Clock: require('../Assets/Icons/Clock.png'),
 };

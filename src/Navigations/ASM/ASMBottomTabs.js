@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Feather';
 import { Images } from '../../Assets';
@@ -14,6 +8,7 @@ import { Colors } from '../../Constants/Colors';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import HomeTabShell from '../../Components/HomeTabShell';
+import ASMHome from '../../Screens/ASM/ASMHome';
 import Training from '../../Screens/CommonScreens/Training';
 import Notification from '../../Screens/CommonScreens/Notification';
 import FeedBack from '../../Screens/CommonScreens/FeedBack';
@@ -164,7 +159,7 @@ const ASMBottomTabs = () => (
   >
     <BOTTOM_STACK.Screen
       name="Home"
-      component={HomeTabShell}
+      component={ASMHome}
       options={{
         tabBarIcon: tabBarIcon('home', Strings.home, styles.homeTabShift),
       }}

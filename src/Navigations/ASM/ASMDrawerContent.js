@@ -140,13 +140,20 @@ const ASMDrawerContent = ({ navigation }) => {
 
 const MenuItem = ({ label, onPress, iconName, imageSource }) => (
   <Pressable
-    style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+    style={({ pressed }) => [
+      styles.menuItem,
+      pressed && styles.menuItemPressed,
+    ]}
     onPress={onPress}
   >
     {iconName ? (
       <Icon name={iconName} size={wp(5)} color={Colors.slateGrey} />
     ) : (
-      <Image source={imageSource} style={styles.menuIcon} resizeMode="contain" />
+      <Image
+        source={imageSource}
+        style={styles.menuIcon}
+        resizeMode="contain"
+      />
     )}
     <Text style={styles.menuLabel} numberOfLines={1}>
       {label}

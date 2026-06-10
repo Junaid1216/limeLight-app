@@ -5,6 +5,7 @@ import SplashScreen from '../Screens/StartScreens/SplashScreen';
 import Role from '../Screens/StartScreens/Role';
 import AuthNavigation from './AuthNavigation';
 import AppNavigator from './AppNavigator';
+import StaffDetail from '../Screens/CommonScreens/StaffDetail';
 import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
 import BranchTargets from '../Screens/AppFlow/BranchTargets';
 import BranchStaffComparison from '../Screens/AppFlow/BranchStaffComparison';
@@ -21,6 +22,7 @@ const MainNavigation = () => {
         <MAIN_STACK.Screen name="SplashScreen" component={SplashScreen} />
         <MAIN_STACK.Screen name="Role" component={Role} />
         <MAIN_STACK.Screen name="AuthNavigation" component={AuthNavigation} />
+        <MAIN_STACK.Screen name="StaffDetail" component={StaffDetail} />
         <MAIN_STACK.Screen name="Drawer" component={AppNavigator} />
         <MAIN_STACK.Screen
           name="TargetAssignment"
