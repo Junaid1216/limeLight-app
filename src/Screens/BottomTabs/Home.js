@@ -28,7 +28,7 @@ const renderIncentiveItem = ({ item }) => (
 const StaffHomeContent = () => (
   <FlatList
     data={slipBoundIncentiveData}
-    keyExtractor={item => item.id}
+    keyExtractor={item => item?.id}
     renderItem={renderIncentiveItem}
     ListHeaderComponent={
       <View>

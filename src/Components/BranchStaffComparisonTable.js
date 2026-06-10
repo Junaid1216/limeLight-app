@@ -13,69 +13,77 @@ import { Fonts } from '../Constants/Fonts';
 import { hp, wp } from '../Assets/Responsive';
 import { Strings } from '../Constants/Strings';
 
-const BranchStaffComparisonTable = ({ staff }) => {
-  const renderItem = ({ item, index }) => (
-    <BranchStaffComparisonRow
-      member={item}
-      showBorder={index < staff.length - 1}
-    />
-  );
+const ListHeader = () => (
+  <>
+    <View style={styles.topRow}>
+      <Text style={styles.sectionTitle} numberOfLines={1}>
+        {Strings.staffComparisonHeader}
+      </Text>
 
-  return (
-    <View style={styles.table}>
-      <View style={styles.topRow}>
-        <Text style={styles.sectionTitle}>{Strings.staffComparisonHeader}</Text>
+      <View style={styles.legendWrap}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.achievedDot]} />
+          <Text style={styles.legendText} numberOfLines={1}>
+            {Strings.achievedLabel}
+          </Text>
+        </View>
 
-        <View style={styles.legendWrap}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, styles.achievedDot]} />
-            <Text style={styles.legendText}>{Strings.achievedLabel}</Text>
-          </View>
-
-          <View style={styles.legendItem}>
-            <View style={[styles.legendDot, styles.remainingDot]} />
-            <Text style={styles.legendText}>{Strings.remainingLabel}</Text>
-          </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.remainingDot]} />
+          <Text style={styles.legendText} numberOfLines={1}>
+            {Strings.remainingLabel}
+          </Text>
         </View>
       </View>
+    </View>
 
-      <View style={styles.headerShell}>
-        <ComparisonColumnsLayout
-          style={styles.headerColumns}
-          rank={<Text style={styles.headerText}>{Strings.rank}</Text>}
-          name={<Text style={styles.headerText}>{Strings.name}</Text>}
-          target={
-            <Text style={[styles.headerText, styles.targetHeader]}>
-              {Strings.target}
-            </Text>
-          }
-          commission={
-            <Text
-              style={[styles.headerText, styles.commissionHeader]}
-              numberOfLines={1}
-            >
-              {Strings.commission}
-            </Text>
-          }
-        />
-      </View>
-
-      <FlatList
-        data={staff}
-        keyExtractor={item => String(item.id)}
-        renderItem={renderItem}
-        scrollEnabled={false}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
+    <View style={styles.headerShell}>
+      <ComparisonColumnsLayout
+        style={styles.headerColumns}
+        rank={
+          <Text style={styles.headerText} numberOfLines={1}>
+            {Strings.rank}
+          </Text>
+        }
+        name={
+          <Text style={styles.headerText} numberOfLines={1}>
+            {Strings.name}
+          </Text>
+        }
+        target={
+          <Text style={[styles.headerText, styles.targetHeader]} numberOfLines={1}>
+            {Strings.target}
+          </Text>
+        }
+        commission={
+          <Text style={[styles.headerText, styles.commissionHeader]} numberOfLines={1}>
+            {Strings.commission}
+          </Text>
+        }
       />
     </View>
-  );
-};
+  </>
+);
+
+const BranchStaffComparisonTable = ({ staff }) => (
+  <View style={styles.table}>
+    <FlatList
+      data={staff}
+      keyExtractor={item => String(item?.id)}
+      scrollEnabled={false}
+      ListHeaderComponent={ListHeader}
+      contentContainerStyle={styles.listContent}
+      ItemSeparatorComponent={() => <View style={styles.rowSeparator} />}
+      renderItem={({ item }) => (
+        <BranchStaffComparisonRow member={item} />
+      )}
+    />
+  </View>
+);
 
 const styles = StyleSheet.create({
   table: {
-    marginTop: hp(1.5),
-    width: '100%',
+    marginTop: hp(1),
     alignSelf: 'stretch',
     borderRadius: wp(3),
     borderWidth: wp(0.25),
@@ -88,8 +96,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: ROW_PAD_H,
-    paddingTop: hp(1.6),
-    paddingBottom: hp(1.2),
+    paddingTop: hp(0.9),
+    paddingBottom: hp(0.6),
   },
   sectionTitle: {
     fontSize: Fontsize.sm,
@@ -97,6 +105,7 @@ const styles = StyleSheet.create({
     color: Colors.graphite,
     flexShrink: 1,
     marginRight: wp(1.5),
+    lineHeight: Fontsize.sm * 1.15,
   },
   legendWrap: {
     flexDirection: 'row',
@@ -124,33 +133,46 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.x0,
     fontFamily: Fonts.poppinsRegular,
     color: Colors.steelGray,
+    lineHeight: Fontsize.x0 * 1.1,
   },
   headerShell: {
     marginHorizontal: TABLE_SIDE_INSET,
     backgroundColor: Colors.ghostWhite,
     borderRadius: wp(3),
-    paddingVertical: hp(1.15),
+    paddingVertical: hp(0.75),
     paddingHorizontal: TABLE_PAD,
-    marginBottom: hp(0.5),
+    marginBottom: hp(0.35),
+    borderBottomWidth: wp(0.2),
+    borderBottomColor: Colors.rowDivider,
   },
   headerColumns: {
-    width: '100%',
+    alignSelf: 'stretch',
   },
   headerText: {
     fontSize: Fontsize.xm0,
     fontFamily: Fonts.poppinsBold,
-    color: Colors.slateGrey,
+    color: Colors.steelGray,
+    lineHeight: Fontsize.xm0 * 1.1,
   },
   targetHeader: {
-    paddingLeft: wp(1.2),
+    alignSelf: 'stretch',
+    paddingLeft: wp(6),
+    textAlign: 'left',
   },
   commissionHeader: {
+    alignSelf: 'stretch',
     textAlign: 'right',
     flexShrink: 0,
     paddingRight: wp(0.3),
+    lineHeight: Fontsize.xm0,
   },
   listContent: {
-    paddingBottom: hp(0.8),
+    paddingBottom: hp(0.35),
+  },
+  rowSeparator: {
+    borderBottomWidth: wp(0.25),
+    borderBottomColor: Colors.rowDivider,
+    marginHorizontal: ROW_PAD_H,
   },
 });
 

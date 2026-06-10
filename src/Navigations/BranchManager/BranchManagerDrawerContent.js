@@ -84,9 +84,9 @@ const BranchManagerDrawerContent = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         <MenuItem
-          iconName="git-branch"
+          imageSource={Images.BranchComparisonIcon}
           label={Strings.branchComparison}
-          onPress={() => {}}
+          onPress={() => goToDrawerScreen('BranchComparison')}
         />
         <MenuItem
           iconName="target"

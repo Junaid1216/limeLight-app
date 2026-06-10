@@ -3,7 +3,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { wp } from '../../Assets/Responsive';
 import RegionComparison from '../../Screens/ASM/RegionComparison';
 import SalesStaffPerformance from '../../Screens/ASM/SalesStaffPerformance';
-import ViewTarget from '../../Screens/ASM/ViewTarget';
 import ASMBottomTabs from './ASMBottomTabs';
 import ASMDrawerContent from './ASMDrawerContent';
 
@@ -38,11 +37,6 @@ const ASMDrawerNavigator = () => (
     <DrawerNav.Screen
       name="SalesStaffPerformance"
       component={SalesStaffPerformance}
-      options={{ headerShown: false }}
-    />
-    <DrawerNav.Screen
-      name="ViewTarget"
-      component={ViewTarget}
       options={{ headerShown: false }}
     />
   </DrawerNav.Navigator>

@@ -3,46 +3,51 @@ import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import ASMAchievementCard from '../../Components/ASMAchievementCard';
 import ASMConversionTable from '../../Components/ASMConversionTable';
 import ASMRangeToggle from '../../Components/ASMRangeToggle';
-import HomeHeaderComponent from '../../Components/HomeHeaderComponent';
+import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fonts } from '../../Constants/Fonts';
 import { Fontsize } from '../../Constants/Fontsize';
 import {
   asmAccessoriesData,
-  asmConversionData,
   asmGarmentsData,
   asmUnstitchedData,
+  regionConversionData,
+  regionYoursAchievementRow,
+  regionYoursConversionRow,
 } from '../../Constants/DummyData';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 
-const ASMHome = props => {
+const RegionComparison = props => {
   const params = props?.route?.params;
-  const conversionData = params?.conversionData ?? asmConversionData;
+  const conversionData = params?.conversionData ?? regionConversionData;
   const garmentsData = params?.garmentsData ?? asmGarmentsData;
   const unstitchedData = params?.unstitchedData ?? asmUnstitchedData;
   const accessoriesData = params?.accessoriesData ?? asmAccessoriesData;
+  const yoursConversionRow =
+    params?.yoursConversionRow ?? regionYoursConversionRow;
+  const yoursAchievementRow =
+    params?.yoursAchievementRow ?? regionYoursAchievementRow;
 
-  const [selectedRange, setSelectedRange] = useState(
-    params?.selectedRange ?? Strings.weekly,
-  );
+  const [selectedRange, setSelectedRange] = useState(params?.selectedRange ?? '');
 
   return (
     <View style={MyStyling.container2}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.darkNavy} />
-      <View style={styles.headerArea}>
-        <HomeHeaderComponent />
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
       <ASMConversionTable
         data={conversionData}
+        yoursRow={yoursConversionRow}
+        showLegend={false}
+        useRegionRow
         contentContainerStyle={styles.content}
         topContent={
           <>
-            <Text style={styles.screenTitle} numberOfLines={1}>
-              {Strings.branchComparison}
-            </Text>
+            <MainHeaderComponent
+              title={params?.title ?? Strings.regionComparison}
+              notificationCount={params?.notificationCount ?? 5}
+            />
 
             <ASMRangeToggle
               selectedRange={selectedRange}
@@ -57,23 +62,26 @@ const ASMHome = props => {
         bottomContent={
           <>
             <Text style={styles.sectionHeading} numberOfLines={1}>
-              {Strings.branchComparison}
+              {Strings.regionComparison}
             </Text>
             <View style={styles.achievementGroup}>
               <ASMAchievementCard
                 title={Strings.asmGarments}
                 data={garmentsData}
                 accentColor="#20C997"
+                yoursRow={yoursAchievementRow}
               />
               <ASMAchievementCard
                 title={Strings.asmUnstitched}
                 data={unstitchedData}
                 accentColor={Colors.brightBlue}
+                yoursRow={yoursAchievementRow}
               />
               <ASMAchievementCard
                 title={Strings.asmAccessories}
                 data={accessoriesData}
                 accentColor={Colors.vividAmber}
+                yoursRow={yoursAchievementRow}
                 isLast
               />
             </View>
@@ -85,38 +93,29 @@ const ASMHome = props => {
 };
 
 const styles = StyleSheet.create({
-  headerArea: {
-    backgroundColor: Colors.darkNavy,
-  },
   content: {
     paddingHorizontal: wp(4),
-    paddingTop: hp(2.5),
+    paddingTop: hp(1.8),
     paddingBottom: hp(3),
     backgroundColor: Colors.white,
-  },
-  screenTitle: {
-    fontFamily: Fonts.poppinsBold,
-    fontSize: Fontsize.mm,
-    color: Colors.black,
-    marginBottom: hp(2.2),
-    textAlign: 'center',
   },
   sectionHeading: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: Fontsize.sm,
     color: Colors.black,
+    marginTop: hp(2),
     marginBottom: hp(1.2),
   },
   achievementGroup: {
-    borderWidth: 0.97,
+    borderWidth: 1,
     borderColor: '#A89C9C',
     borderRadius: wp(4),
     paddingHorizontal: wp(2.5),
     paddingTop: hp(2),
     paddingBottom: hp(2),
-    marginBottom: hp(3),
+    marginBottom: hp(2),
     backgroundColor: '#F5FAFF',
   },
 });
 
-export default ASMHome;
+export default RegionComparison;

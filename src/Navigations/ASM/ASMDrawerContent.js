@@ -94,9 +94,9 @@ const ASMDrawerContent = ({ navigation }) => {
           onPress={() => goToAppScreen('BranchStaffComparison')}
         />
         <MenuItem
-          iconName="eye"
-          label={Strings.viewTarget}
-          onPress={() => goToAppScreen('BranchTargets')}
+          iconName="target"
+          label={Strings.TargetAssignment}
+          onPress={() => goToAppScreen('TargetAssignment')}
         />
         <MenuItem
           iconName="headphones"

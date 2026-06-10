@@ -11,7 +11,7 @@ import { Strings } from '../Constants/Strings';
 import BranchTargetTable from './BranchTargetTable';
 
 const BranchTargetCard = ({ branch, isExpanded, onPress }) => {
-  const staffCount = branch.staff.length;
+  const staffCount = branch?.staff?.length ?? 0;
 
   return (
     <View style={styles.card}>
@@ -40,8 +40,10 @@ const BranchTargetCard = ({ branch, isExpanded, onPress }) => {
         </View>
 
         <View style={styles.titleBlock}>
-          <Text style={styles.branchName}>{branch.name}</Text>
-          <Text style={styles.subtitle}>
+          <Text style={styles.branchName} numberOfLines={1}>
+            {branch?.name}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
             {isExpanded
               ? Strings.staffMembers(staffCount)
               : Strings.tapToViewTargets}
@@ -56,7 +58,7 @@ const BranchTargetCard = ({ branch, isExpanded, onPress }) => {
       </Pressable>
 
       {isExpanded && (
-        <BranchTargetTable staff={branch.staff} totals={branch.totals} />
+        <BranchTargetTable staff={branch?.staff} totals={branch?.totals} />
       )}
     </View>
   );

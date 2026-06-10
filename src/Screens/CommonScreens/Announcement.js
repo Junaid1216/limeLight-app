@@ -26,7 +26,7 @@ const Announcement = () => {
 
       <FlatList
         data={listData}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item?.id}
         renderItem={({ item }) => (
           <AnnouncementCard
             item={item}

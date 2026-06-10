@@ -1,17 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-
+import * as Progress from 'react-native-progress';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
-const BAR_HEIGHT = hp(1.2);
-const BAR_RADIUS = BAR_HEIGHT / 2;
+const BAR_SIZE = 10;
 
 const SurveyProgressBar = props => {
-  const [barWidth, setBarWidth] = useState(0);
-
   const current = props?.current ?? 0;
   const total = props?.total;
   const color = props?.color ?? Colors.amber;
@@ -24,10 +21,8 @@ const SurveyProgressBar = props => {
   const progress = isPercentageMode
     ? current / 100
     : total > 0
-    ? current / total
-    : 0;
-
-  const fillWidth = barWidth * Math.min(1, Math.max(0, progress));
+      ? current / total
+      : 0;
 
   return (
     <View style={styles.section}>
@@ -53,28 +48,17 @@ const SurveyProgressBar = props => {
         </Text>
       </View>
 
-      <View
-        style={[
-          styles.track,
-          barWidth > 0 && {
-            width: barWidth,
-            backgroundColor: unfilledColor,
-          },
-        ]}
-        onLayout={event => setBarWidth(event.nativeEvent.layout.width)}
-      >
-        {fillWidth > 0 && (
-          <View
-            style={[
-              styles.fill,
-              {
-                width: fillWidth,
-                backgroundColor: color,
-              },
-            ]}
-          />
-        )}
-      </View>
+      <Progress.Bar
+        progress={Math.min(1, Math.max(0, progress))}
+        width={null}
+        height={BAR_SIZE}
+        color={color}
+        unfilledColor={unfilledColor}
+        borderWidth={0}
+        borderRadius={BAR_SIZE / 2}
+        animated={false}
+        style={styles.progressBar}
+      />
     </View>
   );
 };
@@ -110,20 +94,13 @@ const styles = StyleSheet.create({
     marginLeft: wp(2),
   },
   dot: {
-    width: wp(2),
-    height: wp(2),
-    borderRadius: wp(1),
+    width: BAR_SIZE,
+    height: BAR_SIZE,
+    borderRadius: BAR_SIZE / 2,
     marginRight: wp(2.5),
   },
-  track: {
+  progressBar: {
     alignSelf: 'stretch',
-    height: BAR_HEIGHT,
-    borderRadius: BAR_RADIUS,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: BAR_HEIGHT,
-    borderRadius: BAR_RADIUS,
   },
 });
 

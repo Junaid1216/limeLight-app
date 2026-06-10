@@ -1,8 +1,3 @@
-import StaffComparison from './StaffComparison';
-import { Strings } from '../../Constants/Strings';
+import Comparison from './Comparison';
 
-const BranchComparison = () => (
-  <StaffComparison title={Strings.staffComparisonHeader} />
-);
-
-export default BranchComparison;
+export default Comparison;

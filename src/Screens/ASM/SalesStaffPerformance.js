@@ -8,8 +8,10 @@ import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { Colors } from '../../Constants/Colors';
 
-const SalesStaffPerformance = () => {
-  const topPerformer = staffComparisonRankData[1];
+const SalesStaffPerformance = props => {
+  const params = props?.route?.params;
+  const rankData = params?.rankData ?? staffComparisonRankData;
+  const topPerformer = params?.topPerformer ?? rankData?.[1];
 
   return (
     <View style={MyStyling.container2}>
@@ -19,13 +21,13 @@ const SalesStaffPerformance = () => {
         contentContainerStyle={styles.container}
       >
         <MainHeaderComponent
-          title={Strings.salesStaffPerformance}
-          notificationCount={5}
+          title={params?.title ?? Strings.salesStaffPerformance}
+          notificationCount={params?.notificationCount ?? 5}
         />
         <StaffPerformanceCard
           topPerformer={topPerformer}
-          rankData={staffComparisonRankData}
-          labels={Strings}
+          rankData={rankData}
+          labels={params?.labels ?? Strings}
         />
       </ScrollView>
     </View>

@@ -1,3 +1,4 @@
+import { Images } from '../Assets';
 import { Colors } from './Colors';
 import { categoryColorMap } from './CategoryColors';
 import { Strings } from './Strings';
@@ -457,6 +458,171 @@ export const branchStaffComparisonData = [
     ],
   },
 ];
+
+export const asmConversionData = [
+  { rank: 1, name: 'Emporium', traffic: 92, invoices: 10, conv: 15 },
+  { rank: 2, name: 'MM Alam', traffic: 90, invoices: 12, conv: 14 },
+  { rank: 3, name: 'Dolmen', traffic: 65, invoices: 8, conv: 12 },
+  { rank: 4, name: 'Gulberg', traffic: 62, invoices: 11, conv: 11 },
+  { rank: 5, name: 'Packages', traffic: 64, invoices: 9, conv: 8 },
+  { rank: 6, name: 'Amanah Mall', traffic: 59, invoices: 9, conv: 8 },
+  { rank: 7, name: 'Liberty', traffic: 55, invoices: 7, conv: 7 },
+  { rank: 8, name: 'Fortress', traffic: 52, invoices: 8, conv: 6 },
+  { rank: 9, name: 'Centaurus', traffic: 48, invoices: 6, conv: 6 },
+  { rank: 10, name: 'Giga Mall', traffic: 45, invoices: 5, conv: 5 },
+];
+
+export const asmYoursAchievementRow = {
+  rank: 7,
+  name: 'DHA (Yours)',
+  achieved: 70,
+  remaining: 30,
+};
+
+export const regionYoursConversionRow = {
+  rank: 1,
+  name: 'Lahore (Yours)',
+  traffic: 92,
+  invoices: 10,
+  conv: 15,
+};
+
+export const regionConversionData = [
+  { rank: 2, name: 'GT Road 1', traffic: 90, invoices: 12, conv: 14 },
+  { rank: 3, name: 'ISB/PINDI', traffic: 65, invoices: 8, conv: 12 },
+  { rank: 4, name: 'Faisalabad', traffic: 62, invoices: 11, conv: 11 },
+  { rank: 5, name: 'Karachi', traffic: 64, invoices: 9, conv: 8 },
+  { rank: 6, name: 'South', traffic: 59, invoices: 9, conv: 8 },
+  { rank: 7, name: 'North', traffic: 41, invoices: 8, conv: 7 },
+  { rank: 8, name: 'Multan', traffic: 55, invoices: 7, conv: 7 },
+  { rank: 9, name: 'Hyderabad', traffic: 48, invoices: 6, conv: 6 },
+  { rank: 10, name: 'Quetta', traffic: 42, invoices: 5, conv: 5 },
+];
+
+export const regionYoursAchievementRow = {
+  rank: 7,
+  name: 'Lahore (Yours)',
+  achieved: 70,
+  remaining: 30,
+};
+
+export const bmTeamAchievementRow = {
+  rank: 1,
+  name: 'DHA (Team)',
+  achieved: 70,
+  remaining: 30,
+};
+
+export const branchManagerStaffData = branchStaffComparisonData[0].staff;
+
+const asmAchievementRows = [
+  { rank: 1, name: 'Emporium', achieved: 43, remaining: 57 },
+  { rank: 2, name: 'MM Alam', achieved: 65, remaining: 35 },
+  { rank: 3, name: 'Dolmen', achieved: 80, remaining: 22 },
+  { rank: 4, name: 'Gulberg', achieved: 70, remaining: 30 },
+  { rank: 5, name: 'Packages', achieved: 63, remaining: 37 },
+  { rank: 6, name: 'Amanah Mall', achieved: 56, remaining: 44 },
+];
+
+export const asmGarmentsData = asmAchievementRows;
+export const asmUnstitchedData = asmAchievementRows;
+export const asmAccessoriesData = asmAchievementRows;
+
+const managerBranchTargets = [
+  { week: 'Week 1', units: 60, badge: '20%' },
+  { week: 'Week 2', units: 75, badge: '25%' },
+  { week: 'Week 3', units: 90, badge: '30%' },
+  { week: 'Week 4', units: 75, badge: '25%' },
+];
+
+const managerWeeklyPerformance = [
+  {
+    week: 'W1',
+    progress: 1,
+    percent: 20,
+    units: 60,
+    status: 'Done',
+    statusColor: Colors.branchGreen,
+  },
+  {
+    week: 'W2',
+    progress: 0.21,
+    percent: 21,
+    units: 65,
+    status: '10 CF',
+    statusColor: Colors.vividAmber,
+  },
+  {
+    week: 'W3',
+    progress: 0.2,
+    percent: 20,
+    units: 60,
+    status: Strings.active,
+    statusColor: Colors.brightBlue,
+  },
+  {
+    week: 'W4',
+    progress: 0,
+    percent: 0,
+    units: 0,
+    status: 'Next',
+    statusColor: Colors.black,
+  },
+];
+
+export const managerPerformanceSummary = {
+  branchMonthlyTarget: 1050,
+  achieved: 500,
+  remaining: 550,
+  commission: 500,
+  achievedPercent: 52,
+  remainingPercent: 50,
+};
+
+export const managerGarmentsPerformance = {
+  id: 'garments',
+  title: Strings.garments,
+  target: 260,
+  achieved: 160,
+  remaining: 100,
+  achievementPercent: 61,
+  iconSource: Images.Garments,
+  iconBg: Colors.darkgreen,
+  progressColor: Colors.branchGreen,
+  iconTintColor: Colors.branchGreen,
+  branchTargets: managerBranchTargets,
+  weeklyPerformance: managerWeeklyPerformance,
+};
+
+export const managerUnstitchedPerformance = {
+  id: 'unstitched',
+  title: Strings.unstitched,
+  target: 200,
+  achieved: 100,
+  remaining: 100,
+  achievementPercent: 51,
+  iconSource: Images.unstiched,
+  iconBg: Colors.whiteOrange,
+  progressColor: Colors.vividAmber,
+  iconTintColor: Colors.vividAmber,
+  branchTargets: managerBranchTargets,
+  weeklyPerformance: managerWeeklyPerformance,
+};
+
+export const managerAccessoriesPerformance = {
+  id: 'accessories',
+  title: Strings.accessories,
+  target: 150,
+  achieved: 75,
+  remaining: 75,
+  achievementPercent: 50,
+  iconSource: Images.Accesories,
+  iconBg: Colors.lightBlue,
+  progressColor: Colors.brightBlue,
+  iconTintColor: Colors.brightBlue,
+  branchTargets: managerBranchTargets,
+  weeklyPerformance: managerWeeklyPerformance,
+};
 
 export const surveyReportDetail = {
   reportTitle: 'Price Satisfaction Survey',

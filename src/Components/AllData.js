@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     marginTop: wp(1.4),
   },
   avatarText: {
-    fontSize: wp(3.5),
+    fontSize: Fontsize.xs4,
     color: Colors.jadeGreen,
   },
   details: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    fontSize: wp(4.3),
+    fontSize: Fontsize.sm2,
     color: Colors.charcoalText,
     marginRight: wp(1.9),
   },
@@ -145,16 +145,16 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: Colors.jadeGreen,
-    fontSize: wp(2.7),
+    fontSize: Fontsize.xs,
     fontFamily: Fonts.poppinsMedium,
   },
   code: {
     marginTop: wp(1.0),
-    fontSize: wp(3.2),
+    fontSize: Fontsize.xs1,
     color: Colors.warmGray,
   },
   date: {
-    fontSize: Fontsize.xs0,
+    fontSize: Fontsize.xx0,
     color: Colors.warmGray,
     marginTop: wp(1.9),
   },

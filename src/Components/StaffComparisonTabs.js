@@ -13,7 +13,10 @@ const StaffComparisonTabs = ({ selectedTab, weeklyLabel, monthlyLabel, onPressWe
         style={[styles.tabButton, selectedTab === weeklyLabel && styles.tabButtonActive]}
         onPress={onPressWeekly}
       >
-        <Text style={[styles.tabText, selectedTab === weeklyLabel && styles.tabTextActive]}>
+        <Text
+          style={[styles.tabText, selectedTab === weeklyLabel && styles.tabTextActive]}
+          numberOfLines={1}
+        >
           {weeklyLabel}
         </Text>
       </TouchableOpacity>
@@ -23,7 +26,10 @@ const StaffComparisonTabs = ({ selectedTab, weeklyLabel, monthlyLabel, onPressWe
         style={[styles.tabButton, selectedTab === monthlyLabel && styles.tabButtonActive]}
         onPress={onPressMonthly}
       >
-        <Text style={[styles.tabText, selectedTab === monthlyLabel && styles.tabTextActive]}>
+        <Text
+          style={[styles.tabText, selectedTab === monthlyLabel && styles.tabTextActive]}
+          numberOfLines={1}
+        >
           {monthlyLabel}
         </Text>
       </TouchableOpacity>

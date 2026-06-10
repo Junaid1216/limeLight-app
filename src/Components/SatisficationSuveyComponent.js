@@ -77,14 +77,21 @@ const SatisficationSurveyComponent = ({
         <Text style={styles.breakCount}>{responses}</Text>
       </View>
 
-      {breakdown.map(item => (
-        <SurveyProgressBar
-          key={item.label}
-          title={item.label}
-          current={item.value}
-          color={item.color}
-        />
-      ))}
+      <SurveyProgressBar
+        title={breakdown[0].label}
+        current={breakdown[0].value}
+        color={breakdown[0].color}
+      />
+      <SurveyProgressBar
+        title={breakdown[1].label}
+        current={breakdown[1].value}
+        color={breakdown[1].color}
+      />
+      <SurveyProgressBar
+        title={breakdown[2].label}
+        current={breakdown[2].value}
+        color={breakdown[2].color}
+      />
     </View>
   );
 };

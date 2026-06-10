@@ -11,9 +11,14 @@ import { branchStaffComparisonData } from '../../Constants/DummyData';
 import { hp, wp } from '../../Assets/Responsive';
 import { MyStyling } from '../../Constants/Styling';
 
-const BranchStaffComparison = () => {
-  const [expandedId, setExpandedId] = useState(1);
-  const [selectedTab, setSelectedTab] = useState(Strings.weekly);
+const BranchStaffComparison = props => {
+  const params = props?.route?.params;
+  const branchData = params?.branchData ?? branchStaffComparisonData;
+
+  const [expandedId, setExpandedId] = useState(params?.expandedId ?? 1);
+  const [selectedTab, setSelectedTab] = useState(
+    params?.selectedTab ?? Strings.weekly,
+  );
 
   const toggleBranch = id => {
     setExpandedId(prev => (prev === id ? null : id));
@@ -22,8 +27,8 @@ const BranchStaffComparison = () => {
   const renderBranch = ({ item }) => (
     <BranchStaffComparisonCard
       branch={item}
-      isExpanded={expandedId === item.id}
-      onPress={() => toggleBranch(item.id)}
+      isExpanded={expandedId === item?.id}
+      onPress={() => toggleBranch(item?.id)}
     />
   );
 
@@ -33,13 +38,13 @@ const BranchStaffComparison = () => {
 
       <View style={styles.content}>
         <MainHeaderComponent
-          title={Strings.staffComparisonHeader}
-          notificationCount={5}
+          title={params?.title ?? Strings.staffComparisonHeader}
+          notificationCount={params?.notificationCount ?? 5}
         />
 
         <FlatList
-          data={branchStaffComparisonData}
-          keyExtractor={item => String(item.id)}
+          data={branchData}
+          keyExtractor={item => String(item?.id)}
           renderItem={renderBranch}
           ListHeaderComponent={
             <StaffComparisonTabs

@@ -13,8 +13,8 @@ export const ROW_PAD_H = TABLE_SIDE_INSET + TABLE_PAD;
 
 export const COMPARISON_COLUMNS = {
   rank: wp(8),
-  name: wp(13),
-  commission: wp(18),
+  name: wp(17),
+  commission: wp(19),
 };
 
 export const ComparisonColumnsLayout = ({
@@ -25,35 +25,39 @@ export const ComparisonColumnsLayout = ({
   style,
 }) => (
   <View style={[styles.columnsRow, style]}>
-    <View style={styles.rankCol}>{rank}</View>
-    <View style={styles.nameCol}>{name}</View>
+    <View style={[styles.rankCol, { width: COMPARISON_COLUMNS.rank }]}>{rank}</View>
+    <View style={[styles.nameCol, { width: COMPARISON_COLUMNS.name }]}>{name}</View>
     <View style={styles.targetCol}>{target}</View>
-    <View style={styles.commissionCol}>{commission}</View>
+    <View style={[styles.commissionCol, { width: COMPARISON_COLUMNS.commission }]}>
+      {commission}
+    </View>
   </View>
 );
 
-const BranchStaffComparisonRow = ({ member, showBorder }) => (
-  <View style={[styles.row, showBorder && styles.border]}>
+const BranchStaffComparisonRow = ({ member }) => (
+  <View style={styles.row}>
     <ComparisonColumnsLayout
       rank={
         <View style={styles.rankBadge}>
-          <Text style={styles.rankText}>{member.rank}</Text>
+          <Text style={styles.rankText} numberOfLines={1}>
+            {member?.rank}
+          </Text>
         </View>
       }
       name={
-        <Text style={styles.name} numberOfLines={1}>
-          {member.name}
+        <Text style={styles.name} numberOfLines={1} ellipsizeMode="clip">
+          {member?.name}
         </Text>
       }
       target={
         <BranchStaffProgressBar
-          achieved={member.achieved}
-          remaining={member.remaining}
+          achieved={member?.achieved}
+          remaining={member?.remaining}
         />
       }
       commission={
-        <Text style={styles.commission} numberOfLines={1}>
-          {member.commission}
+        <Text style={styles.commission} numberOfLines={1} ellipsizeMode="clip">
+          {member?.commission}
         </Text>
       }
     />
@@ -66,52 +70,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rankCol: {
-    width: COMPARISON_COLUMNS.rank,
     justifyContent: 'center',
   },
   nameCol: {
-    width: COMPARISON_COLUMNS.name,
+    paddingLeft: wp(2.5),
   },
   targetCol: {
     flex: 1,
     flexShrink: 1,
-    paddingLeft: wp(1.2),
-    marginRight: wp(0.5),
+    paddingLeft: wp(12),
+    marginRight: wp(0.3),
   },
   commissionCol: {
-    width: COMPARISON_COLUMNS.commission,
     flexShrink: 0,
     alignItems: 'flex-end',
     paddingRight: wp(0.3),
   },
   row: {
-    paddingVertical: hp(1.1),
+    paddingVertical: hp(0.55),
     paddingHorizontal: ROW_PAD_H,
   },
-  border: {
-    borderBottomWidth: wp(0.25),
-    borderBottomColor: Colors.rowDivider,
-  },
   rankBadge: {
-    width: wp(4.5),
-    height: wp(4.5),
-    borderRadius: wp(2.25),
+    width: wp(5),
+    height: wp(5),
+    borderRadius: wp(2.5),
     backgroundColor: Colors.branchGreen,
     justifyContent: 'center',
     alignItems: 'center',
   },
   rankText: {
-    fontSize: Fontsize.xxxxs,
+    fontSize: Fontsize.x0,
     fontFamily: Fonts.poppinsBold,
     color: Colors.white,
+    lineHeight: Fontsize.x0,
   },
   name: {
     fontSize: Fontsize.xs0,
     fontFamily: Fonts.poppinsBold,
     color: Colors.graphite,
+    lineHeight: Fontsize.xs0 * 1.15,
+    includeFontPadding: false,
+    flexShrink: 0,
   },
   commission: {
-    fontSize: Fontsize.xs2,
+    fontSize: Fontsize.xs1,
     fontFamily: Fonts.poppinsBold,
     color: Colors.graphite,
     textAlign: 'right',

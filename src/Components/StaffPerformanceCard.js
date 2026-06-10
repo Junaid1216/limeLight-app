@@ -22,26 +22,32 @@ const getRankBadgeColors = (rank, rankColor) => {
 };
 
 const RankItem = ({ item, index, totalItems, achievedSuffix }) => {
-  const achievedColor = getAchievedColor(item.rank);
-  const badgeColors = getRankBadgeColors(item.rank, item.rankColor);
+  const achievedColor = getAchievedColor(item?.rank);
+  const badgeColors = getRankBadgeColors(item?.rank, item?.rankColor);
 
   return (
     <View style={[styles.rankRow, index !== totalItems - 1 && styles.rankRowBorder]}>
       <View style={[styles.rankBadge, { backgroundColor: badgeColors.backgroundColor, borderColor: badgeColors.borderColor }]}>
-        <Text style={[styles.rankBadgeText, { color: badgeColors.textColor }]}>
-          {item.rank}
+        <Text style={[styles.rankBadgeText, { color: badgeColors.textColor }]} numberOfLines={1}>
+          {item?.rank}
         </Text>
       </View>
 
       <View style={styles.rankNameWrap}>
-        <Text style={styles.rankName}>{item.name}</Text>
-        <Text style={[styles.achievedText, { color: achievedColor }]}>
-          {item.achieved} {achievedSuffix}
+        <Text style={styles.rankName} numberOfLines={1}>
+          {item?.name}
+        </Text>
+        <Text style={[styles.achievedText, { color: achievedColor }]} numberOfLines={1}>
+          {item?.achieved} {achievedSuffix}
         </Text>
       </View>
 
-      <Text style={styles.rankTarget}>{item.target}</Text>
-      <Text style={styles.rankCommission}>{item.commission}</Text>
+      <Text style={styles.rankTarget} numberOfLines={1}>
+        {item?.target}
+      </Text>
+      <Text style={styles.rankCommission} numberOfLines={1}>
+        {item?.commission}
+      </Text>
     </View>
   );
 };
@@ -55,34 +61,54 @@ const StaffPerformanceCard = ({
     <View style={styles.performanceCard}>
       <View style={styles.meRow}>
         <View style={styles.meBadge}>
-          <Text style={styles.meBadgeText}>33</Text>
+          <Text style={styles.meBadgeText} numberOfLines={1}>
+            33
+          </Text>
         </View>
         <View style={styles.meInfoWrap}>
-          <Text style={styles.meName}>{labels.saleemYou}</Text>
-          <Text style={styles.meAchievement}>25 {labels.achievedSuffix}</Text>
+          <Text style={styles.meName} numberOfLines={1}>
+            {labels?.saleemYou}
+          </Text>
+          <Text style={styles.meAchievement} numberOfLines={1}>
+            25 {labels?.achievedSuffix}
+          </Text>
         </View>
-        <Text style={styles.meTarget}>{topPerformer.target}</Text>
-        <Text style={styles.meCommission}>{topPerformer.commission}</Text>
+        <Text style={styles.meTarget} numberOfLines={1}>
+          {topPerformer?.target}
+        </Text>
+        <Text style={styles.meCommission} numberOfLines={1}>
+          {topPerformer?.commission}
+        </Text>
       </View>
 
-      <Text style={styles.sectionHeading}>{labels.achieveTarget}</Text>
+      <Text style={styles.sectionHeading} numberOfLines={1}>
+        {labels?.achieveTarget}
+      </Text>
 
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableHeaderText, styles.rankCol]}>{labels.rank}</Text>
-        <Text style={[styles.tableHeaderText, styles.nameCol]}>{labels.name}</Text>
-        <Text style={[styles.tableHeaderText, styles.targetCol]}>{labels.target}</Text>
-        <Text style={[styles.tableHeaderText, styles.commissionCol]}>{labels.commission}</Text>
+        <Text style={[styles.tableHeaderText, styles.rankCol]} numberOfLines={1}>
+          {labels?.rank}
+        </Text>
+        <Text style={[styles.tableHeaderText, styles.nameCol]} numberOfLines={1}>
+          {labels?.name}
+        </Text>
+        <Text style={[styles.tableHeaderText, styles.targetCol]} numberOfLines={1}>
+          {labels?.target}
+        </Text>
+        <Text style={[styles.tableHeaderText, styles.commissionCol]} numberOfLines={1}>
+          {labels?.commission}
+        </Text>
       </View>
 
       <FlatList
         data={rankData}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item?.id}
         renderItem={({ item, index }) => (
           <RankItem
             item={item}
             index={index}
             totalItems={rankData.length}
-            achievedSuffix={labels.achievedSuffix}
+            achievedSuffix={labels?.achievedSuffix}
           />
         )}
         showsVerticalScrollIndicator={false}

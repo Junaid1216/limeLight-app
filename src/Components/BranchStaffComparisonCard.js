@@ -11,7 +11,7 @@ import { Strings } from '../Constants/Strings';
 import BranchStaffComparisonTable from './BranchStaffComparisonTable';
 
 const BranchStaffComparisonCard = ({ branch, isExpanded, onPress }) => {
-  const staffCount = branch.staff.length;
+  const staffCount = branch?.staff?.length ?? 0;
 
   return (
     <View style={[styles.card, isExpanded && styles.cardExpanded]}>
@@ -37,8 +37,10 @@ const BranchStaffComparisonCard = ({ branch, isExpanded, onPress }) => {
         </View>
 
         <View style={styles.textBox}>
-          <Text style={styles.title}>{branch.name}</Text>
-          <Text style={styles.subtitle}>
+          <Text style={styles.title} numberOfLines={1}>
+            {branch?.name}
+          </Text>
+          <Text style={styles.subtitle} numberOfLines={1}>
             {isExpanded
               ? Strings.staffMembers(staffCount)
               : Strings.tapToViewTargets}
@@ -54,7 +56,7 @@ const BranchStaffComparisonCard = ({ branch, isExpanded, onPress }) => {
 
       {isExpanded && (
         <View style={styles.tableWrap}>
-          <BranchStaffComparisonTable staff={branch.staff} />
+          <BranchStaffComparisonTable staff={branch?.staff} />
         </View>
       )}
     </View>
@@ -71,9 +73,6 @@ const styles = StyleSheet.create({
     borderColor: Colors.lightGray,
     elevation: wp(0.2),
     shadowColor: Colors.black,
-    // shadowOpacity: 0.05,
-    // shadowOffset: { width: 0, height: hp(0.25) },
-    // shadowRadius: wp(1.5),
     overflow: 'hidden',
   },
   cardExpanded: {

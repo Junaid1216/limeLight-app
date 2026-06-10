@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
 
   categoryName: {
     color: Colors.white,
-    fontSize: Fontsize. xs1,
+    fontSize: Fontsize.xs1,
     fontFamily: Fonts.poppinsRegular,
     marginLeft: wp(2),
   },
@@ -272,12 +272,11 @@ const styles = StyleSheet.create({
 
   targetBox: {
     backgroundColor: '#123F47',
-    minWidth: 34,
-    height: 22,
-    borderRadius: 5,
+    minWidth: wp(8.2),
+    height: wp(5.2),
+    borderRadius: wp(1.25),
     justifyContent: 'center',
     alignItems: 'center',
-    // marginLeft: wp(4),
     marginRight: wp(6),
   },
 

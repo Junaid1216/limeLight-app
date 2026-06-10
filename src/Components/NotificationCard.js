@@ -8,7 +8,8 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
 const NotificationCard = ({ item, onPress }) => {
-  const iconSource = Images[item.icon];
+  const iconKey = item?.icon === 'Survey' ? 'Note' : item?.icon;
+  const iconSource = Images[iconKey];
 
   return (
     <TouchableOpacity
@@ -24,22 +25,26 @@ const NotificationCard = ({ item, onPress }) => {
             resizeMode="contain"
           />
         ) : (
-          <Icon name={item.icon} size={wp(5)} color={Colors.mediumGrey} />
+          <Icon name={item?.icon} size={wp(5)} color={Colors.mediumGrey} />
         )}
       </View>
 
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={1}>
-          {item.title}
+          {item?.title}
         </Text>
         <Text style={styles.description} numberOfLines={2}>
-          {item.description}
+          {item?.description}
         </Text>
         <View style={styles.footerRow}>
           <View style={styles.tag}>
-            <Text style={styles.tagText}>{item.category}</Text>
+            <Text style={styles.tagText} numberOfLines={1}>
+              {item?.category}
+            </Text>
           </View>
-          <Text style={styles.time}>{item.time}</Text>
+          <Text style={styles.time} numberOfLines={1}>
+            {item?.time}
+          </Text>
         </View>
       </View>
 

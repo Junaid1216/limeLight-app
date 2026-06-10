@@ -9,8 +9,8 @@ import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 
-const AnnouncementDetail = ({ route }) => {
-  const item = route.params?.item;
+const AnnouncementDetail = props => {
+  const item = props?.route?.params?.item;
 
   return (
     <View style={MyStyling.container2}>
@@ -25,7 +25,9 @@ const AnnouncementDetail = ({ route }) => {
         <View style={styles.card}>
           <View style={styles.topRow}>
             <View style={styles.categoryBadge}>
-              <Text style={styles.categoryText}>{item?.category}</Text>
+              <Text style={styles.categoryText} numberOfLines={1}>
+                {item?.category}
+              </Text>
             </View>
 
             <View style={styles.dateRow}>

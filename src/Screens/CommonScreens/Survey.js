@@ -34,7 +34,9 @@ const Survey = () => {
               />
             </View>
             <View style={styles.activeBadge}>
-              <Text style={styles.activeText}>{Strings.active}</Text>
+              <Text style={styles.activeText} numberOfLines={1}>
+                {Strings.active}
+              </Text>
             </View>
           </View>
 
@@ -48,7 +50,7 @@ const Survey = () => {
               style={styles.questionIcon}
               resizeMode="contain"
             />
-            <Text style={styles.questionsText}>
+            <Text style={styles.questionsText} numberOfLines={1}>
               {Strings.surveyQuestionsCount}
             </Text>
           </View>

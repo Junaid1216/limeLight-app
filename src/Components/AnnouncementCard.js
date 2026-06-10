@@ -18,7 +18,9 @@ const AnnouncementCard = ({ item, onPress }) => {
     <View style={styles.card}>
       <View style={styles.topRow}>
         <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{item.category}</Text>
+          <Text style={styles.categoryText} numberOfLines={1}>
+            {item?.category}
+          </Text>
         </View>
 
         <View style={styles.dateRow}>
@@ -27,23 +29,27 @@ const AnnouncementCard = ({ item, onPress }) => {
             style={styles.calendarIcon}
             resizeMode="contain"
           />
-          <Text style={styles.dateText}>{item.date}</Text>
+          <Text style={styles.dateText} numberOfLines={1}>
+            {item?.date}
+          </Text>
         </View>
       </View>
 
       <Text style={styles.title} numberOfLines={1}>
-        {item.title}
+        {item?.title}
       </Text>
 
       <Text style={styles.description} numberOfLines={3}>
-        {item.description}
+        {item?.description}
       </Text>
 
       <TouchableOpacity
         style={styles.readMoreRow}
         activeOpacity={0.7}
         onPress={() => onPress?.(item)}>
-        <Text style={styles.readMoreText}>{Strings.readMore}</Text>
+        <Text style={styles.readMoreText} numberOfLines={1}>
+          {Strings.readMore}
+        </Text>
         <Image
           source={Images.ColorfulArrow}
           style={styles.readMoreIcon}

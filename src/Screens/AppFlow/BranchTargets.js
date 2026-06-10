@@ -20,8 +20,8 @@ const BranchTargets = () => {
   const renderItem = ({ item }) => (
     <BranchTargetCard
       branch={item}
-      isExpanded={expandedId === item.id}
-      onPress={() => handleToggle(item.id)}
+      isExpanded={expandedId === item?.id}
+      onPress={() => handleToggle(item?.id)}
     />
   );
 
@@ -37,7 +37,7 @@ const BranchTargets = () => {
 
         <FlatList
           data={branchesData}
-          keyExtractor={item => String(item.id)}
+          keyExtractor={item => String(item?.id)}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}

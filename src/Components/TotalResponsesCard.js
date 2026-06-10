@@ -98,17 +98,17 @@ const styles = StyleSheet.create({
     marginTop: hp(0.8),
   },
   iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: wp(13.4),
+    height: wp(13.4),
+    borderRadius: wp(4),
     backgroundColor: 'rgba(255,255,255,0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: wp(3),
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: wp(6.8),
+    height: wp(6.8),
     tintColor:Colors.white,
   },
 });

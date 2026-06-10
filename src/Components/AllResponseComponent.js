@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { Colors } from '../Constants/Colors';
 import { wp } from '../Assets/Responsive';
+import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import AllData from '../Components/AllData';
 import CompletedComponent from '../Components/CompletedComponent';
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
   },
 
   tabBarLabel: {
-    fontSize: wp(3.2),
+    fontSize: Fontsize.xs1,
     textTransform: 'none',
     fontFamily: Fonts.poppinsRegular,
   },

@@ -6,6 +6,7 @@ import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
+import { navigateToNotification } from '../Navigations/navigationHelpers';
 
 const MainHeaderComponent = props => {
   const navigation = useNavigation();
@@ -32,7 +33,7 @@ const MainHeaderComponent = props => {
       {showNotification ? (
         <TouchableOpacity
           style={styles.notification}
-          onPress={() => navigation.navigate('Notification')}
+          onPress={() => navigateToNotification(navigation)}
         >
           <Image
             source={Images.NotificationBell}

@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: wp(4.6),
+    fontSize: wp(2.4),
     color: Colors.blueGrey,
     textAlign: 'center',
     width: wp(55),

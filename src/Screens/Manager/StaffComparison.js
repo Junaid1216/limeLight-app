@@ -11,8 +11,14 @@ import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { Colors } from '../../Constants/Colors';
 
-const StaffComparison = ({ title = Strings.staffComparisonHeader }) => {
-  const [selectedTab, setSelectedTab] = useState(Strings.weekly);
+const StaffComparison = props => {
+  const params = props?.route?.params;
+  const title = params?.title ?? props?.title ?? Strings.staffComparisonHeader;
+  const rankData = params?.rankData ?? staffComparisonRankData;
+
+  const [selectedTab, setSelectedTab] = useState(
+    params?.selectedTab ?? Strings.weekly,
+  );
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [datePickerKey, setDatePickerKey] = useState(null);
@@ -20,7 +26,7 @@ const StaffComparison = ({ title = Strings.staffComparisonHeader }) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const topPerformer = staffComparisonRankData[1];
+  const topPerformer = params?.topPerformer ?? rankData?.[1];
 
   const formatDate = date => date.toLocaleDateString('en-GB');
 
@@ -56,7 +62,10 @@ const StaffComparison = ({ title = Strings.staffComparisonHeader }) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled">
-        <MainHeaderComponent title={title} notificationCount={5} />
+        <MainHeaderComponent
+          title={title}
+          notificationCount={params?.notificationCount ?? 5}
+        />
 
         <StaffComparisonTabs
           selectedTab={selectedTab}
@@ -68,12 +77,12 @@ const StaffComparison = ({ title = Strings.staffComparisonHeader }) => {
 
         <StaffPerformanceCard
           topPerformer={topPerformer}
-          rankData={staffComparisonRankData}
-          labels={Strings}
+          rankData={rankData}
+          labels={params?.labels ?? Strings}
         />
 
         <StaffConversionChartCard
-          labels={Strings}
+          labels={params?.labels ?? Strings}
           fromDate={fromDate}
           toDate={toDate}
           formatDate={formatDate}

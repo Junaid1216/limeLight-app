@@ -1,47 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import * as Progress from 'react-native-progress';
-
-import { hp, wp } from '../Assets/Responsive';
+import { wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
-import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
-const BAR_HEIGHT = 3.67;
-
-
 const BranchStaffProgressBar = ({ achieved, remaining }) => {
-  const [barWidth, setBarWidth] = useState(0);
   const progress = Math.min(1, Math.max(0, achieved / 100));
 
   return (
     <View style={styles.row}>
-      <View
-        style={styles.barBox}
-        onLayout={e => {
-          const width = e.nativeEvent.layout.width;
-          if (width > 0) {
-            setBarWidth(width);
-          }
-        }}
-      >
-        {barWidth > 0 && (
-          <Progress.Bar
-            progress={progress}
-            width={barWidth}
-            height={BAR_HEIGHT}
-            color={Colors.green}
-            unfilledColor={Colors.amber}
-            borderWidth={0}
-            borderRadius={wp(2)}
-            animated={false}
-          />
-        )}
-      </View>
+      <Progress.Bar
+        progress={progress}
+        width={styles.BAR_WIDTH.width}
+        height={styles.BAR_HEIGHT.height}
+        color={Colors.green}
+        unfilledColor={Colors.amber}
+        borderWidth={0}
+        borderRadius={styles.BAR_HEIGHT.borderRadius}
+        animated={false}
+      />
 
       <View style={styles.percentRow}>
-        <Text style={styles.greenText}>{achieved}%</Text>
-        <Text style={styles.orangeText}>{remaining}%</Text>
+        <Text style={styles.greenText} numberOfLines={1}>
+          {achieved}%
+        </Text>
+        <Text style={styles.orangeText} numberOfLines={1}>
+          {remaining}%
+        </Text>
       </View>
     </View>
   );
@@ -49,30 +35,30 @@ const BranchStaffProgressBar = ({ achieved, remaining }) => {
 
 const styles = StyleSheet.create({
   row: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
   },
-  barBox: {
-    flex: 1,
-    height: BAR_HEIGHT,
-    marginRight: wp(1),
-    borderRadius: wp(2),
-    overflow: 'hidden',
+  BAR_WIDTH: {
+    width: wp(17),
+  },
+  BAR_HEIGHT: {
+    height: wp(1),
+    borderRadius: wp(0.5),
   },
   percentRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 0,
+    marginLeft: wp(0.8),
   },
   greenText: {
-    fontSize: 6.55,
+    fontSize: wp(2.4),
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.green,
     marginRight: wp(0.6),
   },
   orangeText: {
-    fontSize: 6.55,
+    fontSize: wp(2.4),
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.amber,
   },

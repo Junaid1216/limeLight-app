@@ -67,12 +67,13 @@ const Verification = () => {
       <OtpInput />
 
       <View style={styles.resendRow}>
-        <Text style={styles.resendText}>
+        <Text style={styles.resendText} numberOfLines={2}>
           {Strings.didntReceiveCode}
           <Text
             style={[styles.resendLink, isResendDisabled && styles.resendLinkDisabled]}
             onPress={handleResend}
-            disabled={isResendDisabled}>
+            disabled={isResendDisabled}
+            numberOfLines={1}>
             {resendText}
           </Text>
         </Text>

@@ -101,9 +101,9 @@ const styles = StyleSheet.create({
     marginBottom: hp(3),
   },
   avatarCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: wp(13.4),  // 56
+height: wp(13.4), // 56
+    borderRadius: wp(6.7), // 28
     backgroundColor: '#20C9971A',
     borderColor: '#20C9971A',
     borderWidth: 1,
@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   staffName: {
-    fontSize: 15,
+    fontSize: wp(3.5),
     fontFamily: Fonts.poppinsRegular,
     color: Colors.darkNavy,
     marginBottom: hp(0.4),
   },
   staffRole: {
-    fontSize: 10,
+    fontSize: wp(2.4),
     fontFamily: Fonts.poppinsRegular,
     color: Colors.mediumGrey,
     marginBottom: hp(1.2),
@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
     gap: wp(1),
   },
   locationIcon: {
-    width: 13,
-    height: 13,
+    width: wp(3.1),
+    height: wp(3.1),
     tintColor: '#71717B',
   },
   statsRow: {

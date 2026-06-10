@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
   },
 
   icon: {
-    width: 15,
-    height: 15,
+    width: wp(3.6),
+    height: wp(3.6),
     marginLeft: wp(1.8),
     marginTop: wp(2),
   },

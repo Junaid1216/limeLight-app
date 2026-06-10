@@ -13,7 +13,7 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
-import HomeTabShell from '../../Components/HomeTabShell';
+import BranchManager from '../../Screens/Manager/BranchManager';
 import Training from '../../Screens/CommonScreens/Training';
 import Notification from '../../Screens/CommonScreens/Notification';
 import FeedBack from '../../Screens/CommonScreens/FeedBack';
@@ -164,7 +164,7 @@ const BranchManagerBottomTabs = () => (
   >
     <BOTTOM_STACK.Screen
       name="Home"
-      component={HomeTabShell}
+      component={BranchManager}
       options={{
         tabBarIcon: tabBarIcon('home', Strings.home, styles.homeTabShift),
       }}

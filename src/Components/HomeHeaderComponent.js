@@ -10,6 +10,7 @@ import { Fonts } from '../Constants/Fonts';
 import { getHomeBranchLabel } from '../Constants/roleConfig';
 import { Strings } from '../Constants/Strings';
 import { useRole } from '../Context/RoleContext';
+import { navigateToNotification } from '../Navigations/navigationHelpers';
 
 const NOTIFICATION_COUNT = 5;
 
@@ -33,7 +34,7 @@ const HomeHeaderComponent = () => {
       <View style={styles.rightActions}>
         <TouchableOpacity
           style={styles.notification}
-          onPress={() => navigation.navigate('Notification')}>
+          onPress={() => navigateToNotification(navigation)}>
           <Image
             source={Images.NotificationBell}
             resizeMode="contain"
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
   },
   userBranch: {
     fontFamily: Fonts.poppinsRegular,
-    fontSize: Fontsize.xxs0,
+    fontSize: wp(3),
     color: Colors.ashGray,
     marginTop: hp(0.2),
   },
