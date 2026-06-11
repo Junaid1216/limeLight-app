@@ -636,3 +636,133 @@ export const surveyReportDetail = {
     { label: 'Low', value: 15, color: '#F4A11A' },
   ],
 };
+
+export const trainingTabs = ['Customer', 'Product', 'Display'];
+
+export const trainingStatuses = ['New', 'Pending', 'Completed'];
+
+export const trainingDisplayCategories = [
+  'Unstitched',
+  'RTW',
+  'Co-ords',
+  'Western',
+];
+
+export const trainingWaveform = [
+  0.8, 1.4, 2.2, 1.6, 2.8, 1.2, 2.4, 1.8, 3, 1.5, 2.6, 1, 2, 1.4, 2.8, 1.2,
+  2.2, 1.6, 1, 1.8, 1.3, 0.9,
+];
+
+export const trainingCustomerData = [
+  {
+    id: 'c1',
+    image: Images.CustomerService,
+    title: 'Managing Multiple Customers During Rush Hours',
+    description:
+      'Learn time management techniques to handle multiple customers during peak store hours without compromising service quality.',
+    date: '15 Sep',
+  },
+  {
+    id: 'c2',
+    image: Images.GreetingCustomers,
+    title: 'Greeting Customers with Confidence & Warmth',
+    description:
+      'Master the art of first impressions and create welcoming experiences that build customer loyalty from the moment they walk in.',
+    date: '19 Sep',
+  },
+  {
+    id: 'c3',
+    image: Images.HandlingComplaints,
+    title: 'Handling Complaints & Difficult Conversations',
+    description:
+      'Turn complaints into opportunities by learning empathy-driven communication techniques used by top retail professionals.',
+    date: '25 Sep',
+  },
+];
+
+export const trainingProductData = [
+  {
+    id: 'p1',
+    swatch: '#E6DCC6',
+    title: '2 Piece Jacquard Suit Dyed',
+    code: 'A1708ST-XSL-143',
+    tags: [
+      { label: 'Printed' },
+      { label: 'Jacquard' },
+      { label: 'Winter', accent: true },
+    ],
+    price: 'Rs. 5,999',
+    audio: '2:14',
+    detail: {
+      color: 'Purple',
+      shirt: 'Printed · 2.27m',
+      bottom: 'Dyed · 1.8m',
+      fabric: 'Cambric',
+      detailTags: [
+        { label: 'Printed', solid: true },
+        { label: 'Jacquard' },
+      ],
+      highlights: [
+        'Lightweight Winter Fabric',
+        'Perfect For Daily Wear',
+        'Designed For People Aged 22–35',
+      ],
+      audio: '0:18',
+    },
+  },
+  {
+    id: 'p2',
+    swatch: '#C0249E',
+    title: '2 Piece Jacquard Suit Dyed',
+    code: 'A1201SK-XSL-168',
+    tags: [
+      { label: 'Printed Shirt' },
+      { label: 'Cambric' },
+      { label: 'Purple', dotColor: '#9333EA' },
+    ],
+    price: 'Rs. 5,699',
+    highlight: 'Lightweight summer fabric, perfect for daily wear',
+    audio: '1:48',
+    detail: {
+      color: 'Purple',
+      shirt: 'Printed · 2.27m',
+      bottom: 'Dyed · 1.8m',
+      fabric: 'Cambric',
+      detailTags: [
+        { label: 'Printed', solid: true },
+        { label: 'Cambric' },
+      ],
+      highlights: [
+        'Lightweight Summer Fabric',
+        'Perfect For Daily Wear',
+        'Designed For People Aged 22–35',
+      ],
+      audio: '0:15',
+    },
+  },
+];
+
+export const trainingDisplayData = [
+  {
+    id: 'd1',
+    image: Images.WindowDisplay,
+    location: 'Window Section',
+    category: 'UNSTITCHED DISPLAY GUIDE',
+    title: 'Getting the Window Ready',
+    description:
+      'Learn how to prepare the display window with proper product placement, spacing, and visual balance.',
+    progress: 0,
+    duration: '0:00 / 4:12',
+  },
+  {
+    id: 'd2',
+    image: Images.VisualMerchandising,
+    location: 'Main Floor',
+    category: 'VISUAL MERCHANDISING',
+    title: 'Unstitched Display Guide',
+    description:
+      'Learn how to arrange unstitched fabric sections in a clean, attractive, and customer-friendly way.',
+    progress: 0,
+    duration: '0:00 / 6:04',
+  },
+];

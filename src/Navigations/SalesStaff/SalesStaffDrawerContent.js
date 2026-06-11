@@ -24,8 +24,8 @@ const SalesStaffDrawerContent = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { role } = useRole();
 
-  const goToTabScreen = screenName => {
-    navigation.navigate(DRAWER_BOTTOM_ROUTE, { screen: screenName });
+  const goToTabScreen = (screenName, params) => {
+    navigation.navigate(DRAWER_BOTTOM_ROUTE, { screen: screenName, params });
     navigation.closeDrawer();
   };
 
@@ -76,17 +76,23 @@ const SalesStaffDrawerContent = ({ navigation }) => {
         <MenuItem
           iconName="headphones"
           label={Strings.customerServiceTraining}
-          onPress={() => goToTabScreen('Training')}
+          onPress={() =>
+            goToTabScreen('Training', { tab: 'Customer', ts: Date.now() })
+          }
         />
         <MenuItem
           iconName="package"
           label={Strings.productTraining}
-          onPress={() => goToTabScreen('Training')}
+          onPress={() =>
+            goToTabScreen('Training', { tab: 'Product', ts: Date.now() })
+          }
         />
         <MenuItem
           iconName="grid"
           label={Strings.displayTraining}
-          onPress={() => goToTabScreen('Training')}
+          onPress={() =>
+            goToTabScreen('Training', { tab: 'Display', ts: Date.now() })
+          }
         />
         <MenuItem
           imageSource={Images.MegaAssignment}

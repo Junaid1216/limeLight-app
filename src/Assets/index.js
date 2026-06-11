@@ -12,6 +12,12 @@ export const Images = {
   Avatar: require('./Images/Avator.png'),
   TotalResponse: require('./Images/TotalResponse.png'),
 
+  CustomerService: require('./Images/Customer service.png'),
+  GreetingCustomers: require('./Images/Greeting customers.png'),
+  HandlingComplaints: require('./Images/Handling complaints.png'),
+  WindowDisplay: require('./Images/Window display.png'),
+  VisualMerchandising: require('./Images/Visual merchandising.png'),
+
   LeftArrow: require('./Icons/leftArrow.png'),
   RightArrow: require('./Icons/rightArrow.png'),
   Email: require('./Icons/email.png'),
@@ -44,4 +50,5 @@ export const Images = {
   tickCircle: require('../Assets/Icons/tickCircle.png'),
   Clock: require('../Assets/Icons/Clock.png'),
   LiveStatus: require('./Icons/LiveStatus.png'),
+  SvgMargin: require('./Icons/SVG_margin.png'),
 };
