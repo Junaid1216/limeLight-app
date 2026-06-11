@@ -8,6 +8,8 @@ import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 
+const NOTIFICATION_COUNT = 5;
+
 const TrainingHeader = () => {
   const navigation = useNavigation();
 
@@ -33,7 +35,11 @@ const TrainingHeader = () => {
         onPress={() => navigation.navigate('Notification')}
       >
         <Feather name="bell" size={wp(5.5)} color={Colors.black} />
-        <View style={styles.bellDot} />
+        {NOTIFICATION_COUNT > 0 && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{NOTIFICATION_COUNT}</Text>
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -72,16 +78,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bellDot: {
+  badge: {
     position: 'absolute',
-    top: wp(1.5),
-    right: wp(1.8),
-    width: wp(2),
-    height: wp(2),
-    borderRadius: wp(1),
+    top: wp(0.4),
+    right: wp(0.6),
+    minWidth: wp(4),
+    height: wp(4),
+    borderRadius: wp(2),
     backgroundColor: Colors.red,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(1),
     borderWidth: 1,
     borderColor: Colors.white,
+  },
+  badgeText: {
+    color: Colors.white,
+    fontSize: Fontsize.xs,
+    fontFamily: Fonts.poppinsSemiBold,
   },
 });
 

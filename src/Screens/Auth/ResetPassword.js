@@ -50,7 +50,9 @@ const ResetPassword = () => {
 
         <Btn
           title={Strings.continue}
-          onPress={() => navigation.navigate('Login')}
+          onPress={() =>
+            navigation.reset({ index: 0, routes: [{ name: 'Login' }] })
+          }
           style={styles.continueBtn}
         />
       </View>

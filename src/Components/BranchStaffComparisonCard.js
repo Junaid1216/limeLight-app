@@ -10,7 +10,12 @@ import { hp, wp } from '../Assets/Responsive';
 import { Strings } from '../Constants/Strings';
 import BranchStaffComparisonTable from './BranchStaffComparisonTable';
 
-const BranchStaffComparisonCard = ({ branch, isExpanded, onPress }) => {
+const BranchStaffComparisonCard = ({
+  branch,
+  isExpanded,
+  onPress,
+  onStaffPress,
+}) => {
   const staffCount = branch?.staff?.length ?? 0;
 
   return (
@@ -56,7 +61,10 @@ const BranchStaffComparisonCard = ({ branch, isExpanded, onPress }) => {
 
       {isExpanded && (
         <View style={styles.tableWrap}>
-          <BranchStaffComparisonTable staff={branch?.staff} />
+          <BranchStaffComparisonTable
+            staff={branch?.staff}
+            onStaffPress={onStaffPress}
+          />
         </View>
       )}
     </View>

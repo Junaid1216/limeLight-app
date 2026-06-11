@@ -6,35 +6,41 @@ import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
-import { Strings } from '../Constants/Strings';
+import { getProfileInfo } from '../Constants/roleConfig';
+import { useRole } from '../Context/RoleContext';
 
-const ProfileSummaryCard = () => (
-  <View style={styles.card}>
-    <View style={styles.avatarWrap}>
-      <View style={styles.avatar}>
-        <Image
-          source={Images.Avatar}
-          style={styles.avatarImage}
-          resizeMode="contain"
-          tintColor={Colors.white}
-        />
+const ProfileSummaryCard = () => {
+  const { role } = useRole();
+  const profile = getProfileInfo(role);
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.avatarWrap}>
+        <View style={styles.avatar}>
+          <Image
+            source={Images.Avatar}
+            style={styles.avatarImage}
+            resizeMode="contain"
+            tintColor={Colors.white}
+          />
+        </View>
+        <View style={styles.lockBadge}>
+          <Icon name="lock" size={wp(3)} color={Colors.white} />
+        </View>
       </View>
-      <View style={styles.lockBadge}>
-        <Icon name="lock" size={wp(3)} color={Colors.white} />
-      </View>
-    </View>
 
-    <Text style={styles.name} numberOfLines={1}>
-      {Strings.homeUserName}
-    </Text>
-
-    <View style={styles.roleBadge}>
-      <Text style={styles.roleText} numberOfLines={1}>
-        {Strings.salesStaff}
+      <Text style={styles.name} numberOfLines={1}>
+        {profile.name}
       </Text>
+
+      <View style={styles.roleBadge}>
+        <Text style={styles.roleText} numberOfLines={1}>
+          {profile.roleTag}
+        </Text>
+      </View>
     </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   card: {

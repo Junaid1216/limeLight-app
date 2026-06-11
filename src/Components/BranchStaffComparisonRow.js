@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import BranchStaffProgressBar from './BranchStaffProgressBar';
 import { Colors } from '../Constants/Colors';
@@ -34,8 +34,11 @@ export const ComparisonColumnsLayout = ({
   </View>
 );
 
-const BranchStaffComparisonRow = ({ member }) => (
-  <View style={styles.row}>
+const BranchStaffComparisonRow = ({ member, onPress }) => (
+  <Pressable
+    style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+    onPress={() => onPress?.(member)}
+  >
     <ComparisonColumnsLayout
       rank={
         <View style={styles.rankBadge}>
@@ -61,7 +64,7 @@ const BranchStaffComparisonRow = ({ member }) => (
         </Text>
       }
     />
-  </View>
+  </Pressable>
 );
 
 const styles = StyleSheet.create({
@@ -89,6 +92,9 @@ const styles = StyleSheet.create({
   row: {
     paddingVertical: hp(0.55),
     paddingHorizontal: ROW_PAD_H,
+  },
+  rowPressed: {
+    opacity: 0.6,
   },
   rankBadge: {
     width: wp(5),

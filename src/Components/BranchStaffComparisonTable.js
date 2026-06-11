@@ -65,7 +65,7 @@ const ListHeader = () => (
   </>
 );
 
-const BranchStaffComparisonTable = ({ staff }) => (
+const BranchStaffComparisonTable = ({ staff, onStaffPress }) => (
   <View style={styles.table}>
     <FlatList
       data={staff}
@@ -75,7 +75,7 @@ const BranchStaffComparisonTable = ({ staff }) => (
       contentContainerStyle={styles.listContent}
       ItemSeparatorComponent={() => <View style={styles.rowSeparator} />}
       renderItem={({ item }) => (
-        <BranchStaffComparisonRow member={item} />
+        <BranchStaffComparisonRow member={item} onPress={onStaffPress} />
       )}
     />
   </View>

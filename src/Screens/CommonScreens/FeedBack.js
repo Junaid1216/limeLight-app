@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Images } from '../../Assets';
+import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import { hp, wp } from '../../Assets/Responsive';
@@ -96,6 +97,12 @@ const FeedBack = () => {
             </Text>
           </View>
         </View>
+
+        <Btn
+          title={Strings.submitFeedback}
+          onPress={() => {}}
+          style={styles.submitBtn}
+        />
       </ScrollView>
     </View>
   );
@@ -158,6 +165,9 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.poppinsRegular,
     color: Colors.mediumGrey,
     lineHeight: hp(2.2),
+  },
+  submitBtn: {
+    marginTop: hp(2.5),
   },
 });
 

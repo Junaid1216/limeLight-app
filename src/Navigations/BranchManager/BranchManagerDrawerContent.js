@@ -49,6 +49,14 @@ const BranchManagerDrawerContent = ({ navigation }) => {
     navigation.getParent()?.navigate(screenName);
   };
 
+  const handleLogout = () => {
+    navigation.closeDrawer();
+    navigation.getParent()?.getParent()?.reset({
+      index: 0,
+      routes: [{ name: 'AuthNavigation' }],
+    });
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top + hp(2) }]}>
       <Pressable
@@ -127,29 +135,44 @@ const BranchManagerDrawerContent = ({ navigation }) => {
         <MenuItem
           imageSource={Images.Note}
           label={Strings.surveys}
-          onPress={() => goToTabScreen('Survey')}
+          onPress={() => goToTabScreen('Survey', { screen: 'SurveyMain' })}
         />
         <MenuItem
           iconName="file-text"
           label={Strings.surveysReport}
           onPress={() => goToTabScreen('Survey', { screen: 'SurveyReport' })}
         />
+
+        <View style={styles.logoutDivider} />
+        <MenuItem
+          iconName="log-out"
+          label={Strings.logout}
+          onPress={handleLogout}
+          danger
+        />
       </ScrollView>
     </View>
   );
 };
 
-const MenuItem = ({ label, onPress, iconName, imageSource }) => (
+const MenuItem = ({ label, onPress, iconName, imageSource, danger }) => (
   <Pressable
     style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
     onPress={onPress}
   >
     {iconName ? (
-      <Icon name={iconName} size={wp(5)} color={Colors.slateGrey} />
+      <Icon
+        name={iconName}
+        size={wp(5)}
+        color={danger ? Colors.brightRed : Colors.slateGrey}
+      />
     ) : (
       <Image source={imageSource} style={styles.menuIcon} resizeMode="contain" />
     )}
-    <Text style={styles.menuLabel} numberOfLines={1}>
+    <Text
+      style={[styles.menuLabel, danger && styles.menuLabelDanger]}
+      numberOfLines={1}
+    >
       {label}
     </Text>
   </Pressable>
@@ -229,6 +252,14 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.xs3,
     fontFamily: Fonts.poppinsMedium,
     color: Colors.black,
+  },
+  menuLabelDanger: {
+    color: Colors.brightRed,
+  },
+  logoutDivider: {
+    height: hp(0.15),
+    backgroundColor: Colors.lightGrey,
+    marginVertical: hp(1),
   },
 });
 

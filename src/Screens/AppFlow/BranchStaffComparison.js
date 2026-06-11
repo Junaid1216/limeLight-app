@@ -24,11 +24,16 @@ const BranchStaffComparison = props => {
     setExpandedId(prev => (prev === id ? null : id));
   };
 
+  const goToStaffDetail = member => {
+    props?.navigation?.navigate('StaffDetail', { member });
+  };
+
   const renderBranch = ({ item }) => (
     <BranchStaffComparisonCard
       branch={item}
       isExpanded={expandedId === item?.id}
       onPress={() => toggleBranch(item?.id)}
+      onStaffPress={goToStaffDetail}
     />
   );
 

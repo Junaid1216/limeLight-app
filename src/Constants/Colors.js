@@ -31,6 +31,7 @@ export const Colors = {
   green: '#2D9B83',
   teal: '#1EAD96',
   branchGreen: '#20C997',
+  branchGreenBg: '#00C9501A',
   mintGreen: '#27C58B',
   emerald: '#2ECC71',
   limeGreen: '#22C55E',

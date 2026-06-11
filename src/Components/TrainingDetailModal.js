@@ -104,7 +104,7 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
                 <MaterialCommunityIcons
                   name="tshirt-crew-outline"
                   size={wp(3.8)}
-                  color={Colors.grey}
+                  color={Colors.branchGreen}
                 />
                 <Text style={styles.specLabel}>SHIRT</Text>
               </View>
@@ -117,7 +117,7 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
                 <MaterialCommunityIcons
                   name="content-cut"
                   size={wp(3.8)}
-                  color={Colors.grey}
+                  color={Colors.branchGreen}
                 />
                 <Text style={styles.specLabel}>BOTTOM</Text>
               </View>
@@ -145,7 +145,11 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
 
           <View style={styles.audioSectionHeader}>
             <View style={styles.sectionHeaderRow}>
-              <Feather name="headphones" size={wp(4.2)} color={Colors.green} />
+              <Feather
+                name="headphones"
+                size={wp(4.2)}
+                color={Colors.branchGreen}
+              />
               <Text style={styles.sectionHeaderText}>Audio Training</Text>
             </View>
             <View style={styles.guideBadge}>
@@ -218,12 +222,12 @@ const styles = StyleSheet.create({
     width: wp(2.2),
     height: wp(2.2),
     borderRadius: wp(1.1),
-    backgroundColor: Colors.green,
+    backgroundColor: Colors.branchGreen,
   },
   modalHeaderTitle: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: Fontsize.xs2,
-    color: Colors.green,
+    color: Colors.branchGreen,
     letterSpacing: 0.5,
   },
   closeBtn: {
@@ -302,19 +306,20 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
   },
   modalTagSolid: {
-    backgroundColor: Colors.green,
+    backgroundColor: Colors.branchGreenBg,
   },
   modalTagOutline: {
     borderWidth: 1,
-    borderColor: Colors.paleGray,
+    borderColor: 'transparent',
+    backgroundColor: Colors.branchGreenBg,
   },
   modalTagText: {
     fontFamily: Fonts.poppinsMedium,
     fontSize: Fontsize.xm2,
-    color: Colors.grey,
+    color: Colors.branchGreen,
   },
   modalTagTextSolid: {
-    color: Colors.white,
+    color: Colors.branchGreen,
   },
   specRow: {
     flexDirection: 'row',
@@ -375,7 +380,7 @@ const styles = StyleSheet.create({
     width: wp(5),
     height: wp(5),
     borderRadius: wp(2.5),
-    backgroundColor: Colors.green,
+    backgroundColor: Colors.branchGreen,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -393,7 +398,8 @@ const styles = StyleSheet.create({
   },
   guideBadge: {
     borderWidth: 1,
-    borderColor: Colors.green,
+    borderColor: 'transparent',
+    backgroundColor: Colors.branchGreenBg,
     borderRadius: wp(4),
     paddingHorizontal: wp(3),
     paddingVertical: hp(0.4),
@@ -401,7 +407,7 @@ const styles = StyleSheet.create({
   guideBadgeText: {
     fontFamily: Fonts.poppinsMedium,
     fontSize: Fontsize.xm2,
-    color: Colors.green,
+    color: Colors.branchGreen,
   },
   modalAudioBox: {
     flexDirection: 'row',
