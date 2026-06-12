@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 0,
-    marginLeft: wp(0.8),
+    marginLeft: wp(1.8),
   },
   greenText: {
     fontSize: wp(2.4),
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.green,
-    marginRight: wp(0.6),
+    marginRight: wp(1.4),
   },
   orangeText: {
     fontSize: wp(2.4),

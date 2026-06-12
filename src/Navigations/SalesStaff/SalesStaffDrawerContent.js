@@ -47,8 +47,8 @@ const SalesStaffDrawerContent = ({ navigation }) => {
   const handleLogout = () => {
     navigation.closeDrawer();
     navigation.getParent()?.getParent()?.reset({
-      index: 0,
-      routes: [{ name: 'AuthNavigation' }],
+      index: 1,
+      routes: [{ name: 'Role' }, { name: 'AuthNavigation' }],
     });
   };
 

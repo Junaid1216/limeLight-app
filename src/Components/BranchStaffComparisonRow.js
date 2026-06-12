@@ -81,8 +81,8 @@ const styles = StyleSheet.create({
   targetCol: {
     flex: 1,
     flexShrink: 1,
-    paddingLeft: wp(12),
-    marginRight: wp(0.3),
+    paddingLeft: wp(6),
+    marginRight: wp(2.5),
   },
   commissionCol: {
     flexShrink: 0,

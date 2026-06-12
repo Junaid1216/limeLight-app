@@ -1,5 +1,11 @@
-import React from 'react';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Keyboard,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MyStyling } from '../../Constants/Styling';
@@ -12,22 +18,48 @@ import MonthlyTargetCalculator from '../../Components/MonthlyTargetCalculator';
 import MonthlyTargetAssignment from '../../Components/MonthlyTargetAssignment';
 import Btn from '../../Components/Btn';
 
+const BUTTONS_BOTTOM = 20;
+
 const TargetAssignment = () => {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', event => {
+      setKeyboardHeight(event.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      <View style={styles.content}>
+      <View style={styles.headerWrap}>
         <MainHeaderComponent
           title={Strings.TargetAssignment}
           notificationCount={5}
         />
+      </View>
 
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
         <MonthlyTargetCalculator />
 
         <MonthlyTargetAssignment />
-      </View>
-      <View style={styles.bottomButtons}>
+      </ScrollView>
+
+      <View
+        style={[styles.bottomButtons, { bottom: BUTTONS_BOTTOM - keyboardHeight }]}>
         <Btn title="↺ Reset" style={styles.resetBtn} />
 
         <Btn title="Save Targets" style={styles.saveBtn} />
@@ -39,42 +71,17 @@ const TargetAssignment = () => {
 export default TargetAssignment;
 
 const styles = StyleSheet.create({
-  content: {
+  headerWrap: {
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
   },
-
+  scroll: {
+    flex: 1,
+    paddingHorizontal: wp(6),
+  },
   scrollContent: {
-    flexGrow: 1,
-    paddingBottom: hp(80),
-  },
-  bottomButtons: {
-    position: 'absolute',
-    bottom: 20,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  resetBtn: {
-    flex: 1,
-    height: 50,
-    backgroundColor: '#000',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-
-  saveBtn: {
-    flex: 1,
-    height: 50,
-    backgroundColor: '#1FA58A',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
+    paddingTop: hp(1),
+    paddingBottom: hp(14),
   },
   bottomButtons: {
     position: 'absolute',

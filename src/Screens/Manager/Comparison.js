@@ -28,6 +28,10 @@ const Comparison = props => {
 
   const [selectedRange, setSelectedRange] = useState(params?.selectedRange ?? '');
 
+  const goToStaffDetail = member => {
+    props?.navigation?.navigate('StaffDetail', { member });
+  };
+
   return (
     <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
@@ -45,7 +49,10 @@ const Comparison = props => {
           onSelectRange={setSelectedRange}
         />
 
-        <BranchStaffComparisonTable staff={staffData} />
+        <BranchStaffComparisonTable
+          staff={staffData}
+          onStaffPress={goToStaffDetail}
+        />
 
         <Text style={styles.sectionHeading} numberOfLines={1}>
           {Strings.branchComparison}

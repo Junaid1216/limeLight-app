@@ -7,8 +7,8 @@ import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
 const CHIP_WIDTH = wp((70 / 375) * 100);
-const CHIP_HEIGHT = hp((38.99 / 812) * 100);
-const UNITS_FONT_SIZE = wp((5.5 / 375) * 100);
+const CHIP_HEIGHT = hp((48 / 812) * 100);
+const UNITS_FONT_SIZE = wp(2.6);
 
 const BranchTargetChip = ({ item }) => (
   <View style={styles.chip}>
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     fontFamily: Fonts.poppinsMedium,
-    fontSize: Fontsize.xxxxs,
+    fontSize: Fontsize.x0,
     color: Colors.slateGrey,
     includeFontPadding: false,
   },
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontFamily: Fonts.poppinsMedium,
-    fontSize: Fontsize.xxxxs,
+    fontSize: Fontsize.x00,
     color: Colors.brightBlue,
     includeFontPadding: false,
   },

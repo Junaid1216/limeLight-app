@@ -10,7 +10,10 @@ import { Fonts } from '../Constants/Fonts';
 import { getHomeBranchLabel } from '../Constants/roleConfig';
 import { Strings } from '../Constants/Strings';
 import { useRole } from '../Context/RoleContext';
-import { navigateToNotification } from '../Navigations/navigationHelpers';
+import {
+  navigateToNotification,
+  navigateToProfile,
+} from '../Navigations/navigationHelpers';
 
 const NOTIFICATION_COUNT = 5;
 
@@ -47,14 +50,16 @@ const HomeHeaderComponent = () => {
           )}
         </TouchableOpacity>
 
-        <View style={styles.avatar}>
+        <TouchableOpacity
+          style={styles.avatar}
+          onPress={() => navigateToProfile(navigation)}>
           <Image
             source={Images.Avatar}
             style={styles.avatarImage}
             resizeMode="contain"
             tintColor={Colors.white}
           />
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );

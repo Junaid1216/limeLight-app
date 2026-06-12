@@ -17,7 +17,6 @@ const resolvePadding = (custom, progress, defaultValue) => {
 
 const LabeledProgressBar = props => {
   const fill = Math.min(1, Math.max(0, props.progress ?? 0));
-  const empty = 1 - fill;
   const paddingLeft = resolvePadding(
     props.fillPaddingLeft,
     fill,
@@ -30,38 +29,35 @@ const LabeledProgressBar = props => {
   );
 
   return (
-    <View style={styles.row}>
-      <View style={[styles.track, { backgroundColor: props.unfilledColor }]}>
-        <View style={styles.barRow}>
-          <View
-            style={[
-              styles.fill,
-              {
-                flex: fill,
-                backgroundColor: props.color,
-                paddingLeft,
-                paddingRight,
-              },
-            ]}>
-            <Text
-              style={styles.fillText}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}>
-              {props.achievedText}
-            </Text>
-          </View>
-          <View style={{ flex: empty }} />
-        </View>
+    <View style={[styles.track, { backgroundColor: props.unfilledColor }]}>
+      <View
+        style={[
+          styles.fill,
+          {
+            width: `${fill * 100}%`,
+            backgroundColor: props.color,
+            paddingLeft,
+            paddingRight,
+          },
+        ]}>
+        <Text
+          style={styles.fillText}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}>
+          {props.achievedText}
+        </Text>
       </View>
 
-      <Text
-        style={[styles.remaining, { color: props.remainingTextColor }]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}>
-        {props.remainingText}
-      </Text>
+      <View style={styles.remainingWrap} pointerEvents="none">
+        <Text
+          style={[styles.remaining, { color: props.remainingTextColor }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}>
+          {props.remainingText}
+        </Text>
+      </View>
     </View>
   );
 };
@@ -69,24 +65,16 @@ const LabeledProgressBar = props => {
 export default LabeledProgressBar;
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp(2.5),
-  },
   track: {
-    flex: 1,
+    alignSelf: 'stretch',
     height: hp(3.8),
     borderRadius: hp(1.9),
     overflow: 'hidden',
-  },
-  barRow: {
-    flexDirection: 'row',
-    flex: 1,
-    height: hp(3.8),
+    justifyContent: 'center',
   },
   fill: {
     minWidth: 0,
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'flex-start',
     paddingVertical: hp(0.55),
@@ -98,12 +86,16 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.xxs0,
     color: Colors.white,
   },
+  remainingWrap: {
+    position: 'absolute',
+    right: wp(4),
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+  },
   remaining: {
-    flexShrink: 0,
     fontFamily: Fonts.poppinsRegular,
     fontSize: Fontsize.xxs0,
     textAlign: 'right',
-    paddingRight: wp(5),
-    maxWidth: wp(28),
   },
 });

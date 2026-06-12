@@ -10,6 +10,25 @@ const APP_STACK_ROUTE_NAMES = new Set([
   'SurveyResponse',
 ]);
 
+export const navigateToProfile = navigation => {
+  if (!navigation) {
+    return;
+  }
+
+  let nav = navigation;
+
+  while (nav) {
+    const routeNames = nav.getState()?.routeNames ?? [];
+
+    if (routeNames.includes('Profile')) {
+      nav.navigate('Profile');
+      return;
+    }
+
+    nav = nav.getParent();
+  }
+};
+
 export const navigateToNotification = navigation => {
   if (!navigation) {
     return;

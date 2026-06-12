@@ -1,8 +1,8 @@
-import React from 'react';
-import { FlatList, StyleSheet, Text, View, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TextInput, View, Image } from 'react-native';
 
 import { Colors } from '../Constants/Colors';
-import { hp, wp } from '../Assets/Responsive';
+import { wp } from '../Assets/Responsive';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 
@@ -91,8 +91,19 @@ const staffData = [
 ];
 
 const MonthlyTargetAssignment = () => {
-  const renderItem = ({ item }) => (
-    <View style={styles.row}>
+  const [rows, setRows] = useState(
+    staffData.map(item => ({ ...item, g: '', u: '', a: '' })),
+  );
+
+  const updateField = (id, field, value) => {
+    const cleaned = value.replace(/[^0-9]/g, '');
+    setRows(prev =>
+      prev.map(row => (row.id === id ? { ...row, [field]: cleaned } : row)),
+    );
+  };
+
+  const renderRow = item => (
+    <View style={styles.row} key={item.id}>
       <View style={styles.nameContainer}>
         <View style={[styles.avatar, { backgroundColor: item.color }]}>
           <Text style={styles.avatarText}>{item.initials}</Text>
@@ -101,17 +112,38 @@ const MonthlyTargetAssignment = () => {
         <Text style={styles.name}>{item.name}</Text>
       </View>
 
-      <View style={styles.inputBox}>
-        <Text style={styles.inputText}>{item.g}</Text>
-      </View>
+      <TextInput
+        style={styles.inputBox}
+        value={item.g}
+        onChangeText={text => updateField(item.id, 'g', text)}
+        keyboardType="number-pad"
+        textAlign="center"
+        maxLength={4}
+        placeholder="0"
+        placeholderTextColor="#9CA3AF"
+      />
 
-      <View style={styles.inputBox}>
-        <Text style={styles.inputText}>{item.u}</Text>
-      </View>
+      <TextInput
+        style={styles.inputBox}
+        value={item.u}
+        onChangeText={text => updateField(item.id, 'u', text)}
+        keyboardType="number-pad"
+        textAlign="center"
+        maxLength={4}
+        placeholder="0"
+        placeholderTextColor="#9CA3AF"
+      />
 
-      <View style={styles.inputBox}>
-        <Text style={styles.inputText}>{item.a}</Text>
-      </View>
+      <TextInput
+        style={styles.inputBox}
+        value={item.a}
+        onChangeText={text => updateField(item.id, 'a', text)}
+        keyboardType="number-pad"
+        textAlign="center"
+        maxLength={4}
+        placeholder="0"
+        placeholderTextColor="#9CA3AF"
+      />
     </View>
   );
 
@@ -152,13 +184,7 @@ const MonthlyTargetAssignment = () => {
         <Text style={styles.headerText}>ACCESSORIES</Text>
       </View>
 
-      <FlatList
-        data={staffData}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        scrollEnabled={true}
-        showsVerticalScrollIndicator={false}
-      />
+      {rows.map(renderRow)}
     </View>
   );
 };
@@ -169,7 +195,6 @@ const styles = StyleSheet.create({
   boxContainer: {
     marginTop: wp(4),
     width: wp(89),
-    height: hp(35), // ya hp(50)
     borderRadius: wp(5),
     backgroundColor: Colors.white,
     elevation: wp(0.7),
@@ -269,13 +294,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ECECEC',
     borderRadius: wp(2),
-    justifyContent: 'center',
-    alignItems: 'center',
     marginHorizontal: wp(0.5),
-  },
-
-  inputText: {
+    paddingVertical: 0,
     fontSize: Fontsize.xs1,
+    fontFamily: Fonts.poppinsMedium,
     color: '#111827',
   },
   titleContainer: {

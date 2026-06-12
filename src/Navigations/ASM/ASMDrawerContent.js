@@ -52,8 +52,8 @@ const ASMDrawerContent = ({ navigation }) => {
   const handleLogout = () => {
     navigation.closeDrawer();
     navigation.getParent()?.getParent()?.reset({
-      index: 0,
-      routes: [{ name: 'AuthNavigation' }],
+      index: 1,
+      routes: [{ name: 'Role' }, { name: 'AuthNavigation' }],
     });
   };
 
@@ -100,11 +100,6 @@ const ASMDrawerContent = ({ navigation }) => {
           iconName="trending-up"
           label={Strings.salesStaffPerformance}
           onPress={() => goToAppScreen('BranchStaffComparison')}
-        />
-        <MenuItem
-          iconName="target"
-          label={Strings.TargetAssignment}
-          onPress={() => goToAppScreen('TargetAssignment')}
         />
         <MenuItem
           iconName="crosshair"

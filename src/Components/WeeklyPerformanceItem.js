@@ -8,7 +8,7 @@ import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
 const BAR_HEIGHT = hp(2.8);
-const UNITS_FONT_SIZE = wp((5.5 / 375) * 100);
+const UNITS_FONT_SIZE = wp(2.6);
 
 const WeeklyPerformanceItem = ({ item }) => {
   const progress = Math.min(1, Math.max(0, item?.progress ?? 0));
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'center',
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: Fontsize.xxxxs,
+    fontSize: Fontsize.x0,
     color: Colors.white,
     includeFontPadding: false,
     lineHeight: BAR_HEIGHT,
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontFamily: Fonts.poppinsBold,
-    fontSize: Fontsize.xxxxs,
+    fontSize: Fontsize.x0,
     includeFontPadding: false,
     textAlign: 'left',
   },
