@@ -13,12 +13,15 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
+import { otpRegex } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 
 const RESEND_TIMER_SECONDS = 50;
 
 const Verification = () => {
   const navigation = useNavigation();
+  const [form, setForm] = useState({ otp: ['', '', '', '', '', ''] });
+  const [error, setError] = useState({ otpError: '' });
   const [resendTimer, setResendTimer] = useState(0);
 
   const isResendDisabled = resendTimer > 0;
@@ -51,6 +54,21 @@ const Verification = () => {
     setResendTimer(RESEND_TIMER_SECONDS);
   };
 
+  const handleContinue = () => {
+    const otpValue = form.otp.join('');
+
+    if (!otpValue) {
+      setError({ otpError: 'Please enter OTP' });
+      return;
+    } else if (!otpRegex.test(otpValue)) {
+      setError({ otpError: 'OTP must be 6 digits' });
+      return;
+    } else {
+      setError({ otpError: '' });
+      navigation.navigate('ResetPassword');
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
@@ -64,7 +82,14 @@ const Verification = () => {
         {Strings.otpSentTo}
       </Text>
 
-      <OtpInput />
+      <OtpInput
+        value={form.otp}
+        onChange={otp => {
+          setForm({ ...form, otp });
+          setError({ ...error, otpError: '' });
+        }}
+        error={error.otpError}
+      />
 
       <View style={styles.resendRow}>
         <Text style={styles.resendText} numberOfLines={2}>
@@ -81,7 +106,7 @@ const Verification = () => {
 
       <Btn
         title={Strings.continue}
-        onPress={() => navigation.navigate('ResetPassword')}
+        onPress={handleContinue}
         style={styles.continueBtn}
       />
     </View>

@@ -39,6 +39,7 @@ const Customtextinput = props => {
           styles.inputBox,
           props?.feedbackStyle && styles.feedbackInputBox,
           props?.multiline && styles.feedbackMultilineBox,
+          props?.error && styles.inputBoxError,
           props?.inputBoxStyle,
         ]}>
         {props?.icon ? (
@@ -85,6 +86,10 @@ const Customtextinput = props => {
           </TouchableOpacity>
         ) : null}
       </View>
+
+      {props?.error ? (
+        <Text style={styles.errorText}>{props.error}</Text>
+      ) : null}
     </View>
   );
 };
@@ -182,6 +187,15 @@ const styles = StyleSheet.create({
   },
   eyeIcon: {
     marginLeft: wp(2),
+  },
+  inputBoxError: {
+    borderColor: Colors.brightRed,
+  },
+  errorText: {
+    fontSize: Fontsize.xs,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.brightRed,
+    marginTop: hp(0.5),
   },
 });
 

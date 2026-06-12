@@ -7,14 +7,37 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
+import { emailRegex } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState({
+    emailError: '',
+    passwordError: '',
+  });
+
+  const handleLogin = () => {
+    if (!form.email) {
+      setError({ emailError: 'Please enter email', passwordError: '' });
+      return;
+    } else if (!emailRegex.test(form.email)) {
+      setError({ emailError: 'Please enter a valid email', passwordError: '' });
+      return;
+    } else if (!form.password) {
+      setError({ emailError: '', passwordError: 'Please enter password' });
+      return;
+    } else {
+      setError({ emailError: '', passwordError: '' });
+      navigation.navigate('Drawer', {
+        screen: 'BottomNavigation',
+        params: { screen: 'Home' },
+      });
+    }
+  };
 
   return (
     <View style={[MyStyling.container1, styles.content]}>
@@ -37,9 +60,13 @@ const Login = () => {
           placeholder={Strings.emailPlaceholder}
           icon={Images.Email}
           iconBg={Colors.lightBlue}
-          value={email}
-          onChangeText={setEmail}
+          value={form.email}
+          onChangeText={text => {
+            setForm({ ...form, email: text });
+            setError({ ...error, emailError: '' });
+          }}
           keyboardType="email-address"
+          error={error.emailError}
         />
 
         <Customtextinput
@@ -47,10 +74,14 @@ const Login = () => {
           placeholder={Strings.passwordPlaceholder}
           icon={Images.Password}
           iconBg={Colors.lightGreen}
-          value={password}
-          onChangeText={setPassword}
+          value={form.password}
+          onChangeText={text => {
+            setForm({ ...form, password: text });
+            setError({ ...error, passwordError: '' });
+          }}
           secureTextEntry
           showToggle
+          error={error.passwordError}
         />
 
         <Pressable
@@ -63,15 +94,7 @@ const Login = () => {
         </Pressable>
       </View>
 
-      <Btn
-        title={Strings.login}
-        onPress={() =>
-          navigation.navigate('Drawer', {
-            screen: 'BottomNavigation',
-            params: { screen: 'Home' },
-          })
-        }
-      />
+      <Btn title={Strings.login} onPress={handleLogin} />
     </View>
   );
 };

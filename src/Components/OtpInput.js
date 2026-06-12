@@ -1,14 +1,12 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
 // 1 OTP = 6 digits (6 boxes)
-const OtpInput = () => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-
+const OtpInput = ({ value, onChange, error }) => {
   const ref1 = useRef(null);
   const ref2 = useRef(null);
   const ref3 = useRef(null);
@@ -18,9 +16,9 @@ const OtpInput = () => {
   const refs = [ref1, ref2, ref3, ref4, ref5, ref6];
 
   const onDigit = (index, text) => {
-    const newOtp = [...otp];
+    const newOtp = [...value];
     newOtp[index] = text === '' ? '' : text.slice(-1);
-    setOtp(newOtp);
+    onChange(newOtp);
 
     if (newOtp[index] && index < 5) {
       refs[index + 1].current.focus();
@@ -31,30 +29,31 @@ const OtpInput = () => {
     if (e.nativeEvent.key !== 'Backspace') {
       return;
     }
-    if (otp[index] || index === 0) {
+    if (value[index] || index === 0) {
       return;
     }
 
-    const newOtp = [...otp];
+    const newOtp = [...value];
     newOtp[index - 1] = '';
-    setOtp(newOtp);
+    onChange(newOtp);
     refs[index - 1].current.focus();
   };
 
   return (
-    <View style={styles.otpRow}>
+    <View style={styles.wrapper}>
+      <View style={styles.otpRow}>
       <TextInput
         ref={ref1}
-        style={styles.otpBox}
-        value={otp[0]}
+        style={[styles.otpBox, error && styles.otpBoxError]}
+        value={value[0]}
         onChangeText={text => onDigit(0, text)}
         keyboardType="number-pad"
         maxLength={1}
       />
       <TextInput
         ref={ref2}
-        style={styles.otpBox}
-        value={otp[1]}
+        style={[styles.otpBox, error && styles.otpBoxError]}
+        value={value[1]}
         onChangeText={text => onDigit(1, text)}
         onKeyPress={onBackspace(1)}
         keyboardType="number-pad"
@@ -62,8 +61,8 @@ const OtpInput = () => {
       />
       <TextInput
         ref={ref3}
-        style={styles.otpBox}
-        value={otp[2]}
+        style={[styles.otpBox, error && styles.otpBoxError]}
+        value={value[2]}
         onChangeText={text => onDigit(2, text)}
         onKeyPress={onBackspace(2)}
         keyboardType="number-pad"
@@ -71,8 +70,8 @@ const OtpInput = () => {
       />
       <TextInput
         ref={ref4}
-        style={styles.otpBox}
-        value={otp[3]}
+        style={[styles.otpBox, error && styles.otpBoxError]}
+        value={value[3]}
         onChangeText={text => onDigit(3, text)}
         onKeyPress={onBackspace(3)}
         keyboardType="number-pad"
@@ -80,8 +79,8 @@ const OtpInput = () => {
       />
       <TextInput
         ref={ref5}
-        style={styles.otpBox}
-        value={otp[4]}
+        style={[styles.otpBox, error && styles.otpBoxError]}
+        value={value[4]}
         onChangeText={text => onDigit(4, text)}
         onKeyPress={onBackspace(4)}
         keyboardType="number-pad"
@@ -89,22 +88,27 @@ const OtpInput = () => {
       />
       <TextInput
         ref={ref6}
-        style={styles.otpBox}
-        value={otp[5]}
+        style={[styles.otpBox, error && styles.otpBoxError]}
+        value={value[5]}
         onChangeText={text => onDigit(5, text)}
         onKeyPress={onBackspace(5)}
         keyboardType="number-pad"
         maxLength={1}
       />
+      </View>
+
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: hp(2),
+  },
   otpRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: hp(2),
   },
   otpBox: {
     width: wp(12),
@@ -118,6 +122,15 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.poppinsRegular,
     color: Colors.black,
     padding: 0,
+  },
+  otpBoxError: {
+    borderColor: Colors.brightRed,
+  },
+  errorText: {
+    fontSize: Fontsize.xs,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.brightRed,
+    marginTop: hp(0.5),
   },
 });
 

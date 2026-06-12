@@ -13,13 +13,28 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
+import { emailRegex } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation } from '@react-navigation/native';
 
 const ForgotPassword = () => {
   const navigation = useNavigation();
-  const [email, setEmail] = useState('');
+  const [form, setForm] = useState({ email: '' });
+  const [error, setError] = useState({ emailError: '' });
+
+  const handleSendVerificationCode = () => {
+    if (!form.email) {
+      setError({ emailError: 'Please enter email' });
+      return;
+    } else if (!emailRegex.test(form.email)) {
+      setError({ emailError: 'Please enter a valid email' });
+      return;
+    } else {
+      setError({ emailError: '' });
+      navigation.navigate('Verification');
+    }
+  };
 
   return (
     <View style={[MyStyling.container2]}>
@@ -36,14 +51,18 @@ const ForgotPassword = () => {
           placeholder={Strings.emailPlaceholder}
           icon={Images.Email}
           iconBg={Colors.lightBlue}
-          value={email}
-          onChangeText={setEmail}
+          value={form.email}
+          onChangeText={text => {
+            setForm({ ...form, email: text });
+            setError({ ...error, emailError: '' });
+          }}
           keyboardType="email-address"
+          error={error.emailError}
         />
 
         <Btn
           title={Strings.sendVerificationCode}
-          onPress={() => navigation.navigate('Verification')}
+          onPress={handleSendVerificationCode}
           style={styles.sendBtn}
         />
       </View>
