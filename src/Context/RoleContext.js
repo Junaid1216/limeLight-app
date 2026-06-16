@@ -1,13 +1,12 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ROLES } from '../Constants/roleConfig';
 
 const RoleContext = createContext({
-  role: ROLES.STAFF,
+  role: null,
   setRole: () => {},
 });
 
 export const RoleProvider = ({ children }) => {
-  const [role, setRole] = useState(ROLES.STAFF);
+  const [role, setRole] = useState(null);
 
   const value = useMemo(
     () => ({

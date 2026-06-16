@@ -16,18 +16,30 @@ import {
 } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Api from '../../Services/Api_services';
 
 const ResetPassword = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { login, type } = route.params || {};
+
   const [form, setForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
     newPasswordError: '',
     confirmPasswordError: '',
   });
 
-  const handleContinue = () => {
-    if (!form.newPassword) {
+  const handleContinue = async () => {
+    if (isLoading) {
+      return;
+    } else if (!login || !type) {
+      setError({
+        newPasswordError: 'Please go back and verify OTP again',
+        confirmPasswordError: '',
+      });
+    } else if (!form.newPassword) {
       setError({
         newPasswordError: 'Please enter new password',
         confirmPasswordError: '',
@@ -69,7 +81,40 @@ const ResetPassword = () => {
       });
     } else {
       setError({ newPasswordError: '', confirmPasswordError: '' });
-      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('type', type);
+      formData.append('login', login);
+      formData.append('password', form.newPassword);
+
+      try {
+        const res = await Api.resetPassword(formData);
+        console.log(
+          'Reset Password Response:',
+          JSON.stringify(res?.data, null, 2),
+        );
+
+        if (res?.data?.status == 'success') {
+          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+        } else {
+          setError({
+            newPasswordError: res?.data?.message,
+            confirmPasswordError: '',
+          });
+        }
+      } catch (err) {
+        console.log(
+          'Reset Password API Error:',
+          JSON.stringify(err?.response?.data, null, 2),
+        );
+        setError({
+          newPasswordError: 'Error occurred while resetting password',
+          confirmPasswordError: '',
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -119,6 +164,7 @@ const ResetPassword = () => {
         <Btn
           title={Strings.continue}
           onPress={handleContinue}
+          loading={isLoading}
           style={styles.continueBtn}
         />
       </View>

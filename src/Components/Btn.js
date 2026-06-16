@@ -1,22 +1,36 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
 const Btn = props => {
+  const { loading, title, onPress, style, icon } = props;
+
   return (
-    <Pressable style={[styles.btn, props?.style]} onPress={props?.onPress}>
+    <Pressable
+      style={[styles.btn, style, loading && styles.btnDisabled]}
+      onPress={onPress}
+      disabled={loading}>
       <View style={styles.content}>
-        {props?.icon ? (
-          <Image
-            source={props?.icon}
-            style={styles.icon}
-            resizeMode="contain"
-          />
-        ) : null}
-        <Text style={styles.btnText}>{props?.title}</Text>
+        {loading ? (
+          <ActivityIndicator color={Colors.white} size="small" />
+        ) : (
+          <>
+            {icon ? (
+              <Image source={icon} style={styles.icon} resizeMode="contain" />
+            ) : null}
+            <Text style={styles.btnText}>{title}</Text>
+          </>
+        )}
       </View>
     </Pressable>
   );
@@ -45,6 +59,9 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.sm,
     fontFamily: Fonts.poppinsMedium,
     color: Colors.white,
+  },
+  btnDisabled: {
+    opacity: 0.7,
   },
 });
 

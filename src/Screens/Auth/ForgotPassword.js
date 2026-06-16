@@ -13,26 +13,60 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
-import { emailRegex } from '../../Constants/Regex';
+import { isValidLogin } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation } from '@react-navigation/native';
+import { useRole } from '../../Context/RoleContext';
+import Api from '../../Services/Api_services';
 
 const ForgotPassword = () => {
   const navigation = useNavigation();
+  const { role } = useRole();
   const [form, setForm] = useState({ email: '' });
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({ emailError: '' });
 
-  const handleSendVerificationCode = () => {
-    if (!form.email) {
-      setError({ emailError: 'Please enter email' });
+  const handleSendVerificationCode = async () => {
+    if (isLoading) {
       return;
-    } else if (!emailRegex.test(form.email)) {
-      setError({ emailError: 'Please enter a valid email' });
-      return;
+    } else if (!role) {
+      setError({ emailError: 'Please select your role first' });
+    } else if (!form.email.trim()) {
+      setError({ emailError: 'Please enter email or employee ID' });
+    } else if (!isValidLogin(form.email.trim())) {
+      setError({ emailError: 'Please enter a valid email or employee ID' });
     } else {
       setError({ emailError: '' });
-      navigation.navigate('Verification');
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('type', role);
+      formData.append('login', form.email.trim());
+
+      try {
+        const res = await Api.sendOtp(formData);
+        console.log('Send OTP Response:', JSON.stringify(res?.data, null, 2));
+
+        if (res?.data?.status == 'success') {
+          navigation.navigate('Verification', {
+            login: form.email.trim(),
+            type: role,
+          });
+        } else {
+          setError({
+            emailError: res?.data?.message,
+          });
+        }
+      } catch (err) {
+        console.log(
+          'Send OTP API Error:',
+          JSON.stringify(err?.response?.data, null, 2),
+        );
+        setError({ emailError: 'Error occurred while sending code' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -56,13 +90,14 @@ const ForgotPassword = () => {
             setForm({ ...form, email: text });
             setError({ ...error, emailError: '' });
           }}
-          keyboardType="email-address"
+          keyboardType="default"
           error={error.emailError}
         />
 
         <Btn
           title={Strings.sendVerificationCode}
           onPress={handleSendVerificationCode}
+          loading={isLoading}
           style={styles.sendBtn}
         />
       </View>

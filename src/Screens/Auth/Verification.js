@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import OtpInput from '../../Components/OtpInput';
@@ -15,13 +15,18 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { otpRegex } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
+import Api from '../../Services/Api_services';
 
 const RESEND_TIMER_SECONDS = 50;
 
 const Verification = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { login, type } = route.params || {};
+
   const [form, setForm] = useState({ otp: ['', '', '', '', '', ''] });
   const [error, setError] = useState({ otpError: '' });
+  const [isLoading, setIsLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
   const isResendDisabled = resendTimer > 0;
@@ -47,25 +52,79 @@ const Verification = () => {
     return () => clearInterval(intervalId);
   }, [isResendDisabled]);
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (isResendDisabled) {
       return;
-    }
-    setResendTimer(RESEND_TIMER_SECONDS);
-  };
-
-  const handleContinue = () => {
-    const otpValue = form.otp.join('');
-
-    if (!otpValue) {
-      setError({ otpError: 'Please enter OTP' });
-      return;
-    } else if (!otpRegex.test(otpValue)) {
-      setError({ otpError: 'OTP must be 6 digits' });
-      return;
+    } else if (!login || !type) {
+      setError({ otpError: 'Please go back and enter your email or ID again' });
     } else {
       setError({ otpError: '' });
-      navigation.navigate('ResetPassword');
+
+      const formData = new FormData();
+      formData.append('type', type);
+      formData.append('login', login);
+
+      try {
+        const res = await Api.resendOtp(formData);
+        console.log('Resend OTP Response:', JSON.stringify(res?.data, null, 2));
+
+        if (res?.data?.status == 'success') {
+          setResendTimer(RESEND_TIMER_SECONDS);
+        } else {
+          setError({ otpError: res?.data?.message });
+        }
+      } catch (err) {
+        console.log(
+          'Resend OTP API Error:',
+          JSON.stringify(err?.response?.data, null, 2),
+        );
+        setError({ otpError: 'Error occurred while sending code' });
+      }
+    }
+  };
+
+  const handleContinue = async () => {
+    const otpValue = form.otp.join('');
+
+    if (isLoading) {
+      return;
+    } else if (!login || !type) {
+      setError({ otpError: 'Please go back and enter your email or ID again' });
+    } else if (!otpValue) {
+      setError({ otpError: 'Please enter OTP' });
+    } else if (!otpRegex.test(otpValue)) {
+      setError({ otpError: 'OTP must be 6 digits' });
+    } else {
+      setError({ otpError: '' });
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('type', type);
+      formData.append('login', login);
+      formData.append('otp', otpValue);
+
+      try {
+        const res = await Api.verifyOtp(formData);
+        console.log('Verify OTP Response:', JSON.stringify(res?.data, null, 2));
+
+        if (res?.data?.status == 'success') {
+          navigation.navigate('ResetPassword', {
+            login,
+            type,
+            otp: otpValue,
+          });
+        } else {
+          setError({ otpError: res?.data?.message });
+        }
+      } catch (err) {
+        console.log(
+          'Verify OTP API Error:',
+          JSON.stringify(err?.response?.data, null, 2),
+        );
+        setError({ otpError: 'Error occurred while verifying OTP' });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -79,7 +138,7 @@ const Verification = () => {
         {Strings.enterOtp}
       </Text>
       <Text style={styles.subtitle} numberOfLines={1}>
-        {Strings.otpSentTo}
+        {login ? `OTP sent to ${login}` : Strings.otpSentTo}
       </Text>
 
       <OtpInput
@@ -107,6 +166,7 @@ const Verification = () => {
       <Btn
         title={Strings.continue}
         onPress={handleContinue}
+        loading={isLoading}
         style={styles.continueBtn}
       />
     </View>

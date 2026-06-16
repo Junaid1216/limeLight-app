@@ -17,12 +17,13 @@ import { Fonts } from '../../Constants/Fonts';
 import { getRoleDisplayLabel } from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
+import { setAuthToken } from '../../Services/Api_services';
 
 const DRAWER_BOTTOM_ROUTE = 'BottomNavigation';
 
 const SalesStaffDrawerContent = ({ navigation }) => {
   const insets = useSafeAreaInsets();
-  const { role } = useRole();
+  const { role, setRole } = useRole();
 
   const goToTabScreen = (screenName, params) => {
     navigation.navigate(DRAWER_BOTTOM_ROUTE, { screen: screenName, params });
@@ -46,9 +47,11 @@ const SalesStaffDrawerContent = ({ navigation }) => {
 
   const handleLogout = () => {
     navigation.closeDrawer();
+    setAuthToken(null);
+    setRole(null);
     navigation.getParent()?.getParent()?.reset({
-      index: 1,
-      routes: [{ name: 'Role' }, { name: 'AuthNavigation' }],
+      index: 0,
+      routes: [{ name: 'Role' }],
     });
   };
 

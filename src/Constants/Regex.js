@@ -1,5 +1,10 @@
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export const employeeIdRegex = /^[A-Za-z0-9]+$/;
+
+export const isValidLogin = value =>
+  emailRegex.test(value) || employeeIdRegex.test(value);
+
 export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+={}\[\]:;"'<>,.~`|\\/-]).{8,}$/;
 

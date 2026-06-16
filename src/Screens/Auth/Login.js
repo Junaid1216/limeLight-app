@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
@@ -7,35 +7,98 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
-import { emailRegex } from '../../Constants/Regex';
+import { isValidLogin } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useRole } from '../../Context/RoleContext';
+import Api, { setAuthToken } from '../../Services/Api_services';
 
 const Login = () => {
   const navigation = useNavigation();
+  const { role } = useRole();
+
   const [form, setForm] = useState({ email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
     emailError: '',
     passwordError: '',
   });
 
-  const handleLogin = () => {
-    if (!form.email) {
-      setError({ emailError: 'Please enter email', passwordError: '' });
+  useFocusEffect(
+    useCallback(() => {
+      if (!role) {
+        navigation.getParent()?.getParent()?.reset({
+          index: 0,
+          routes: [{ name: 'Role' }],
+        });
+      } else {
+        setError({ emailError: '', passwordError: '' });
+      }
+    }, [role, navigation]),
+  );
+
+  const handleLogin = async () => {
+    if (isLoading) {
       return;
-    } else if (!emailRegex.test(form.email)) {
-      setError({ emailError: 'Please enter a valid email', passwordError: '' });
-      return;
+    } else if (!role) {
+      setError({
+        emailError: 'Please select your role first',
+        passwordError: '',
+      });
+    } else if (!form.email.trim()) {
+      setError({
+        emailError: 'Please enter email or employee ID',
+        passwordError: '',
+      });
+    } else if (!isValidLogin(form.email.trim())) {
+      setError({
+        emailError: 'Please enter a valid email or employee ID',
+        passwordError: '',
+      });
     } else if (!form.password) {
-      setError({ emailError: '', passwordError: 'Please enter password' });
-      return;
+      setError({
+        emailError: '',
+        passwordError: 'Please enter password',
+      });
     } else {
       setError({ emailError: '', passwordError: '' });
-      navigation.navigate('Drawer', {
-        screen: 'BottomNavigation',
-        params: { screen: 'Home' },
-      });
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('type', role);
+      formData.append('login', form.email.trim());
+      formData.append('password', form.password);
+
+      try {
+        const res = await Api.login(formData);
+        console.log('Login Response:', JSON.stringify(res?.data, null, 2));
+
+        if (res?.data?.status == 'success') {
+          setAuthToken(res?.data?.data?.token);
+
+          navigation.navigate('Drawer', {
+            screen: 'BottomNavigation',
+            params: { screen: 'Home' },
+          });
+        } else {
+          setError({
+            emailError: res?.data?.message,
+            passwordError: '',
+          });
+        }
+      } catch (err) {
+        console.log(
+          'Login API Error:',
+          JSON.stringify(err?.response?.data, null, 2),
+        );
+        setError({
+          emailError: err?.response?.data?.message,
+          passwordError: '',
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -65,7 +128,7 @@ const Login = () => {
             setForm({ ...form, email: text });
             setError({ ...error, emailError: '' });
           }}
-          keyboardType="email-address"
+          keyboardType="default"
           error={error.emailError}
         />
 
@@ -94,7 +157,11 @@ const Login = () => {
         </Pressable>
       </View>
 
-      <Btn title={Strings.login} onPress={handleLogin} />
+      <Btn
+        title={Strings.login}
+        onPress={handleLogin}
+        loading={isLoading}
+      />
     </View>
   );
 };

@@ -32,6 +32,7 @@
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.24.0",
+    "react-native-simple-toast": "^3.3.2",
     "react-native-svg": "^15.15.5",
     "react-native-tab-view": "^4.3.0",
     "react-native-toast-message": "^2.3.3",
