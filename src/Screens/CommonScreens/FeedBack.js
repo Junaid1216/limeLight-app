@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
@@ -16,13 +17,144 @@ import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
+import { employeeIdRegex } from '../../Constants/Regex';
+import { ROLES } from '../../Constants/roleConfig';
 import { MyStyling } from '../../Constants/Styling';
+import { useRole } from '../../Context/RoleContext';
+import Api, { getAuthToken } from '../../Services/Api_services';
 
 const FeedBack = () => {
-  const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [branch, setBranch] = useState('');
-  const [feedback, setFeedback] = useState('');
+  const { role } = useRole();
+  const isAsm = role === ROLES.ASM;
+  const locationLabel = isAsm ? Strings.region : Strings.branchLabel;
+  const [form, setForm] = useState({
+    code: '',
+    name: '',
+    branch: '',
+    feedback: '',
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState({
+    codeError: '',
+    nameError: '',
+    branchError: '',
+    feedbackError: '',
+  });
+
+  const handleSubmit = async () => {
+    if (isLoading) {
+      return;
+    } else if (!form.code.trim()) {
+      setError({
+        codeError: 'Please enter code',
+        nameError: '',
+        branchError: '',
+        feedbackError: '',
+      });
+    } else if (!employeeIdRegex.test(form.code.trim())) {
+      setError({
+        codeError: 'Please enter a valid code',
+        nameError: '',
+        branchError: '',
+        feedbackError: '',
+      });
+    } else if (!/[A-Za-z]/.test(form.code.trim())) {
+      setError({
+        codeError: 'Code must contain at least one letter',
+        nameError: '',
+        branchError: '',
+        feedbackError: '',
+      });
+    } else if (!form.name.trim()) {
+      setError({
+        codeError: '',
+        nameError: 'Please enter name',
+        branchError: '',
+        feedbackError: '',
+      });
+    } else if (!form.branch.trim()) {
+      setError({
+        codeError: '',
+        nameError: '',
+        branchError: isAsm ? 'Please enter region' : 'Please enter branch',
+        feedbackError: '',
+      });
+    } else if (!form.feedback.trim()) {
+      setError({
+        codeError: '',
+        nameError: '',
+        branchError: '',
+        feedbackError: 'Please enter feedback',
+      });
+    } else if (!getAuthToken()) {
+      setError({
+        codeError: '',
+        nameError: '',
+        branchError: '',
+        feedbackError: 'Please login again',
+      });
+    } else {
+      setError({
+        codeError: '',
+        nameError: '',
+        branchError: '',
+        feedbackError: '',
+      });
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('code', form.code.trim());
+      formData.append('name', form.name.trim());
+      formData.append(isAsm ? 'region_name' : 'branch_name', form.branch.trim());
+      formData.append('feedback', form.feedback.trim());
+
+      const feedbackLabel = isAsm ? 'ASM Feedback' : 'Staff Feedback';
+      const feedbackEndpoint = isAsm ? 'asm-feedback' : 'staff-feedback';
+
+      try {
+        console.log(`${feedbackLabel} Request:`, feedbackEndpoint);
+        const res = isAsm
+          ? await Api.asmFeedback(formData)
+          : await Api.staffFeedback(formData);
+        console.log(
+          `${feedbackLabel} Response:`,
+          JSON.stringify(res?.data, null, 2),
+        );
+
+        if (res?.status == 200) {
+          console.log(
+            `${feedbackLabel} Success:`,
+            JSON.stringify(res?.data, null, 2),
+          );
+          Toast.show(res?.data?.message, Toast.LONG);
+          setForm({ code: '', name: '', branch: '', feedback: '' });
+        } else {
+          Toast.show(res?.data?.message, Toast.LONG);
+          setError({
+            codeError: '',
+            nameError: '',
+            branchError: '',
+            feedbackError: res?.data?.message,
+          });
+        }
+      } catch (error) {
+        console.log(`${feedbackLabel} API Error:`, {
+          status: error?.response?.status,
+          url: feedbackEndpoint,
+          data: error?.response?.data || error,
+        });
+        Toast.show(error?.response?.data?.message, Toast.LONG);
+        setError({
+          codeError: '',
+          nameError: '',
+          branchError: '',
+          feedbackError: error?.response?.data?.message,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <View style={MyStyling.container2}>
@@ -49,29 +181,40 @@ const FeedBack = () => {
           <View style={styles.row}>
             <Customtextinput
               feedbackStyle
-              keyboardType="number-pad"
               icon={Images.Hash}
               label={Strings.codeLabel}
-              value={code}
-              onChangeText={setCode}
+              value={form.code}
+              onChangeText={text => {
+                setForm({ ...form, code: text });
+                setError({ ...error, codeError: '' });
+              }}
+              error={error.codeError}
               wrapperStyle={styles.halfInput}
             />
             <Customtextinput
               feedbackStyle
               label={Strings.nameLabel}
               icon={Images.Person}
-              value={name}
-              onChangeText={setName}
+              value={form.name}
+              onChangeText={text => {
+                setForm({ ...form, name: text });
+                setError({ ...error, nameError: '' });
+              }}
+              error={error.nameError}
               wrapperStyle={styles.halfInput}
             />
           </View>
 
           <Customtextinput
             feedbackStyle
-            label={Strings.branchLabel}
+            label={locationLabel}
             icon={Images.Branch}
-            value={branch}
-            onChangeText={setBranch}
+            value={form.branch}
+            onChangeText={text => {
+              setForm({ ...form, branch: text });
+              setError({ ...error, branchError: '' });
+            }}
+            error={error.branchError}
             iconTint={Colors.branchGreen}
             wrapperStyle={styles.inputSideSpace}
           />
@@ -81,8 +224,12 @@ const FeedBack = () => {
             label={Strings.yourFeedbackLabel}
             labelRight={Strings.required}
             multiline
-            value={feedback}
-            onChangeText={setFeedback}
+            value={form.feedback}
+            onChangeText={text => {
+              setForm({ ...form, feedback: text });
+              setError({ ...error, feedbackError: '' });
+            }}
+            error={error.feedbackError}
             wrapperStyle={[styles.inputSideSpace, styles.lastInput]}
           />
 
@@ -100,7 +247,8 @@ const FeedBack = () => {
 
         <Btn
           title={Strings.submitFeedback}
-          onPress={() => {}}
+          onPress={handleSubmit}
+          loading={isLoading}
           style={styles.submitBtn}
         />
       </ScrollView>

@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import OtpInput from '../../Components/OtpInput';
@@ -68,17 +69,18 @@ const Verification = () => {
         const res = await Api.resendOtp(formData);
         console.log('Resend OTP Response:', JSON.stringify(res?.data, null, 2));
 
-        if (res?.data?.status == 'success') {
+        if (res?.status == 200) {
+          console.log('Resend OTP Success:', JSON.stringify(res?.data, null, 2));
+          Toast.show(res?.data?.message, Toast.LONG);
           setResendTimer(RESEND_TIMER_SECONDS);
         } else {
+          Toast.show(res?.data?.message, Toast.LONG);
           setError({ otpError: res?.data?.message });
         }
-      } catch (err) {
-        console.log(
-          'Resend OTP API Error:',
-          JSON.stringify(err?.response?.data, null, 2),
-        );
-        setError({ otpError: 'Error occurred while sending code' });
+      } catch (error) {
+        console.log('Resend OTP API Error:', error?.response?.data || error);
+        Toast.show(error?.response?.data?.message, Toast.LONG);
+        setError({ otpError: error?.response?.data?.message });
       }
     }
   };
@@ -107,21 +109,22 @@ const Verification = () => {
         const res = await Api.verifyOtp(formData);
         console.log('Verify OTP Response:', JSON.stringify(res?.data, null, 2));
 
-        if (res?.data?.status == 'success') {
+        if (res?.status == 200) {
+          console.log('Verify OTP Success:', JSON.stringify(res?.data, null, 2));
+          Toast.show(res?.data?.message, Toast.LONG);
           navigation.navigate('ResetPassword', {
             login,
             type,
             otp: otpValue,
           });
         } else {
+          Toast.show(res?.data?.message, Toast.LONG);
           setError({ otpError: res?.data?.message });
         }
-      } catch (err) {
-        console.log(
-          'Verify OTP API Error:',
-          JSON.stringify(err?.response?.data, null, 2),
-        );
-        setError({ otpError: 'Error occurred while verifying OTP' });
+      } catch (error) {
+        console.log('Verify OTP API Error:', error?.response?.data || error);
+        Toast.show(error?.response?.data?.message, Toast.LONG);
+        setError({ otpError: error?.response?.data?.message });
       } finally {
         setIsLoading(false);
       }

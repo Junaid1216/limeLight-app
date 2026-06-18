@@ -17,6 +17,7 @@ import { isValidLogin } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import { useRole } from '../../Context/RoleContext';
 import Api from '../../Services/Api_services';
 
@@ -48,22 +49,23 @@ const ForgotPassword = () => {
         const res = await Api.sendOtp(formData);
         console.log('Send OTP Response:', JSON.stringify(res?.data, null, 2));
 
-        if (res?.data?.status == 'success') {
+        if (res?.status == 200) {
+          console.log('Send OTP Success:', JSON.stringify(res?.data, null, 2));
+          Toast.show(res?.data?.message, Toast.LONG);
           navigation.navigate('Verification', {
             login: form.email.trim(),
             type: role,
           });
         } else {
+          Toast.show(res?.data?.message, Toast.LONG);
           setError({
             emailError: res?.data?.message,
           });
         }
-      } catch (err) {
-        console.log(
-          'Send OTP API Error:',
-          JSON.stringify(err?.response?.data, null, 2),
-        );
-        setError({ emailError: 'Error occurred while sending code' });
+      } catch (error) {
+        console.log('Send OTP API Error:', error?.response?.data || error);
+        Toast.show(error?.response?.data?.message, Toast.LONG);
+        setError({ emailError: error?.response?.data?.message });
       } finally {
         setIsLoading(false);
       }

@@ -6,6 +6,17 @@ export const ROLES = {
   ASM: 'asm',
 };
 
+export const getTrainingApiRole = role => {
+  switch (role) {
+    case ROLES.MANAGER:
+      return 'branch_manager';
+    case ROLES.ASM:
+      return 'asm';
+    default:
+      return 'sales_staff';
+  }
+};
+
 export const getRoleDisplayLabel = role => {
   switch (role) {
     case ROLES.MANAGER:
@@ -58,4 +69,22 @@ export const getProfileInfo = role => {
         designation: Strings.seniorSalesStaff,
       };
   }
+};
+
+export const mapProfileData = (apiData = {}, role) => {
+  const fallback = getProfileInfo(role);
+  const roleLabel =
+    apiData.role_name ??
+    apiData.role ??
+    getRoleDisplayLabel(apiData.type || role);
+
+  return {
+    name: apiData.name ?? fallback.name,
+    branchLabel: fallback.branchLabel,
+    branchValue:
+      apiData.branch_name ?? apiData.branch ?? fallback.branchValue,
+    roleTag: roleLabel,
+    roleValue: roleLabel,
+    designation: apiData.designation ?? fallback.designation,
+  };
 };

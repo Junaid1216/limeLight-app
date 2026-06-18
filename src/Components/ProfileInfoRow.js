@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
@@ -34,17 +34,15 @@ const ProfileInfoRow = props => {
           <Text style={styles.label} numberOfLines={1}>
             {props?.label}
           </Text>
-          <Text style={styles.value} numberOfLines={1}>
-            {props?.value}
-          </Text>
+          <TextInput
+            style={styles.valueInput}
+            value={props?.value}
+            onChangeText={props?.onChangeText}
+            editable={props?.editable !== false}
+            numberOfLines={1}
+          />
         </View>
       </View>
-      <Icon
-        name="lock"
-        size={wp(3.5)}
-        color={Colors.coolGrey}
-        style={styles.lockIcon}
-      />
     </View>
   );
 };
@@ -84,13 +82,12 @@ const styles = StyleSheet.create({
     color: Colors.zinc,
     marginBottom: hp(0.25),
   },
-  value: {
+  valueInput: {
     fontFamily: Fonts.poppinsBold,
     fontSize: Fontsize.xs2,
     color: Colors.black,
-  },
-  lockIcon: {
-    marginLeft: wp(2),
+    padding: 0,
+    margin: 0,
   },
 });
 

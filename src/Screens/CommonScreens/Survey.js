@@ -1,6 +1,14 @@
-import React from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { Image, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  ActivityIndicator,
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
@@ -10,9 +18,92 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
+import { useRole } from '../../Context/RoleContext';
+import Api from '../../Services/Api_services';
+
+const mapSurveyQuestions = data => {
+  const list = Array.isArray(data)
+    ? data
+    : data?.questions ?? data?.survey_questions ?? [];
+
+  const title = Array.isArray(data)
+    ? Strings.priceSatisfactionSurvey
+    : data?.title ?? data?.survey_title ?? Strings.priceSatisfactionSurvey;
+
+  const questions = list.map((item, index) => ({
+    id: String(item?.id ?? item?.question_id ?? index + 1),
+    question: item?.question ?? item?.question_text ?? '',
+    options: item?.options ??
+      item?.answer_options ?? [
+        Strings.optionHigh,
+        Strings.optionFair,
+        Strings.optionLow,
+      ],
+  }));
+
+  return { title, questions };
+};
 
 const Survey = () => {
   const navigation = useNavigation();
+  const { role } = useRole();
+  const [surveyTitle, setSurveyTitle] = useState(Strings.priceSatisfactionSurvey);
+  const [questions, setQuestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchSurveyQuestions = useCallback(async () => {
+    if (!role) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      console.log('Survey Questions Request:', `survey-questions/${role}`, {
+        role,
+      });
+      const res = await Api.getSurveyQuestions(role);
+      console.log(
+        'Survey Questions Response:',
+        JSON.stringify(res?.data, null, 2),
+      );
+
+      if (res?.status == 200) {
+        const { title, questions: mappedQuestions } = mapSurveyQuestions(
+          res?.data?.data,
+        );
+
+        console.log(
+          'Survey Questions Success:',
+          JSON.stringify(mappedQuestions, null, 2),
+        );
+
+        setSurveyTitle(title);
+        setQuestions(mappedQuestions);
+      } else {
+        Toast.show(res?.data?.message, Toast.LONG);
+        setQuestions([]);
+      }
+    } catch (error) {
+      console.log('Survey Questions API Error:', {
+        status: error?.response?.status,
+        url: `survey-questions/${role}`,
+        data: error?.response?.data || error,
+      });
+      Toast.show(error?.response?.data?.message, Toast.LONG);
+      setQuestions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [role]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchSurveyQuestions();
+    }, [fetchSurveyQuestions]),
+  );
+
+  const questionsCountLabel = `${questions.length} Questions`;
 
   return (
     <View style={MyStyling.container2}>
@@ -24,47 +115,56 @@ const Survey = () => {
           notificationCount={5}
         />
 
-        <View style={styles.card}>
-          <View style={styles.cardTopRow}>
-            <View style={styles.iconWrap}>
+        {isLoading ? (
+          <ActivityIndicator
+            size="large"
+            color={Colors.teal}
+            style={styles.loader}
+          />
+        ) : questions.length > 0 ? (
+          <View style={styles.card}>
+            <View style={styles.cardTopRow}>
+              <View style={styles.iconWrap}>
+                <Image
+                  source={Images.Note}
+                  style={styles.noteIcon}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.activeBadge}>
+                <Text style={styles.activeText} numberOfLines={1}>
+                  {Strings.active}
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.surveyTitle} numberOfLines={2}>
+              {surveyTitle}
+            </Text>
+
+            <View style={styles.questionsRow}>
               <Image
-                source={Images.Note}
-                style={styles.noteIcon}
+                source={Images.Question}
+                style={styles.questionIcon}
                 resizeMode="contain"
               />
-            </View>
-            <View style={styles.activeBadge}>
-              <Text style={styles.activeText} numberOfLines={1}>
-                {Strings.active}
+              <Text style={styles.questionsText} numberOfLines={1}>
+                {questionsCountLabel}
               </Text>
             </View>
-          </View>
 
-          <Text style={styles.surveyTitle} numberOfLines={2}>
-            {Strings.priceSatisfactionSurvey}
-          </Text>
-
-          <View style={styles.questionsRow}>
-            <Image
-              source={Images.Question}
-              style={styles.questionIcon}
-              resizeMode="contain"
+            <Btn
+              title={Strings.openSurvey}
+              onPress={() =>
+                navigation.navigate('SurveyProgress', {
+                  surveyTitle,
+                  questions,
+                })
+              }
+              style={styles.openSurveyBtn}
             />
-            <Text style={styles.questionsText} numberOfLines={1}>
-              {Strings.surveyQuestionsCount}
-            </Text>
           </View>
-
-          <Btn
-            title={Strings.openSurvey}
-            onPress={() =>
-              navigation.navigate('SurveyProgress', {
-                surveyId: 'price-satisfaction',
-              })
-            }
-            style={styles.openSurveyBtn}
-          />
-        </View>
+        ) : null}
       </View>
     </View>
   );
@@ -75,6 +175,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
+  },
+  loader: {
+    marginTop: hp(4),
   },
   card: {
     backgroundColor: Colors.white,

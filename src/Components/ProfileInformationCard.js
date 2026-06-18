@@ -6,18 +6,12 @@ import ProfileSectionHeader from './ProfileSectionHeader';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Strings } from '../Constants/Strings';
-import { getProfileInfo } from '../Constants/roleConfig';
-import { useRole } from '../Context/RoleContext';
 
-const ProfileInformationCard = () => {
-  const { role } = useRole();
-  const profile = getProfileInfo(role);
-
+const ProfileInformationCard = props => {
   return (
     <View style={styles.section}>
       <ProfileSectionHeader
         title={Strings.profileInformation}
-        showReadOnly={true}
         numberoflines={1}
         style={styles.ProfileInformationStyle}
       />
@@ -26,25 +20,29 @@ const ProfileInformationCard = () => {
         <ProfileInfoRow
           iconSource={Images.Person}
           label={Strings.fullName}
-          value={profile.name}
+          value={props?.name}
+          onChangeText={text => props?.onFieldChange?.('name', text)}
         />
         <View style={styles.divider} />
         <ProfileInfoRow
           iconSource={Images.BranchIcon}
-          label={profile.branchLabel}
-          value={profile.branchValue}
+          label={props?.branchLabel}
+          value={props?.branchValue}
+          onChangeText={text => props?.onFieldChange?.('branchValue', text)}
         />
         <View style={styles.divider} />
         <ProfileInfoRow
           iconSource={Images.Staff}
           label={Strings.roleLabel}
-          value={profile.roleValue}
+          value={props?.roleValue}
+          onChangeText={text => props?.onFieldChange?.('roleValue', text)}
         />
         <View style={styles.divider} />
         <ProfileInfoRow
           iconSource={Images.Designation}
           label={Strings.designation}
-          value={profile.designation}
+          value={props?.designation}
+          onChangeText={text => props?.onFieldChange?.('designation', text)}
         />
       </View>
     </View>
@@ -69,9 +67,9 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.lightPeriwinkle,
   },
-  ProfileInformationStyle:{
-    maxWidth:wp(50),
-  }
+  ProfileInformationStyle: {
+    maxWidth: wp(50),
+  },
 });
 
 export default ProfileInformationCard;

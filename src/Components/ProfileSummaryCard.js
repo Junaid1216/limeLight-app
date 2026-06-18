@@ -6,13 +6,8 @@ import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
-import { getProfileInfo } from '../Constants/roleConfig';
-import { useRole } from '../Context/RoleContext';
 
-const ProfileSummaryCard = () => {
-  const { role } = useRole();
-  const profile = getProfileInfo(role);
-
+const ProfileSummaryCard = ({ name, roleTag }) => {
   return (
     <View style={styles.card}>
       <View style={styles.avatarWrap}>
@@ -30,12 +25,12 @@ const ProfileSummaryCard = () => {
       </View>
 
       <Text style={styles.name} numberOfLines={1}>
-        {profile.name}
+        {name}
       </Text>
 
       <View style={styles.roleBadge}>
         <Text style={styles.roleText} numberOfLines={1}>
-          {profile.roleTag}
+          {roleTag}
         </Text>
       </View>
     </View>
@@ -52,7 +47,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(2.5),
     paddingHorizontal: wp(4),
     marginBottom: hp(2.2),
-    elevation:1.5
+    elevation: 1.5,
   },
   avatarWrap: {
     position: 'relative',

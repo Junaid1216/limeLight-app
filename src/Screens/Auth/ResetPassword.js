@@ -17,6 +17,7 @@ import {
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import Api from '../../Services/Api_services';
 
 const ResetPassword = () => {
@@ -95,21 +96,25 @@ const ResetPassword = () => {
           JSON.stringify(res?.data, null, 2),
         );
 
-        if (res?.data?.status == 'success') {
+        if (res?.status == 200) {
+          console.log(
+            'Reset Password Success:',
+            JSON.stringify(res?.data, null, 2),
+          );
+          Toast.show(res?.data?.message, Toast.LONG);
           navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
         } else {
+          Toast.show(res?.data?.message, Toast.LONG);
           setError({
             newPasswordError: res?.data?.message,
             confirmPasswordError: '',
           });
         }
-      } catch (err) {
-        console.log(
-          'Reset Password API Error:',
-          JSON.stringify(err?.response?.data, null, 2),
-        );
+      } catch (error) {
+        console.log('Reset Password API Error:', error?.response?.data || error);
+        Toast.show(error?.response?.data?.message, Toast.LONG);
         setError({
-          newPasswordError: 'Error occurred while resetting password',
+          newPasswordError: error?.response?.data?.message,
           confirmPasswordError: '',
         });
       } finally {

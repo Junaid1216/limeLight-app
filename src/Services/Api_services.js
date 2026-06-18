@@ -6,6 +6,8 @@ axios.defaults.headers.common.Accept = 'application/json';
 
 let authToken = null;
 
+export const getAuthToken = () => authToken;
+
 export const setAuthToken = token => {
   authToken = token;
 
@@ -19,7 +21,10 @@ export const setAuthToken = token => {
 axios.interceptors.request.use(
   config => {
     if (authToken) {
-      config.headers.Authorization = `Bearer ${authToken}`;
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${authToken}`,
+      };
     }
     return config;
   },
@@ -47,10 +52,17 @@ const requests = {
 
 const Api = {
   login: data => requests.post('login', data),
+  logout: () => requests.delete('logout'),
   sendOtp: data => requests.post('sendotp', data),
   resendOtp: data => requests.post('resendotp', data),
   verifyOtp: data => requests.post('verifyotp', data),
   resetPassword: data => requests.post('resetpassword', data),
+  changePassword: data => requests.post('changepassword', data),
+  getProfile: () => requests.get('getprofile'),
+  staffFeedback: data => requests.post('staff-feedback', data),
+  asmFeedback: data => requests.post('asm-feedback', data),
+  getSurveyQuestions: role => requests.get(`survey-questions/${role}`),
+  getTrainingVideos: role => requests.get(`training-videos?role=${role}`),
 };
 
 export default Api;

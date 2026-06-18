@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
-import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
@@ -10,26 +17,105 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
+import { useRole } from '../../Context/RoleContext';
+import Api from '../../Services/Api_services';
 
-const TOTAL_QUESTIONS = 2;
+const mapSurveyQuestions = data => {
+  const list = Array.isArray(data)
+    ? data
+    : data?.questions ?? data?.survey_questions ?? [];
 
-const surveyOptions = [
-  Strings.optionHigh,
-  Strings.optionFair,
-  Strings.optionLow,
-];
+  const title = Array.isArray(data)
+    ? Strings.priceSatisfactionSurvey
+    : data?.title ?? data?.survey_title ?? Strings.priceSatisfactionSurvey;
+
+  const questions = list.map((item, index) => ({
+    id: String(item?.id ?? item?.question_id ?? index + 1),
+    question: item?.question ?? item?.question_text ?? '',
+    options: item?.options ??
+      item?.answer_options ?? [
+        Strings.optionHigh,
+        Strings.optionFair,
+        Strings.optionLow,
+      ],
+  }));
+
+  return { title, questions };
+};
 
 const SurveyProgress = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { role } = useRole();
   const [answers, setAnswers] = useState({});
+  const [surveyTitle, setSurveyTitle] = useState(Strings.priceSatisfactionSurvey);
+  const [questions, setQuestions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  let answeredCount = 0;
-  if (answers.q1) {
-    answeredCount++;
-  }
-  if (answers.q2) {
-    answeredCount++;
-  }
+  const fetchSurveyQuestions = useCallback(async () => {
+    if (!role) {
+      return;
+    }
+
+    setIsLoading(true);
+    setAnswers({});
+
+    try {
+      console.log('Survey Questions Request:', `survey-questions/${role}`, {
+        role,
+      });
+      const res = await Api.getSurveyQuestions(role);
+      console.log(
+        'Survey Questions Response:',
+        JSON.stringify(res?.data, null, 2),
+      );
+
+      if (res?.status == 200) {
+        const { title, questions: mappedQuestions } = mapSurveyQuestions(
+          res?.data?.data,
+        );
+
+        console.log(
+          'Survey Questions Success:',
+          JSON.stringify(mappedQuestions, null, 2),
+        );
+
+        setSurveyTitle(title);
+        setQuestions(mappedQuestions);
+      } else {
+        Toast.show(res?.data?.message, Toast.LONG);
+        setQuestions([]);
+      }
+    } catch (error) {
+      console.log('Survey Questions API Error:', {
+        status: error?.response?.status,
+        url: `survey-questions/${role}`,
+        data: error?.response?.data || error,
+      });
+      Toast.show(error?.response?.data?.message, Toast.LONG);
+      setQuestions([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [role]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const routeQuestions = route.params?.questions;
+      const routeTitle = route.params?.surveyTitle;
+
+      if (routeQuestions?.length) {
+        setSurveyTitle(routeTitle ?? Strings.priceSatisfactionSurvey);
+        setQuestions(routeQuestions);
+        setAnswers({});
+        return;
+      }
+
+      fetchSurveyQuestions();
+    }, [fetchSurveyQuestions, route.params?.questions, route.params?.surveyTitle]),
+  );
+
+  const answeredCount = questions.filter(item => answers[item.id]).length;
 
   return (
     <View style={MyStyling.container2}>
@@ -44,27 +130,34 @@ const SurveyProgress = () => {
           notificationCount={5}
         />
 
-        <SurveyProgressBar
-          title={Strings.priceSatisfactionSurvey}
-          current={answeredCount}
-          total={TOTAL_QUESTIONS}
-        />
+        {isLoading ? (
+          <ActivityIndicator
+            size="large"
+            color={Colors.teal}
+            style={styles.loader}
+          />
+        ) : (
+          <>
+            <SurveyProgressBar
+              title={surveyTitle}
+              current={answeredCount}
+              total={questions.length}
+            />
 
-        <SurveyQuestionCard
-          qLabel={Strings.q1}
-          question={Strings.surveyQuestion1}
-          options={surveyOptions}
-          selected={answers.q1}
-          onSelect={option => setAnswers({ ...answers, q1: option })}
-        />
-
-        <SurveyQuestionCard
-          qLabel={Strings.q2}
-          question={Strings.surveyQuestion2}
-          options={surveyOptions}
-          selected={answers.q2}
-          onSelect={option => setAnswers({ ...answers, q2: option })}
-        />
+            {questions.map((item, index) => (
+              <SurveyQuestionCard
+                key={item.id}
+                qLabel={`Q${index + 1}`}
+                question={item.question}
+                options={item.options}
+                selected={answers[item.id]}
+                onSelect={option =>
+                  setAnswers(prev => ({ ...prev, [item.id]: option }))
+                }
+              />
+            ))}
+          </>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -81,6 +174,7 @@ const SurveyProgress = () => {
             })
           }
           style={styles.submitBtn}
+          loading={isLoading}
         />
       </View>
     </View>
@@ -95,6 +189,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
     paddingBottom: hp(2),
+  },
+  loader: {
+    marginTop: hp(4),
   },
   footer: {
     paddingHorizontal: wp(6),

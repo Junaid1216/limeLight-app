@@ -11,6 +11,7 @@ import { isValidLogin } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import { useRole } from '../../Context/RoleContext';
 import Api, { setAuthToken } from '../../Services/Api_services';
 
@@ -72,9 +73,11 @@ const Login = () => {
 
       try {
         const res = await Api.login(formData);
-        console.log('Login Response:', JSON.stringify(res?.data, null, 2));
+        console.log('Login success:', JSON.stringify(res?.data, null, 2));
 
-        if (res?.data?.status == 'success') {
+        if (res?.status == 200) {
+          console.log('Login Response:', JSON.stringify(res?.data, null, 2));
+          Toast.show(res?.data?.message, Toast.LONG);
           setAuthToken(res?.data?.data?.token);
 
           navigation.navigate('Drawer', {
@@ -82,18 +85,17 @@ const Login = () => {
             params: { screen: 'Home' },
           });
         } else {
+          Toast.show(res?.data?.message, Toast.LONG);
           setError({
             emailError: res?.data?.message,
             passwordError: '',
           });
         }
-      } catch (err) {
-        console.log(
-          'Login API Error:',
-          JSON.stringify(err?.response?.data, null, 2),
-        );
+      } catch (error) {
+        console.log('Login API Error:', error?.response?.data || error);
+        Toast.show(error?.response?.data?.message, Toast.LONG);
         setError({
-          emailError: err?.response?.data?.message,
+          emailError: error?.response?.data?.message,
           passwordError: '',
         });
       } finally {

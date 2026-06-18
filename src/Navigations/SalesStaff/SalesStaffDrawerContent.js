@@ -17,7 +17,8 @@ import { Fonts } from '../../Constants/Fonts';
 import { getRoleDisplayLabel } from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
-import { setAuthToken } from '../../Services/Api_services';
+import Api, { setAuthToken } from '../../Services/Api_services';
+import Toast from 'react-native-simple-toast';
 
 const DRAWER_BOTTOM_ROUTE = 'BottomNavigation';
 
@@ -45,8 +46,24 @@ const SalesStaffDrawerContent = ({ navigation }) => {
     navigation.getParent()?.navigate(screenName);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     navigation.closeDrawer();
+
+    try {
+      const res = await Api.logout();
+      console.log('Logout Response:', JSON.stringify(res?.data, null, 2));
+
+      if (res?.status == 200) {
+        console.log('Logout Success:', JSON.stringify(res?.data, null, 2));
+        Toast.show(res?.data?.message, Toast.LONG);
+      } else {
+        Toast.show(res?.data?.message, Toast.LONG);
+      }
+    } catch (error) {
+      console.log('Logout API Error:', error?.response?.data || error);
+      Toast.show(error?.response?.data?.message, Toast.LONG);
+    }
+
     setAuthToken(null);
     setRole(null);
     navigation.getParent()?.getParent()?.reset({
