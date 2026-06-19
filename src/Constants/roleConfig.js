@@ -85,6 +85,9 @@ export const mapProfileData = (apiData = {}, role) => {
       apiData.branch_name ?? apiData.branch ?? fallback.branchValue,
     roleTag: roleLabel,
     roleValue: roleLabel,
-    designation: apiData.designation ?? fallback.designation,
+    designation:
+      apiData.designation_name ??
+      apiData.designation ??
+      fallback.designation,
   };
 };

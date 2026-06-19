@@ -35,7 +35,10 @@ const ProfileInfoRow = props => {
             {props?.label}
           </Text>
           <TextInput
-            style={styles.valueInput}
+            style={[
+              styles.valueInput,
+              props?.editable === false && styles.valueInputDisabled,
+            ]}
             value={props?.value}
             onChangeText={props?.onChangeText}
             editable={props?.editable !== false}
@@ -88,6 +91,9 @@ const styles = StyleSheet.create({
     color: Colors.black,
     padding: 0,
     margin: 0,
+  },
+  valueInputDisabled: {
+    color: Colors.zinc,
   },
 });
 

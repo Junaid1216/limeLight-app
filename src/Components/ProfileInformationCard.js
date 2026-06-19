@@ -21,7 +21,7 @@ const ProfileInformationCard = props => {
           iconSource={Images.Person}
           label={Strings.fullName}
           value={props?.name}
-          onChangeText={text => props?.onFieldChange?.('name', text)}
+          editable={false}
         />
         <View style={styles.divider} />
         <ProfileInfoRow

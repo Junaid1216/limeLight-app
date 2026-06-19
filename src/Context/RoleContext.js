@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  REMOVE_ROLE_DATA,
+  ROLE_DATA,
+} from '../Redux/Slices/RoleSlice';
 
 const RoleContext = createContext({
   role: null,
@@ -6,14 +11,26 @@ const RoleContext = createContext({
 });
 
 export const RoleProvider = ({ children }) => {
-  const [role, setRole] = useState(null);
+  const dispatch = useDispatch();
+  const role = useSelector(state => state?.ROLE?.userData);
+
+  const setRole = useCallback(
+    value => {
+      if (value === null) {
+        dispatch(REMOVE_ROLE_DATA());
+      } else {
+        dispatch(ROLE_DATA(value));
+      }
+    },
+    [dispatch],
+  );
 
   const value = useMemo(
     () => ({
       role,
       setRole,
     }),
-    [role],
+    [role, setRole],
   );
 
   return <RoleContext.Provider value={value}>{children}</RoleContext.Provider>;

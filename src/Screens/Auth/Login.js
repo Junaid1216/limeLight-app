@@ -11,12 +11,15 @@ import { isValidLogin } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import Toast from 'react-native-simple-toast';
 import { useRole } from '../../Context/RoleContext';
+import { USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 
 const Login = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const { role } = useRole();
 
   const [form, setForm] = useState({ email: '', password: '' });
@@ -79,6 +82,8 @@ const Login = () => {
           console.log('Login Response:', JSON.stringify(res?.data, null, 2));
           Toast.show(res?.data?.message, Toast.LONG);
           setAuthToken(res?.data?.data?.token);
+          dispatch(USER_DATA(res?.data?.data));
+          console.log('userData', res?.data?.data);
 
           navigation.navigate('Drawer', {
             screen: 'BottomNavigation',

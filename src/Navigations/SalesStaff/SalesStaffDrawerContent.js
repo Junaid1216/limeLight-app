@@ -17,13 +17,16 @@ import { Fonts } from '../../Constants/Fonts';
 import { getRoleDisplayLabel } from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
+import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 import Toast from 'react-native-simple-toast';
+import { useDispatch } from 'react-redux';
 
 const DRAWER_BOTTOM_ROUTE = 'BottomNavigation';
 
 const SalesStaffDrawerContent = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const dispatch = useDispatch();
   const { role, setRole } = useRole();
 
   const goToTabScreen = (screenName, params) => {
@@ -65,6 +68,7 @@ const SalesStaffDrawerContent = ({ navigation }) => {
     }
 
     setAuthToken(null);
+    dispatch(REMOVE_USER_DATA());
     setRole(null);
     navigation.getParent()?.getParent()?.reset({
       index: 0,

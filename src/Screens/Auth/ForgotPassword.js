@@ -17,13 +17,13 @@ import { isValidLogin } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import Toast from 'react-native-simple-toast';
-import { useRole } from '../../Context/RoleContext';
 import Api from '../../Services/Api_services';
 
 const ForgotPassword = () => {
   const navigation = useNavigation();
-  const { role } = useRole();
+  const role = useSelector(state => state?.ROLE?.userData);
   const [form, setForm] = useState({ email: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({ emailError: '' });
