@@ -59,6 +59,7 @@ const Api = {
   resetPassword: data => requests.post('resetpassword', data),
   changePassword: data => requests.post('changepassword', data),
   getProfile: () => requests.get('getprofile'),
+  updateProfile: data => requests.post('updateprofile', data),
   staffFeedback: data => requests.post('staff-feedback', data),
   asmFeedback: data => requests.post('asm-feedback', data),
   getSurveyQuestions: role => requests.get(`survey-questions/${role}`),

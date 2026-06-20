@@ -128,6 +128,7 @@ export const Strings = {
   incentiveNetSale: 'Net Sale',
   incentiveAmount: 'Incentive',
   profileHeader: 'Profile',
+  updateProfile: 'Update Profile',
   profileInformation: 'PROFILE INFORMATION',
   readOnly: 'Read only',
   fullName: 'Full Name',

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -7,6 +7,8 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
@@ -18,21 +20,37 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { employeeIdRegex } from '../../Constants/Regex';
-import { ROLES } from '../../Constants/roleConfig';
+import { ROLES, getProfileInfo, mapProfileData, normalizeAuthUser } from '../../Constants/roleConfig';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
 import Api, { getAuthToken } from '../../Services/Api_services';
+
+const getFormFromUserData = (userData, role) => {
+  const normalized = normalizeAuthUser(userData);
+  const profile = normalized
+    ? mapProfileData(normalized, role)
+    : getProfileInfo(role);
+
+  return {
+    code:
+      normalized?.employee_id ??
+      normalized?.code ??
+      normalized?.login ??
+      '',
+    name: profile?.name ?? '',
+    branch: profile?.branchValue ?? '',
+    feedback: '',
+  };
+};
 
 const FeedBack = () => {
   const { role } = useRole();
   const isAsm = role === ROLES.ASM;
   const locationLabel = isAsm ? Strings.region : Strings.branchLabel;
-  const [form, setForm] = useState({
-    code: '',
-    name: '',
-    branch: '',
-    feedback: '',
-  });
+
+  const userData = useSelector(state => state?.AUTH?.userData);
+
+  const [form, setForm] = useState(() => getFormFromUserData(userData, role));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
     codeError: '',
@@ -40,6 +58,69 @@ const FeedBack = () => {
     branchError: '',
     feedbackError: '',
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const applyFormFromUserData = (data, source) => {
+        const nextForm = getFormFromUserData(data, role);
+        console.log(`Feedback prefill (${source}):`, JSON.stringify(nextForm, null, 2));
+        setForm(prev => ({
+          ...nextForm,
+          feedback: prev.feedback,
+        }));
+      };
+
+      const loadProfileIfNeeded = async () => {
+        if (userData) {
+          console.log(
+            'Feedback Redux userData:',
+            JSON.stringify(normalizeAuthUser(userData), null, 2),
+          );
+          applyFormFromUserData(userData, 'redux');
+          return;
+        }
+
+        try {
+          const res = await Api.getProfile();
+          if (!isActive) {
+            return;
+          }
+
+          console.log(
+            'Feedback getProfile Response:',
+            JSON.stringify(res?.data, null, 2),
+          );
+
+          if (res?.status == 200) {
+            applyFormFromUserData(res?.data?.data || {}, 'api');
+          } else {
+            applyFormFromUserData(null, 'fallback');
+          }
+        } catch (err) {
+          if (!isActive) {
+            return;
+          }
+          console.log('Get Profile API Error:', err?.response?.data || err);
+          applyFormFromUserData(null, 'fallback');
+        }
+      };
+
+      loadProfileIfNeeded();
+
+      setError({
+        codeError: '',
+        nameError: '',
+        branchError: '',
+        feedbackError: '',
+      });
+
+      return () => {
+        isActive = false;
+      };
+    }, [userData, role]),
+  );
 
   const handleSubmit = async () => {
     if (isLoading) {
@@ -127,7 +208,7 @@ const FeedBack = () => {
             JSON.stringify(res?.data, null, 2),
           );
           Toast.show(res?.data?.message, Toast.LONG);
-          setForm({ code: '', name: '', branch: '', feedback: '' });
+          setForm(prev => ({ ...prev, feedback: '' }));
         } else {
           Toast.show(res?.data?.message, Toast.LONG);
           setError({

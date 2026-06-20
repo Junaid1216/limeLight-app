@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { Images } from '../Assets';
 import { hp, wp } from '../Assets/Responsive';
@@ -7,20 +7,23 @@ import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
-const ProfileSummaryCard = ({ name, roleTag }) => {
+const ProfileSummaryCard = ({ name, roleTag, avatarUri, onAvatarPress }) => {
   return (
     <View style={styles.card}>
       <View style={styles.avatarWrap}>
-        <View style={styles.avatar}>
+        <Pressable
+          style={styles.avatar}
+          onPress={onAvatarPress}
+          disabled={!onAvatarPress}>
           <Image
-            source={Images.Avatar}
-            style={styles.avatarImage}
-            resizeMode="contain"
-            tintColor={Colors.white}
+            source={avatarUri ? { uri: avatarUri } : Images.Avatar}
+            style={avatarUri ? styles.avatarPhoto : styles.avatarImage}
+            resizeMode={avatarUri ? 'cover' : 'contain'}
+            tintColor={avatarUri ? undefined : Colors.white}
           />
-        </View>
+        </Pressable>
         <View style={styles.lockBadge}>
-          <Icon name="lock" size={wp(3)} color={Colors.white} />
+          <Icon name="camera" size={wp(3)} color={Colors.white} />
         </View>
       </View>
 
@@ -65,6 +68,10 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: wp(10),
     height: wp(10),
+  },
+  avatarPhoto: {
+    width: '100%',
+    height: '100%',
   },
   lockBadge: {
     position: 'absolute',

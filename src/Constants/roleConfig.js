@@ -71,6 +71,21 @@ export const getProfileInfo = role => {
   }
 };
 
+export const normalizeAuthUser = (data) => {
+  if (!data) {
+    return null;
+  }
+
+  if (data.user) {
+    return {
+      ...data.user,
+      token: data.token,
+    };
+  }
+
+  return data;
+};
+
 export const mapProfileData = (apiData = {}, role) => {
   const fallback = getProfileInfo(role);
   const roleLabel =
@@ -89,5 +104,10 @@ export const mapProfileData = (apiData = {}, role) => {
       apiData.designation_name ??
       apiData.designation ??
       fallback.designation,
+    avatarUri:
+      apiData.profile_image ??
+      apiData.image ??
+      apiData.avatar ??
+      null,
   };
 };
