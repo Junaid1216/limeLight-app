@@ -10,6 +10,7 @@ import Toast from 'react-native-simple-toast';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import OtpInput from '../../Components/OtpInput';
+import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
@@ -135,7 +136,8 @@ const Verification = () => {
     <View style={styles.screen}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      <MainHeaderComponent title={Strings.verificationHeader} />
+      <ScreenScrollView contentContainerStyle={styles.scrollContent}>
+        <MainHeaderComponent title={Strings.verificationHeader} />
 
       <Text style={styles.heading} numberOfLines={1}>
         {Strings.enterOtp}
@@ -172,15 +174,20 @@ const Verification = () => {
         loading={isLoading}
         style={styles.continueBtn}
       />
+      </ScreenScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     backgroundColor: Colors.white,
+  },
+  scrollContent: {
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
+    paddingBottom: hp(4),
   },
   heading: {
     fontSize: Fontsize.l,

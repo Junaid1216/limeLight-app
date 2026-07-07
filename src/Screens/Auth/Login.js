@@ -3,6 +3,7 @@ import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
+import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
@@ -111,7 +112,10 @@ const Login = () => {
   };
 
   return (
-    <View style={[MyStyling.container1, styles.content]}>
+    <ScreenScrollView
+      style={MyStyling.container1}
+      contentContainerStyle={styles.content}
+      backgroundColor={Colors.mint}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.mint} />
 
       <Text style={styles.welcomeText} numberOfLines={1}>
@@ -170,7 +174,7 @@ const Login = () => {
         onPress={handleLogin}
         loading={isLoading}
       />
-    </View>
+    </ScreenScrollView>
   );
 };
 

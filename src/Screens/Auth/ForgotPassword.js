@@ -9,6 +9,7 @@ import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
@@ -73,10 +74,10 @@ const ForgotPassword = () => {
   };
 
   return (
-    <View style={[MyStyling.container2]}>
+    <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      <View style={styles.content}>
+      <ScreenScrollView contentContainerStyle={styles.content}>
         <MainHeaderComponent title={Strings.forgotPasswordHeader} />
 
         <Text style={styles.heading} numberOfLines={1}>{Strings.cannotLogin}</Text>
@@ -102,7 +103,7 @@ const ForgotPassword = () => {
           loading={isLoading}
           style={styles.sendBtn}
         />
-      </View>
+      </ScreenScrollView>
     </View>
   );
 };
@@ -112,9 +113,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   content: {
-    flex: 1,
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
+    paddingBottom: hp(4),
   },
   heading: {
     fontSize: Fontsize.l,

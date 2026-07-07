@@ -12,7 +12,7 @@ export const MyStyling = {
     flex: 1,
     backgroundColor: Colors.mint,
     paddingHorizontal: wp(5),
-    paddingTop: hp(18),
+    paddingTop: hp(8),
   },
 
   container1: {

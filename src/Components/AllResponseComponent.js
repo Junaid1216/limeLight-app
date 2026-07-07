@@ -14,6 +14,7 @@ const Tab = createMaterialTopTabNavigator();
 const AllResponseComponent = () => {
   return (
     <Tab.Navigator
+      style={styles.navigator}
       screenOptions={{
         tabBarActiveTintColor: Colors.white,
         tabBarInactiveTintColor: Colors.darkgrey,
@@ -35,6 +36,9 @@ const AllResponseComponent = () => {
 export default AllResponseComponent;
 
 const styles = StyleSheet.create({
+  navigator: {
+    flex: 1,
+  },
   tabBar: {
     backgroundColor: Colors.platinum,
     borderRadius: 10,

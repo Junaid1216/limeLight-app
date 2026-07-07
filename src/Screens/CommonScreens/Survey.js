@@ -12,6 +12,7 @@ import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
@@ -109,7 +110,7 @@ const Survey = () => {
     <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      <View style={styles.content}>
+      <ScreenScrollView contentContainerStyle={styles.content}>
         <MainHeaderComponent
           title={Strings.surveyHeader}
           notificationCount={5}
@@ -165,16 +166,16 @@ const Survey = () => {
             />
           </View>
         ) : null}
-      </View>
+      </ScreenScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
+    paddingBottom: hp(4),
   },
   loader: {
     marginTop: hp(4),

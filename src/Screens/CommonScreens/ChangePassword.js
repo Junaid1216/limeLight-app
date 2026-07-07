@@ -6,6 +6,7 @@ import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import Customtextinput from '../../Components/Customtextinput';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
@@ -127,7 +128,7 @@ const ChangePassword = () => {
     <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      <View style={styles.content}>
+      <ScreenScrollView contentContainerStyle={styles.content}>
         <MainHeaderComponent title={Strings.changePasswordHeader} />
 
         <Text style={styles.heading} numberOfLines={1}>
@@ -170,16 +171,16 @@ const ChangePassword = () => {
           loading={isLoading}
           style={styles.continueBtn}
         />
-      </View>
+      </ScreenScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
+    paddingBottom: hp(4),
   },
   heading: {
     fontSize: Fontsize.l,

@@ -15,7 +15,9 @@ const SurveyResponse = () => {
         <MainHeaderComponent title={'Survey Response'} notificationCount={5} />
       </View>
       <ResponseComponent />
-      <AllResponseComponent />
+      <View style={styles.tabsWrap}>
+        <AllResponseComponent />
+      </View>
     </View>
   );
 };
@@ -26,5 +28,8 @@ const styles = StyleSheet.create({
   headerWrap: {
     paddingHorizontal: wp(5),
     paddingTop: hp(3),
+  },
+  tabsWrap: {
+    flex: 1,
   },
 });

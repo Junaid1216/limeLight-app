@@ -8,6 +8,7 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import RoleComponent from '../../Components/RoleComponent';
+import ScreenScrollView from '../../Components/ScreenScrollView';
 import { ROLES } from '../../Constants/roleConfig';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
@@ -22,7 +23,10 @@ const Role = () => {
   };
 
   return (
-    <View style={MyStyling.container}>
+    <ScreenScrollView
+      style={MyStyling.container}
+      contentContainerStyle={styles.scrollContent}
+      backgroundColor={Colors.mint}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.mint} />
       <Text style={styles.title} numberOfLines={1}>{Strings.chooseYourRole}</Text>
 
@@ -62,11 +66,14 @@ const Role = () => {
           onPress={() => goToLogin(ROLES.ASM)}
         />
       </View>
-    </View>
+    </ScreenScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContent: {
+    paddingBottom: hp(4),
+  },
   title: {
     fontSize: Fontsize.ml,
     fontFamily: Fonts.poppinsBold,
