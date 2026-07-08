@@ -6,8 +6,14 @@ const getToday = () => {
   return today;
 };
 
+const getPreviousDate = (daysBefore = 1) => {
+  const date = getToday();
+  date.setDate(date.getDate() - daysBefore);
+  return date;
+};
+
 export const useDateRangePicker = () => {
-  const [fromDate, setFromDate] = useState(null);
+  const [fromDate, setFromDate] = useState(() => getPreviousDate());
   const [toDate, setToDate] = useState(null);
   const [activeField, setActiveField] = useState(null);
 
@@ -18,17 +24,23 @@ export const useDateRangePicker = () => {
     setActiveField(null);
 
     const isDismissed = event.type === 'dismissed' || !selectedDate;
-    if (isDismissed) return;
+    if (isDismissed) {
+      return;
+    } else {
+      const normalizedDate = new Date(selectedDate);
+      normalizedDate.setHours(0, 0, 0, 0);
 
-    const setDateByField = {
-      from: () => {
-        setFromDate(selectedDate);
-        toDate && selectedDate > toDate && setToDate(selectedDate);
-      },
-      to: () => setToDate(selectedDate),
-    };
-
-    setDateByField[activeField]?.();
+      if (activeField === 'from') {
+        setFromDate(normalizedDate);
+        if (toDate && normalizedDate > toDate) {
+          setToDate(normalizedDate);
+        }
+      } else if (activeField === 'to') {
+        setToDate(normalizedDate);
+      } else {
+        return;
+      }
+    }
   };
 
   const isFromField = activeField === 'from';
@@ -43,7 +55,8 @@ export const useDateRangePicker = () => {
     datePicker: activeField && {
       mode: 'date',
       value: pickerValue,
-      minimumDate: isFromField ? today : fromDate || today,
+      minimumDate: isFromField ? undefined : fromDate || getPreviousDate(),
+      maximumDate: isFromField ? toDate || today : today,
       display: 'default',
       onChange: handleDateChange,
     },

@@ -1,75 +1,35 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo } from 'react';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
-import {
-  staffComparisonFootfallData,
-  staffComparisonInvoiceData,
-} from '../Constants/DummyData';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
+import { buildOutletChartData } from '../Utils/outletChartData';
 
 const chartWidth = wp(78);
 const chartHeight = hp(20);
-const chartMaxValue = 250;
-const chartData = staffComparisonFootfallData.map((point, index) => ({
-  value: point.value,
-  label:
-    index === 0
-      ? '10:00'
-      : index === 2
-        ? '02:00'
-        : index === 4
-          ? '06:00'
-          : index === 6
-            ? '10:00'
-            : index === 8
-              ? '12:00'
-              : '',
-  labelComponent: () => {
-    const label =
-      index === 0
-        ? '10:00'
-        : index === 2
-          ? '02:00'
-          : index === 4
-            ? '06:00'
-            : index === 6
-              ? '10:00'
-              : index === 8
-                ? '12:00'
-                : '';
 
-    if (!label) {
-      return null;
-    }
+const formatChartMetric = value => {
+  const num = Number(value);
 
-    return (
-      <View
-        style={[
-          styles.axisLabelContainer,
-          index === 0 && styles.firstXAxisLabel,
-          index === 8 && styles.lastXAxisLabel,
-        ]}
-      >
-        <Text style={styles.axisText}>{label}</Text>
-      </View>
-    );
-  },
-  customData: {
-    footfall: point.value,
-    invoices: staffComparisonInvoiceData[index]?.value || 0,
-    rate:
-      point.value > 0
-        ? Math.round(((staffComparisonInvoiceData[index]?.value || 0) / point.value) * 100)
-        : 0,
-  },
-}));
-
-const chartData2 = staffComparisonInvoiceData.map(point => ({
-  value: point.value,
-}));
+  if (!Number.isFinite(num)) {
+    return '0';
+  } else if (num >= 1000) {
+    const formatted = num / 1000;
+    return Number.isInteger(formatted)
+      ? `${formatted}K`
+      : `${formatted.toFixed(1)}K`;
+  } else {
+    return String(num);
+  }
+};
 
 const getNearestLabelByIndex = (data, index) => {
   if (!data || data.length === 0) {
@@ -80,29 +40,23 @@ const getNearestLabelByIndex = (data, index) => {
     return data[index].label;
   }
 
+  if (data[index]?.customData?.day) {
+    return data[index].customData.day;
+  }
+
   for (let leftIndex = index - 1; leftIndex >= 0; leftIndex -= 1) {
-    if (data[leftIndex]?.label) {
-      return data[leftIndex].label;
+    if (data[leftIndex]?.label || data[leftIndex]?.customData?.day) {
+      return data[leftIndex].label || data[leftIndex].customData.day;
     }
   }
 
   for (let rightIndex = index + 1; rightIndex < data.length; rightIndex += 1) {
-    if (data[rightIndex]?.label) {
-      return data[rightIndex].label;
+    if (data[rightIndex]?.label || data[rightIndex]?.customData?.day) {
+      return data[rightIndex].label || data[rightIndex].customData.day;
     }
   }
 
   return '00:00';
-};
-
-const getPointIndex = (data, selectedPoint) => {
-  const providedIndex = selectedPoint?.index ?? selectedPoint?.dataPointIndex;
-  if (typeof providedIndex === 'number' && providedIndex >= 0) {
-    return providedIndex;
-  }
-
-  const resolvedIndex = data.indexOf(selectedPoint);
-  return resolvedIndex >= 0 ? resolvedIndex : 0;
 };
 
 const getPeakMetrics = data => {
@@ -122,11 +76,57 @@ const getPeakMetrics = data => {
   };
 };
 
-const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPressFrom, onPressTo }) => {
+const StaffConversionChartCard = ({
+  labels,
+  fromDate,
+  toDate,
+  formatDate,
+  onPressFrom,
+  onPressTo,
+  transactionSummary,
+  isLoading = false,
+  shopName,
+}) => {
+  const { chartData, chartData2, chartMaxValue, chartSections } = useMemo(
+    () => buildOutletChartData(transactionSummary, fromDate, toDate),
+    [transactionSummary, fromDate, toDate],
+  );
+
+  const chartDataWithLabels = useMemo(
+    () =>
+      chartData.map((point, index) => {
+        const axisLabel = point.label || point.customData?.day || '';
+
+        return {
+          ...point,
+          labelComponent: () => {
+            if (!axisLabel) {
+              return null;
+            }
+
+            return (
+              <View
+                style={[
+                  styles.axisLabelContainer,
+                  index === 0 && styles.firstXAxisLabel,
+                  index === chartData.length - 1 && styles.lastXAxisLabel,
+                ]}>
+                <Text style={styles.axisText}>{axisLabel}</Text>
+              </View>
+            );
+          },
+        };
+      }),
+    [chartData],
+  );
+
   const peakMetrics = getPeakMetrics(chartData);
   const [activePointerIndex, setActivePointerIndex] = React.useState(null);
   const [isPointerActive, setIsPointerActive] = React.useState(false);
   const activePointerIndexRef = React.useRef(null);
+  const hasChartData = chartData.length > 0 && chartData2.length > 0;
+  const chartSpacing =
+    chartData.length > 1 ? chartWidth / (chartData.length - 1) : chartWidth / 2;
 
   const headerMetrics =
     !isPointerActive || activePointerIndex === null
@@ -143,9 +143,13 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
   };
 
   const syncHeaderWithPointer = pointerInfo => {
-    if (typeof pointerInfo?.pointerIndex !== 'number' || pointerInfo.pointerIndex < 0) {
+    if (
+      typeof pointerInfo?.pointerIndex !== 'number' ||
+      pointerInfo.pointerIndex < 0
+    ) {
       return;
     }
+
     const pointerIndex = pointerInfo.pointerIndex;
 
     if (activePointerIndexRef.current === pointerIndex) {
@@ -160,10 +164,13 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
     setIsPointerActive(true);
   };
 
-  const activePoint = activePointerIndex !== null ? chartData[activePointerIndex] : null;
+  const activePoint =
+    activePointerIndex !== null ? chartData[activePointerIndex] : null;
   const activeTooltipData = activePoint?.customData || null;
   const activeTooltipTime =
-    activePointerIndex !== null ? getNearestLabelByIndex(chartData, activePointerIndex) : '';
+    activePointerIndex !== null
+      ? getNearestLabelByIndex(chartData, activePointerIndex)
+      : '';
   const activeTooltipPositionStyle =
     activePointerIndex === null
       ? null
@@ -176,18 +183,28 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
   return (
     <View style={styles.chartSection}>
       <Text style={styles.chartTitle}>{labels.conversionRate}</Text>
-      <Text style={styles.chartSubTitle}>{labels.footfallVsInvoicesPerformance}</Text>
+      <Text style={styles.chartSubTitle}>
+        {shopName
+          ? `${labels.footfallVsInvoicesPerformance} - ${shopName}`
+          : labels.footfallVsInvoicesPerformance}
+      </Text>
 
       <View style={styles.dateRangeCard}>
         <Text style={styles.dateRangeLabel}>{labels.dateRange}</Text>
 
-        <TouchableOpacity activeOpacity={0.86} onPress={onPressFrom} style={styles.dateButton}>
+        <TouchableOpacity
+          activeOpacity={0.86}
+          onPress={onPressFrom}
+          style={styles.dateButton}>
           <Text style={[styles.dateButtonText, !fromDate && styles.datePlaceholder]}>
             {fromDate ? formatDate(fromDate) : labels.from}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity activeOpacity={0.86} onPress={onPressTo} style={styles.dateButton}>
+        <TouchableOpacity
+          activeOpacity={0.86}
+          onPress={onPressTo}
+          style={styles.dateButton}>
           <Text style={[styles.dateButtonText, !toDate && styles.datePlaceholder]}>
             {toDate ? formatDate(toDate) : labels.to}
           </Text>
@@ -199,12 +216,16 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
           <Text style={styles.chartHeading} numberOfLines={1}>
             {labels.conversionRate}
           </Text>
-          <Text style={styles.peakText}>{`Peak: ${headerMetrics.peakTime} - ${headerMetrics.peakRate}%`}</Text>
+          <Text style={styles.peakText}>
+            {`Peak: ${headerMetrics.peakTime} - ${headerMetrics.peakRate}%`}
+          </Text>
         </View>
 
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: Colors.chartOrange }]} />
+            <View
+              style={[styles.legendDot, { backgroundColor: Colors.chartOrange }]}
+            />
             <Text style={styles.legendLabel}>{labels.footfall}</Text>
           </View>
           <View style={styles.legendItem}>
@@ -214,72 +235,87 @@ const StaffConversionChartCard = ({ labels, fromDate, toDate, formatDate, onPres
         </View>
 
         <View style={styles.chartBody}>
-          {isPointerActive && activeTooltipData && activeTooltipPositionStyle ? (
-            <View style={[styles.externalTooltipCard, activeTooltipPositionStyle]} pointerEvents="none">
-              <View style={styles.tooltipTopRow}>
-                <Text style={styles.tooltipTime}>{activeTooltipTime}</Text>
-                <Text style={styles.tooltipRate}>{`${activeTooltipData.rate}%`}</Text>
-              </View>
-              <Text style={styles.tooltipValue}>
-                {labels.footfall}: {activeTooltipData.footfall}
-              </Text>
-              <Text style={styles.tooltipValue}>
-                {labels.invoices}: {activeTooltipData.invoices}
-              </Text>
-            </View>
-          ) : null}
+          {isLoading ? (
+            <ActivityIndicator
+              size="large"
+              color={Colors.teal}
+              style={styles.loader}
+            />
+          ) : !hasChartData ? (
+            <Text style={styles.emptyText}>No chart data for selected dates.</Text>
+          ) : (
+            <>
+              {isPointerActive && activeTooltipData && activeTooltipPositionStyle ? (
+                <View
+                  style={[styles.externalTooltipCard, activeTooltipPositionStyle]}
+                  pointerEvents="none">
+                  <View style={styles.tooltipTopRow}>
+                    <Text style={styles.tooltipTime}>{activeTooltipTime}</Text>
+                    <Text style={styles.tooltipRate}>{`${activeTooltipData.rate}%`}</Text>
+                  </View>
+                  <Text style={styles.tooltipValue}>
+                    {`${labels.footfall}: ${formatChartMetric(activeTooltipData.footfall)}`}
+                  </Text>
+                  <Text style={styles.tooltipValue}>
+                    {`${labels.invoices}: ${formatChartMetric(activeTooltipData.invoices)}`}
+                  </Text>
+                </View>
+              ) : null}
 
-          <LineChart
-            areaChart
-            curved
-            isAnimated
-            animationDuration={700}
-            width={chartWidth}
-            height={chartHeight}
-            data={chartData}
-            data2={chartData2}
-            color1={Colors.chartOrange}
-            color2={Colors.green}
-            thickness1={2.5}
-            thickness2={2.5}
-            startFillColor1={Colors.chartOrange}
-            endFillColor1={Colors.chartOrange}
-            startFillColor2={Colors.green}
-            endFillColor2={Colors.green}
-            startOpacity1={0.18}
-            endOpacity1={0.04}
-            startOpacity2={0.14}
-            endOpacity2={0.02}
-            noOfSections={4}
-            maxValue={chartMaxValue}
-            rulesColor={Colors.lightPeriwinkle}
-            rulesType="dashed"
-            yAxisColor={Colors.surfaceBorder}
-            xAxisColor={Colors.surfaceBorder}
-            yAxisTextStyle={styles.yAxisText}
-            xAxisLabelTextStyle={styles.axisText}
-            yAxisLabelWidth={wp(7)}
-            spacing={chartWidth / (chartData.length - 1)}
-            initialSpacing={wp(3.2)}
-            endSpacing={wp(4.2)}
-            disableScroll
-            adjustToWidth
-            hideDataPoints
-            getPointerProps={syncHeaderWithPointer}
-            pointerConfig={{
-              pointerStripHeight: chartHeight,
-              pointerStripColor: Colors.coolGrey,
-              pointerStripWidth: 1,
-              pointerColor: Colors.graphite,
-              radius: 4,
-              activatePointersOnLongPress: true,
-              autoAdjustPointerLabelPosition: false,
-              onTouchEnd: resetHeaderToPeak,
-              onTouchStart: activatePointerSync,
-              onResponderMove: activatePointerSync,
-              onResponderGrant: activatePointerSync,
-            }}
-          />
+              <LineChart
+                areaChart
+                curved
+                isAnimated
+                animationDuration={700}
+                width={chartWidth}
+                height={chartHeight}
+                data={chartDataWithLabels}
+                data2={chartData2}
+                color1={Colors.chartOrange}
+                color2={Colors.green}
+                thickness1={2.5}
+                thickness2={2.5}
+                startFillColor1={Colors.chartOrange}
+                endFillColor1={Colors.chartOrange}
+                startFillColor2={Colors.green}
+                endFillColor2={Colors.green}
+                startOpacity1={0.18}
+                endOpacity1={0.04}
+                startOpacity2={0.14}
+                endOpacity2={0.02}
+                noOfSections={chartSections}
+                maxValue={chartMaxValue}
+                formatYLabel={formatChartMetric}
+                rulesColor={Colors.lightPeriwinkle}
+                rulesType="dashed"
+                yAxisColor="transparent"
+                xAxisColor={Colors.surfaceBorder}
+                yAxisTextStyle={styles.yAxisText}
+                xAxisLabelTextStyle={styles.axisText}
+                yAxisLabelWidth={wp(7)}
+                spacing={chartSpacing}
+                initialSpacing={wp(3.2)}
+                endSpacing={wp(4.2)}
+                disableScroll
+                adjustToWidth
+                hideDataPoints
+                getPointerProps={syncHeaderWithPointer}
+                pointerConfig={{
+                  pointerStripHeight: chartHeight,
+                  pointerStripColor: Colors.white,
+                  pointerStripWidth: 1,
+                  pointerColor: Colors.white,
+                  radius: 4,
+                  activatePointersOnLongPress: true,
+                  autoAdjustPointerLabelPosition: false,
+                  onTouchEnd: resetHeaderToPeak,
+                  onTouchStart: activatePointerSync,
+                  onResponderMove: activatePointerSync,
+                  onResponderGrant: activatePointerSync,
+                }}
+              />
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -388,6 +424,16 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     position: 'relative',
   },
+  loader: {
+    marginVertical: hp(4),
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontFamily: Fonts.poppinsMedium,
+    fontSize: Fontsize.xs2,
+    color: Colors.coolGrey,
+    marginVertical: hp(4),
+  },
   axisLabelContainer: {
     width: wp(12),
     alignItems: 'center',
@@ -400,7 +446,7 @@ const styles = StyleSheet.create({
   yAxisText: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: wp(2.35),
-    color: Colors.graphite,
+    color: Colors.coolGrey,
   },
   firstXAxisLabel: {
     marginLeft: wp(4.2),
@@ -408,7 +454,7 @@ const styles = StyleSheet.create({
   },
   lastXAxisLabel: {
     alignItems: 'flex-start',
-    marginLeft:wp(-4.7),
+    marginLeft: wp(-4.7),
   },
   externalTooltipCard: {
     backgroundColor: Colors.graphite,

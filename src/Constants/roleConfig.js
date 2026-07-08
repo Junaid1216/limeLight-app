@@ -86,6 +86,23 @@ export const normalizeAuthUser = (data) => {
   return data;
 };
 
+export const getOutletIdFromUser = userData => {
+  const user = normalizeAuthUser(userData);
+
+  if (!user) {
+    return '';
+  }
+
+  return (
+    user.shop_id ??
+    user.outlet_id ??
+    user.outletId ??
+    user.shop_code ??
+    user.branch_code ??
+    ''
+  );
+};
+
 export const mapProfileData = (apiData = {}, role) => {
   const fallback = getProfileInfo(role);
   const roleLabel =
@@ -108,6 +125,16 @@ export const mapProfileData = (apiData = {}, role) => {
       apiData.profile_image ??
       apiData.image ??
       apiData.avatar ??
+      null,
+    shop_id:
+      apiData.shop_id ??
+      apiData.outlet_id ??
+      apiData.shop_code ??
+      null,
+    outlet_id:
+      apiData.outlet_id ??
+      apiData.shop_id ??
+      apiData.shop_code ??
       null,
   };
 };

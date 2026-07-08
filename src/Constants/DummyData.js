@@ -318,27 +318,27 @@ export const staffComparisonRankData = [
 ];
 
 export const staffComparisonFootfallData = [
-  { value: 8, label: '10:00' },
-  { value: 20, label: '' },
-  { value: 52, label: '02:00' },
-  { value: 88, label: '' },
-  { value: 65, label: '06:00' },
-  { value: 58, label: '' },
-  { value: 70, label: '10:00' },
-  { value: 95, label: '' },
-  { value: 140, label: '12:00' },
+  { value: 1000, label: '10:00' },
+  { value: 4000, label: '' },
+  { value: 1800, label: '02:00' },
+  { value: 2800, label: '' },
+  { value: 2000, label: '06:00' },
+  { value: 2200, label: '' },
+  { value: 1200, label: '10:00' },
+  { value: 3000, label: '' },
+  { value: 2000, label: '12:00' },
 ];
 
 export const staffComparisonInvoiceData = [
-  { value: 2 },
-  { value: 6 },
-  { value: 18 },
-  { value: 32 },
-  { value: 22 },
-  { value: 30 },
-  { value: 12 },
-  { value: 20 },
-  { value: 42 },
+  { value: 200 },
+  { value: 1400 },
+  { value: 500 },
+  { value: 1000 },
+  { value: 1160 },
+  { value: 1000 },
+  { value: 300 },
+  { value: 1100 },
+  { value: 900 },
 ];
 
 export const surveyReportBranchOptions = [
