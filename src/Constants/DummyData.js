@@ -86,6 +86,7 @@ export const targetVsAchievementData = [
 ];
 
 export const garmentsTarget = {
+  id: 'garments',
   categoryName: Strings.garments,
   achieved: targetVsAchievementData[0].achieved,
   remaining: targetVsAchievementData[0].remaining,
@@ -95,6 +96,7 @@ export const garmentsTarget = {
 };
 
 export const unstitchedTarget = {
+  id: 'unstitched',
   categoryName: Strings.unstitched,
   achieved: targetVsAchievementData[1].achieved,
   remaining: targetVsAchievementData[1].remaining,
@@ -102,6 +104,7 @@ export const unstitchedTarget = {
 };
 
 export const accessoriesTarget = {
+  id: 'accessories',
   categoryName: Strings.accessories,
   achieved: targetVsAchievementData[2].achieved,
   remaining: targetVsAchievementData[2].remaining,

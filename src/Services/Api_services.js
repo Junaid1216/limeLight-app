@@ -50,6 +50,37 @@ const requests = {
   delete: url => axios.delete(`${Config.baseURL}${url}`),
 };
 
+const getWithFallback = async (endpoints, label = 'API') => {
+  let lastError;
+
+  for (let index = 0; index < endpoints.length; index += 1) {
+    const endpoint = endpoints[index];
+
+    try {
+      const response = await requests.get(endpoint);
+
+      if (index > 0) {
+        console.log(`${label} fallback used: ${endpoint}`);
+      }
+
+      return response;
+    } catch (error) {
+      lastError = error;
+      const status = error?.response?.status;
+      const hasFallback = index < endpoints.length - 1;
+
+      if (status === 404 && hasFallback) {
+        console.log(`${label} ${endpoint} returned 404, trying fallback`);
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  throw lastError;
+};
+
 const Api = {
   login: data => requests.post('login', data),
   logout: () => requests.delete('logout'),
@@ -64,6 +95,18 @@ const Api = {
   asmFeedback: data => requests.post('asm-feedback', data),
   getSurveyQuestions: role => requests.get(`survey-questions/${role}`),
   getTrainingVideos: role => requests.get(`training-videos?role=${role}`),
+  getCategoryBreakdown: () => requests.get('category-breakdown'),
+  getDashboard: () => requests.get('dashboard'),
+  getSlipBoundIncentive: () => requests.get('slip-bound-incentive'),
+  getConversionRate: (from, to) =>
+    requests.get(`conversion-rate?from=${from}&to=${to}`),
+  getBranchManagerCommission: () =>
+    getWithFallback(
+      ['branch-manager-commission', 'category-breakdown'],
+      'Branch Manager Commission',
+    ),
+  getBranchManagerCategoryPerformance: () =>
+    requests.get('branch-manager-category-performance'),
 };
 
 export default Api;

@@ -14,7 +14,7 @@ const getPreviousDate = (daysBefore = 1) => {
 
 export const useDateRangePicker = () => {
   const [fromDate, setFromDate] = useState(() => getPreviousDate());
-  const [toDate, setToDate] = useState(null);
+  const [toDate, setToDate] = useState(() => getToday());
   const [activeField, setActiveField] = useState(null);
 
   const today = useMemo(getToday, []);

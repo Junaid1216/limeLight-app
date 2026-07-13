@@ -113,7 +113,7 @@ const SalesStaffDrawerContent = ({ navigation }) => {
         <MenuItem
           iconName="bar-chart-2"
           label={Strings.staffComparison}
-          onPress={() => goToAppScreen('BranchStaffComparison')}
+          onPress={() => goToAppScreen('StaffComparison')}
         />
         <MenuItem
           iconName="headphones"

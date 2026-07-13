@@ -112,6 +112,7 @@ export const Strings = {
   commissionStat: 'Commission',
   categoryBreakdown: 'Category Breakdown',
   categoryBreakdownSub: 'Targets, achievements and commission contribution',
+  myCommission: 'My Commission',
   tableCategory: 'Category',
   tableTarget: 'Target',
   tableAchieved: 'Achieved',

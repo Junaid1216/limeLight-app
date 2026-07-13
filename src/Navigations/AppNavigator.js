@@ -4,6 +4,7 @@ import DrawerNavigator from './DrawerNavigator';
 import TargetAssignment from '../Screens/AppFlow/TargetAssignment';
 import BranchTargets from '../Screens/AppFlow/BranchTargets';
 import BranchStaffComparison from '../Screens/AppFlow/BranchStaffComparison';
+import StaffComparison from '../Screens/Manager/StaffComparison';
 import ChangePassword from '../Screens/CommonScreens/ChangePassword';
 import SurveyProgress from '../Screens/CommonScreens/SurveyProgress';
 import Announcement from '../Screens/CommonScreens/Announcement';
@@ -33,6 +34,7 @@ const AppNavigator = () => {
         name="BranchStaffComparison"
         component={BranchStaffComparison}
       />
+      <APP_STACK.Screen name="StaffComparison" component={StaffComparison} />
       <APP_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
     </APP_STACK.Navigator>
   );

@@ -26,9 +26,9 @@ const StatItem = ({ label, value, alignRight = false }) => (
   </View>
 );
 
-const ManagerLiveStatusCard = () => {
-  const data = managerPerformanceSummary;
-  const progress = Math.min(1, Math.max(0, data.achievedPercent / 100));
+const ManagerLiveStatusCard = ({ data }) => {
+  const summary = data ?? managerPerformanceSummary;
+  const progress = Math.min(1, Math.max(0, summary.achievedPercent / 100));
 
   return (
     <View style={styles.card}>
@@ -48,16 +48,16 @@ const ManagerLiveStatusCard = () => {
 
       <View style={styles.statsGrid}>
         <View style={styles.statsRow}>
-          <StatItem label={Strings.branchMonthlyTarget} value={data.branchMonthlyTarget} />
+          <StatItem label={Strings.branchMonthlyTarget} value={summary.branchMonthlyTarget} />
           <StatItem
             label={Strings.achievedLabel}
-            value={data.achieved}
+            value={summary.achieved}
             alignRight
           />
         </View>
         <View style={styles.statsRow}>
-          <StatItem label={Strings.remainingLabel} value={data.remaining} />
-          <StatItem label={Strings.commission} value={data.commission} alignRight />
+          <StatItem label={Strings.remainingLabel} value={summary.remaining} />
+          <StatItem label={Strings.commission} value={summary.commission} alignRight />
         </View>
       </View>
 
@@ -83,7 +83,7 @@ const ManagerLiveStatusCard = () => {
             adjustsFontSizeToFit
             minimumFontScale={0.75}
           >
-            {data.achievedPercent}
+            {summary.achievedPercent}
             {Strings.percentAchieved}
           </Text>
           <Text
@@ -92,7 +92,7 @@ const ManagerLiveStatusCard = () => {
             adjustsFontSizeToFit
             minimumFontScale={0.75}
           >
-            {data.remainingPercent}
+            {summary.remainingPercent}
             {Strings.percentRemaining}
           </Text>
         </View>

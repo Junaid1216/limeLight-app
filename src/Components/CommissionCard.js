@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { commissionData } from '../Constants/DummyData';
@@ -27,8 +27,8 @@ const StatBox = props => (
   </View>
 );
 
-const CommissionCard = () => {
-  const { target, sale, commission, achieved, remaining } = commissionData;
+const CommissionCard = ({ data = commissionData, isLoading }) => {
+  const { target, sale, commission, achieved, remaining } = data;
   const fill = achieved / 100;
   const empty = remaining / 100;
 
@@ -41,58 +41,66 @@ const CommissionCard = () => {
         {Strings.commissionSub}
       </Text>
 
-      <View style={styles.statsRow}>
-        <StatBox
-          label={Strings.targetStat}
-          value={target}
-          backgroundColor={Colors.mintCream}
-          borderColor={Colors.green}
-        />
-        <StatBox
-          label={Strings.saleStat}
-          value={sale}
-          backgroundColor={Colors.aliceBlue}
-          borderColor={Colors.cerulean}
-        />
-        <StatBox
-          label={Strings.commissionStat}
-          value={commission}
-          backgroundColor={Colors.cornsilk}
-          borderColor={Colors.pumpkin}
-        />
-      </View>
-
-      <View style={styles.combinedBar}>
-        <View style={styles.barRow}>
-          <View
-            style={[
-              styles.achievedSegment,
-              { flex: fill, backgroundColor: Colors.emerald },
-            ]}
-          >
-            <Text
-              style={[styles.barText, styles.barTextLeft]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}
-            >
-              {achieved}
-              {Strings.percentAchieved}
-            </Text>
-          </View>
-          <View style={[styles.remainingSegment, { flex: empty }]}>
-            <Text
-              style={[styles.barText, styles.barTextRight]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.75}
-            >
-              {remaining}
-              {Strings.percentRemaining}
-            </Text>
-          </View>
+      {isLoading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator color={Colors.darkNavy} size="small" />
         </View>
-      </View>
+      ) : (
+        <>
+          <View style={styles.statsRow}>
+            <StatBox
+              label={Strings.targetStat}
+              value={target}
+              backgroundColor={Colors.mintCream}
+              borderColor={Colors.green}
+            />
+            <StatBox
+              label={Strings.saleStat}
+              value={sale}
+              backgroundColor={Colors.aliceBlue}
+              borderColor={Colors.cerulean}
+            />
+            <StatBox
+              label={Strings.commissionStat}
+              value={commission}
+              backgroundColor={Colors.cornsilk}
+              borderColor={Colors.pumpkin}
+            />
+          </View>
+
+          <View style={styles.combinedBar}>
+            <View style={styles.barRow}>
+              <View
+                style={[
+                  styles.achievedSegment,
+                  { flex: fill, backgroundColor: Colors.emerald },
+                ]}
+              >
+                <Text
+                  style={[styles.barText, styles.barTextLeft]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                >
+                  {achieved}
+                  {Strings.percentAchieved}
+                </Text>
+              </View>
+              <View style={[styles.remainingSegment, { flex: empty }]}>
+                <Text
+                  style={[styles.barText, styles.barTextRight]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                >
+                  {remaining}
+                  {Strings.percentRemaining}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </>
+      )}
     </View>
   );
 };
@@ -117,6 +125,11 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.xs0,
     color: Colors.steelGray,
     marginBottom: hp(2),
+  },
+  loaderContainer: {
+    paddingVertical: hp(2),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statsRow: {
     flexDirection: 'row',

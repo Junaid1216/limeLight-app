@@ -1,62 +1,71 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
-const NARROW_BAR_THRESHOLD = 0.55;
+const TRACK_HEIGHT = hp(4);
+const THUMB_SIZE = hp(4.2);
+const THUMB_RADIUS = THUMB_SIZE / 2;
+const REMAINING_WIDTH = wp(24);
 
-const resolvePadding = (custom, progress, defaultValue) => {
-  const value = custom ?? defaultValue;
-  if (progress < NARROW_BAR_THRESHOLD) {
-    return Math.min(value, wp(3));
-  }
-  return value;
+const metricTextStyle = {
+  fontFamily: Fonts.poppinsMedium,
+  fontSize: Fontsize.xxs0,
+  textAlign: 'center',
+  includeFontPadding: false,
 };
 
 const LabeledProgressBar = props => {
+  const [progressWidth, setProgressWidth] = useState(0);
   const fill = Math.min(1, Math.max(0, props.progress ?? 0));
-  const paddingLeft = resolvePadding(
-    props.fillPaddingLeft,
-    fill,
-    wp(4.5),
-  );
-  const paddingRight = resolvePadding(
-    props.fillPaddingRight,
-    fill,
-    wp(2.5),
-  );
+  const percent = Math.round(props.achieved ?? fill * 100);
+  const usableWidth = Math.max(progressWidth - THUMB_SIZE, 0);
+  const thumbLeft = usableWidth * fill;
+  const fillWidth = thumbLeft + THUMB_RADIUS;
 
   return (
-    <View style={[styles.track, { backgroundColor: props.unfilledColor }]}>
+    <View style={styles.wrapper}>
       <View
         style={[
-          styles.fill,
-          {
-            width: `${fill * 100}%`,
-            backgroundColor: props.color,
-            paddingLeft,
-            paddingRight,
-          },
+          styles.track,
+          { backgroundColor: props.unfilledColor ?? Colors.darkNavy },
         ]}>
-        <Text
-          style={styles.fillText}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.6}>
-          {props.achievedText}
-        </Text>
-      </View>
+        <View
+          style={styles.progressLane}
+          onLayout={event =>
+            setProgressWidth(event.nativeEvent.layout.width)
+          }>
+          <View
+            style={[
+              styles.fill,
+              {
+                width: fillWidth,
+                backgroundColor: props.color,
+              },
+            ]}
+          />
 
-      <View style={styles.remainingWrap} pointerEvents="none">
-        <Text
-          style={[styles.remaining, { color: props.remainingTextColor }]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.8}>
-          {props.remainingText}
-        </Text>
+          <View style={[styles.thumbWrap, { left: thumbLeft }]}>
+            <View style={[styles.thumb, { borderColor: props.color }]}>
+              <Text style={[styles.thumbText, { color: props.color }]}>
+                {percent}%
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.remainingBox}>
+          <Text
+            style={[
+              styles.remainingText,
+              { color: props.remainingTextColor ?? Colors.white },
+            ]}
+            numberOfLines={1}>
+            {props.remainingText}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -65,37 +74,66 @@ const LabeledProgressBar = props => {
 export default LabeledProgressBar;
 
 const styles = StyleSheet.create({
-  track: {
+  wrapper: {
     alignSelf: 'stretch',
-    height: hp(3.8),
-    borderRadius: hp(1.9),
-    overflow: 'hidden',
-    justifyContent: 'center',
+    paddingVertical: hp(0.5),
+  },
+  track: {
+    height: TRACK_HEIGHT,
+    borderRadius: hp(2),
+    overflow: 'visible',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: wp(0.3),
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  progressLane: {
+    flex: 1,
+    height: TRACK_HEIGHT,
+    position: 'relative',
+    overflow: 'visible',
   },
   fill: {
-    minWidth: 0,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingVertical: hp(0.55),
-    borderRadius: hp(1.9),
-  },
-  fillText: {
-    flex: 1,
-    fontFamily: Fonts.poppinsMedium,
-    fontSize: Fontsize.xxs0,
-    color: Colors.white,
-  },
-  remainingWrap: {
     position: 'absolute',
-    right: wp(4),
+    left: 0,
     top: 0,
     bottom: 0,
-    justifyContent: 'center',
+    borderTopLeftRadius: hp(2),
+    borderBottomLeftRadius: hp(2),
+    minWidth: THUMB_RADIUS,
   },
-  remaining: {
-    fontFamily: Fonts.poppinsRegular,
-    fontSize: Fontsize.xxs0,
-    textAlign: 'right',
+  thumbWrap: {
+    position: 'absolute',
+    top: (TRACK_HEIGHT - THUMB_SIZE) / 2,
+    zIndex: 2,
+  },
+  thumb: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    borderRadius: THUMB_RADIUS,
+    backgroundColor: Colors.white,
+    borderWidth: wp(0.55),
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(0.6),
+    elevation: 5,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: hp(0.3) },
+    shadowOpacity: 0.2,
+    shadowRadius: wp(1.2),
+  },
+  thumbText: {
+    ...metricTextStyle,
+    fontFamily: Fonts.poppinsBold,
+  },
+  remainingBox: {
+    width: REMAINING_WIDTH,
+    height: TRACK_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: wp(1),
+  },
+  remainingText: {
+    ...metricTextStyle,
   },
 });

@@ -2,6 +2,7 @@ const APP_STACK_ROUTE_NAMES = new Set([
   'TargetAssignment',
   'BranchTargets',
   'BranchStaffComparison',
+  'StaffComparison',
   'Announcement',
   'AnnouncementDetail',
   'Profile',

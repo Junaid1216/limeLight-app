@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import LabeledProgressBar from './LabeledProgressBar';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
@@ -12,6 +12,8 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
+const defaultTargetData = [garmentsTarget, unstitchedTarget, accessoriesTarget];
+
 const ProgressRow = props => {
   const remaining = props.remaining ?? 100 - props.achieved;
 
@@ -22,11 +24,9 @@ const ProgressRow = props => {
       </Text>
       <LabeledProgressBar
         progress={props.achieved / 100}
+        achieved={props.achieved}
         color={props.barColor}
         unfilledColor={Colors.darkNavy}
-        fillPaddingLeft={props.fillPaddingLeft}
-        fillPaddingRight={props.fillPaddingRight}
-        achievedText={props.achieved + Strings.percentAchieved}
         remainingText={remaining + Strings.percentRemaining}
         remainingTextColor={Colors.white}
       />
@@ -34,24 +34,31 @@ const ProgressRow = props => {
   );
 };
 
-const TargetVsAchievementCard = () => {
-  return (
-    <View style={styles.card}>
-      <Text style={styles.title} numberOfLines={1}>
-        {Strings.targetVsAchievement}
-      </Text>
-      <Text style={styles.subtitle} numberOfLines={1}>
-        {Strings.targetVsAchievementSub}
-      </Text>
+const TargetVsAchievementCard = ({ items = defaultTargetData, isLoading }) => (
+  <View style={styles.card}>
+    <Text style={styles.title} numberOfLines={1}>
+      {Strings.targetVsAchievement}
+    </Text>
+    <Text style={styles.subtitle} numberOfLines={1}>
+      {Strings.targetVsAchievementSub}
+    </Text>
 
-      <View style={styles.progressList}>
-        <ProgressRow {...garmentsTarget} />
-        <ProgressRow {...unstitchedTarget} />
-        <ProgressRow {...accessoriesTarget} />
+    {isLoading ? (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator color={Colors.white} size="small" />
       </View>
-    </View>
-  );
-};
+    ) : (
+      <View style={styles.progressList}>
+        {items.map((item, index) => (
+          <ProgressRow
+            key={item.id ?? item.categoryName ?? String(index)}
+            {...item}
+          />
+        ))}
+      </View>
+    )}
+  </View>
+);
 
 const styles = StyleSheet.create({
   card: {
@@ -75,6 +82,11 @@ const styles = StyleSheet.create({
     marginBottom: hp(2),
     color: Colors.blueGrey,
     fontSize: Fontsize.xs1,
+  },
+  loaderContainer: {
+    paddingVertical: hp(2),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   progressList: {
     gap: hp(2.5),

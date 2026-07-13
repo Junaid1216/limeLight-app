@@ -1,11 +1,32 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
+import { categoryColorMap } from '../Constants/CategoryColors';
 import { categoryBreakdownData } from '../Constants/DummyData';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
+import Api from '../Services/Api_services';
+
+const getCategoryDotColor = categoryName => {
+  const key = categoryName?.toLowerCase?.();
+  return categoryColorMap[key] || Colors.blueGrey;
+};
+
+const formatCommission = value => `Rs ${value}`;
+
+const mapCategoryBreakdown = items =>
+  (items ?? []).map((item, index) => ({
+    id: item?.category ?? String(index + 1),
+    categoryName: item?.category ?? '',
+    target: String(item?.target ?? 0),
+    achieved: String(item?.achieved ?? 0),
+    commission: formatCommission(item?.commission ?? 0),
+    dotColor: getCategoryDotColor(item?.category),
+  }));
 
 const RowDivider = () => <View style={styles.rowDivider} />;
 
@@ -44,50 +65,111 @@ const TableRow = ({ item }) => (
   </View>
 );
 
-const CategoryBreakdownCard = () => (
-  <View style={styles.section}>
-    <Text style={styles.sectionTitle} numberOfLines={1}>
-      {Strings.categoryBreakdown}
-    </Text>
-    <Text style={styles.sectionSub} numberOfLines={2}>
-      {Strings.categoryBreakdownSub}
-    </Text>
+const CategoryBreakdownCard = ({
+  items,
+  isLoading: externalLoading,
+  fetchEnabled = true,
+  title = Strings.categoryBreakdown,
+  subtitle = Strings.categoryBreakdownSub,
+}) => {
+  const [breakdownData, setBreakdownData] = useState(categoryBreakdownData);
+  const [isLoading, setIsLoading] = useState(false);
 
-    <View style={styles.card}>
-      <View style={styles.tableHeader}>
-        <View style={styles.colCategory}>
-          <Text
-            style={[styles.headerText, styles.headerTextLeft]}
-            numberOfLines={1}>
-            {Strings.tableCategory}
-          </Text>
+  const displayData = items?.length ? items : breakdownData;
+  const showLoading = externalLoading ?? (fetchEnabled && isLoading);
+
+  const fetchCategoryBreakdown = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const res = await Api.getCategoryBreakdown();
+
+      if (res?.status == 200) {
+        console.log(
+          'Category Breakdown Success:',
+          JSON.stringify(res?.data, null, 2),
+        );
+        Toast.show(res?.data?.message, Toast.LONG);
+        setBreakdownData(mapCategoryBreakdown(res?.data?.data));
+      } else {
+        Toast.show(res?.data?.message, Toast.LONG);
+      }
+    } catch (error) {
+      console.log(
+        'Category Breakdown API Error:',
+        error?.response?.data || error,
+      );
+      Toast.show(
+        error?.response?.data?.message || 'Failed to load category breakdown',
+        Toast.LONG,
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (fetchEnabled) {
+        fetchCategoryBreakdown();
+      }
+    }, [fetchCategoryBreakdown, fetchEnabled]),
+  );
+
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle} numberOfLines={1}>
+        {title}
+      </Text>
+      <Text style={styles.sectionSub} numberOfLines={2}>
+        {subtitle}
+      </Text>
+
+      <View style={styles.card}>
+        <View style={styles.tableHeader}>
+          <View style={styles.colCategory}>
+            <Text
+              style={[styles.headerText, styles.headerTextLeft]}
+              numberOfLines={1}>
+              {Strings.tableCategory}
+            </Text>
+          </View>
+          <View style={styles.colNumeric}>
+            <Text style={styles.headerText} numberOfLines={1}>
+              {Strings.tableTarget}
+            </Text>
+          </View>
+          <View style={styles.colNumeric}>
+            <Text style={styles.headerText} numberOfLines={1}>
+              {Strings.tableAchieved}
+            </Text>
+          </View>
+          <View style={styles.colCommission}>
+            <Text style={styles.headerText} numberOfLines={1}>
+              {Strings.tableCommission}
+            </Text>
+          </View>
         </View>
-        <View style={styles.colNumeric}>
-          <Text style={styles.headerText} numberOfLines={1}>
-            {Strings.tableTarget}
-          </Text>
-        </View>
-        <View style={styles.colNumeric}>
-          <Text style={styles.headerText} numberOfLines={1}>
-            {Strings.tableAchieved}
-          </Text>
-        </View>
-        <View style={styles.colCommission}>
-          <Text style={styles.headerText} numberOfLines={1}>
-            {Strings.tableCommission}
-          </Text>
-        </View>
+
+        {showLoading ? (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator color={Colors.darkNavy} size="small" />
+          </View>
+        ) : (
+          <>
+            <RowDivider />
+            {displayData.map((item, index) => (
+              <React.Fragment key={item.id ?? item.categoryName ?? index}>
+                {index > 0 && <RowDivider />}
+                <TableRow item={item} />
+              </React.Fragment>
+            ))}
+          </>
+        )}
       </View>
-
-      <RowDivider />
-      <TableRow item={categoryBreakdownData[0]} />
-      <RowDivider />
-      <TableRow item={categoryBreakdownData[1]} />
-      <RowDivider />
-      <TableRow item={categoryBreakdownData[2]} />
     </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   section: {
@@ -112,9 +194,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: wp(3),
     borderWidth: wp(0.18),
-     borderColor: Colors.silver,
+    borderColor: Colors.silver,
     overflow: 'hidden',
     paddingBottom: hp(1.3),
+  },
+  loaderContainer: {
+    paddingVertical: hp(3),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tableHeader: {
     flexDirection: 'row',
@@ -187,7 +274,7 @@ const styles = StyleSheet.create({
   },
   cellText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize:Fontsize.xs0,
+    fontSize: Fontsize.xs0,
     color: Colors.deepSlate,
     textAlign: 'center',
     width: wp(55),

@@ -55,6 +55,14 @@ const getSummaryFootfall = item =>
 const getSummaryInvoices = item =>
   item?.total_items ?? item?.items ?? item?.invoices ?? 0;
 
+const getSummaryRate = item => {
+  if (item?.conversion_rate == null) {
+    return null;
+  }
+
+  return toNumber(item.conversion_rate);
+};
+
 const formatDay = day => {
   const date = new Date(day);
   return Number.isNaN(date.getTime())
@@ -95,22 +103,53 @@ const getSparseLabelIndices = length => {
   }
 };
 
+const toLocalDate = value => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    const date = new Date(value);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  const datePart = String(value).split('T')[0];
+  const [year, month, day] = datePart.split('-').map(Number);
+
+  if (year && month && day) {
+    return new Date(year, month - 1, day);
+  }
+
+  const parsed = new Date(value);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
+};
+
 const isInDateRange = (day, fromDate, toDate) => {
-  const itemDate = new Date(day);
-  itemDate.setHours(0, 0, 0, 0);
+  const itemDate = toLocalDate(day);
+
+  if (!itemDate) {
+    return false;
+  }
 
   if (fromDate) {
-    const from = new Date(fromDate);
-    from.setHours(0, 0, 0, 0);
-    if (itemDate < from) {
+    const from = toLocalDate(fromDate);
+
+    if (from && itemDate < from) {
       return false;
     }
   }
 
   if (toDate) {
-    const to = new Date(toDate);
-    to.setHours(0, 0, 0, 0);
-    if (itemDate > to) {
+    const to = toLocalDate(toDate);
+
+    if (to && itemDate > to) {
       return false;
     }
   }
@@ -150,14 +189,31 @@ const buildEmptyChartData = () => ({
   chartSections: DEFAULT_CHART_SECTIONS,
 });
 
+const normalizeTransactionSummary = summary => {
+  if (summary == null) {
+    return null;
+  }
+
+  if (Array.isArray(summary)) {
+    return summary;
+  }
+
+  if (Array.isArray(summary?.data)) {
+    return summary.data;
+  }
+
+  return [];
+};
+
 const buildApiChartData = list => {
   const labelIndices = new Set(getSparseLabelIndices(list.length));
 
   const chartData = list.map((item, index) => {
-    const footfall = toNumber(item?.total_transactions);
-    const invoices = Math.round(toNumber(item?.total_items));
-    const day = formatDay(item?.day);
+    const footfall = toNumber(getSummaryFootfall(item));
+    const invoices = Math.round(toNumber(getSummaryInvoices(item)));
+    const day = formatDay(getSummaryDay(item));
     const label = labelIndices.has(index) ? day : '';
+    const apiRate = getSummaryRate(item);
 
     return {
       value: footfall,
@@ -165,14 +221,19 @@ const buildApiChartData = list => {
       customData: {
         footfall,
         invoices,
-        rate: footfall > 0 ? Math.round((invoices / footfall) * 100) : 0,
+        rate:
+          apiRate != null
+            ? Math.round(apiRate)
+            : footfall > 0
+              ? Math.round((invoices / footfall) * 100)
+              : 0,
         day,
       },
     };
   });
 
   const chartData2 = list.map(item => ({
-    value: Math.round(toNumber(item?.total_items)),
+    value: Math.round(toNumber(getSummaryInvoices(item))),
   }));
 
   const maxValue = Math.max(
@@ -191,19 +252,32 @@ const buildApiChartData = list => {
   };
 };
 
-export const buildOutletChartData = (transactionSummary, fromDate, toDate) => {
-  if (transactionSummary == null) {
+export const buildOutletChartData = (
+  transactionSummary,
+  fromDate,
+  toDate,
+  options = {},
+) => {
+  const normalizedSummary = normalizeTransactionSummary(transactionSummary);
+  const skipDateFilter = options?.skipDateFilter ?? normalizedSummary != null;
+
+  if (normalizedSummary == null) {
     return buildDummyChartData();
   }
 
-  const list = (transactionSummary || [])
+  const list = normalizedSummary
     .map(item => ({
       day: getSummaryDay(item),
       total_transactions: getSummaryFootfall(item),
       total_items: getSummaryInvoices(item),
+      conversion_rate: item?.conversion_rate,
     }))
-    .filter(item => item.day && isInDateRange(item.day, fromDate, toDate))
-    .sort((a, b) => new Date(a.day) - new Date(b.day));
+    .filter(
+      item =>
+        item.day &&
+        (skipDateFilter || isInDateRange(item.day, fromDate, toDate)),
+    )
+    .sort((a, b) => toLocalDate(a.day) - toLocalDate(b.day));
 
   if (!list.length) {
     return buildEmptyChartData();
