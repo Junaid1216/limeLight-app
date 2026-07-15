@@ -1,8 +1,16 @@
 import axios from 'axios';
+import Toast from 'react-native-simple-toast';
 import Config from './Config';
+import { getStaffDetailsEndpoint } from '../Utils/staffHelpers';
+import { getApiMessage } from '../Utils/apiHelpers';
 
 axios.defaults.headers.common['Cache-Control'] = 'no-cache';
 axios.defaults.headers.common.Accept = 'application/json';
+axios.defaults.timeout = 20000;
+
+if (__DEV__) {
+  console.log('API baseURL:', Config.baseURL);
+}
 
 let authToken = null;
 
@@ -34,6 +42,17 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   response => response,
   error => {
+    const requestUrl = String(error?.config?.url ?? '');
+    const isLoginRequest = requestUrl.includes('login');
+
+    if (!isLoginRequest) {
+      const message = getApiMessage(null, error);
+
+      if (message) {
+        Toast.show(message, Toast.LONG);
+      }
+    }
+
     if (error?.response?.status === 401) {
       setAuthToken(null);
     }
@@ -50,35 +69,25 @@ const requests = {
   delete: url => axios.delete(`${Config.baseURL}${url}`),
 };
 
-const getWithFallback = async (endpoints, label = 'API') => {
-  let lastError;
-
-  for (let index = 0; index < endpoints.length; index += 1) {
-    const endpoint = endpoints[index];
-
-    try {
-      const response = await requests.get(endpoint);
-
-      if (index > 0) {
-        console.log(`${label} fallback used: ${endpoint}`);
-      }
-
-      return response;
-    } catch (error) {
-      lastError = error;
-      const status = error?.response?.status;
-      const hasFallback = index < endpoints.length - 1;
-
-      if (status === 404 && hasFallback) {
-        console.log(`${label} ${endpoint} returned 404, trying fallback`);
-        continue;
-      }
-
-      throw error;
-    }
+export const isApiSuccess = response => {
+  if (!response) {
+    return false;
   }
 
-  throw lastError;
+  const httpStatus = response?.status;
+  const bodyStatus = response?.data?.status;
+
+  return httpStatus == 200 || bodyStatus == 200;
+};
+
+export const formatApiAppResponse = (response, data) => {
+  const resJson = response?.data;
+
+  return {
+    status: resJson?.status ?? response?.status,
+    message: resJson?.message,
+    data,
+  };
 };
 
 const Api = {
@@ -90,7 +99,6 @@ const Api = {
   resetPassword: data => requests.post('resetpassword', data),
   changePassword: data => requests.post('changepassword', data),
   getProfile: () => requests.get('getprofile'),
-  updateProfile: data => requests.post('updateprofile', data),
   staffFeedback: data => requests.post('staff-feedback', data),
   asmFeedback: data => requests.post('asm-feedback', data),
   getSurveyQuestions: role => requests.get(`survey-questions/${role}`),
@@ -100,13 +108,24 @@ const Api = {
   getSlipBoundIncentive: () => requests.get('slip-bound-incentive'),
   getConversionRate: (from, to) =>
     requests.get(`conversion-rate?from=${from}&to=${to}`),
-  getBranchManagerCommission: () =>
-    getWithFallback(
-      ['branch-manager-commission', 'category-breakdown'],
-      'Branch Manager Commission',
-    ),
+  getBranchManagerDashboard: () => requests.get('branch-manager-dashboard'),
+  getBranchManagerCommission: () => requests.get('branch-manager-commission'),
   getBranchManagerCategoryPerformance: () =>
     requests.get('branch-manager-category-performance'),
+  getBranchManagerStaffComparison: () =>
+    requests.get('branch-manager-staff-comparison'),
+  getBranchManagerBranchComparison: () =>
+    requests.get('branch-manager-branch-comparison'),
+  getAsmBranchComparison: () => requests.get('asm-branch-comparison'),
+  getAsmBranchConversion: type =>
+    requests.get(`asm-branch-conversion?type=${type}`),
+  getAsmRegionComparison: () => requests.get('asm-regions-comparisorn'),
+  getAsmRegionConversion: type =>
+    requests.get(`asm-region-comparison?type=${type}`),
+  getAsmStaffComparison: () => requests.get('asm-staff-comparison'),
+  getAsmBranchTargets: () => requests.get('asm-branch-targets'),
+  getStaffDetails: (id, role) =>
+    requests.get(getStaffDetailsEndpoint(id, role)),
 };
 
 export default Api;

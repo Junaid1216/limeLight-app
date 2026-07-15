@@ -1,19 +1,21 @@
-import { Platform } from 'react-native';
+// Beta server
+const USE_LOCAL_API = false;
 
-// Postman local: http://localhost/limelight-sales-perfomance/api/
-// Beta server: https://ranglerzbeta.in/limelight/api/
-const USE_LOCAL_API = true;
-
-const localApiHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 const betaApi = {
   baseURL: 'https://ranglerzbeta.in/limelight/api/',
   domain: 'https://ranglerzbeta.in/limelight/',
 };
+
 const localApi = {
-  baseURL: `http://${localApiHost}/limelight-sales-perfomance/api/`,
-  domain: `http://${localApiHost}/limelight-sales-perfomance/`,
+  baseURL: 'http://192.168.18.184/limelight-sales-performance/api/',
+  domain: 'http://192.168.18.184/limelight-sales-performance/',
 };
 
-const Config = USE_LOCAL_API ? localApi : betaApi;
+const activeApi = USE_LOCAL_API ? localApi : betaApi;
+
+const Config = {
+  baseURL: activeApi.baseURL,
+  domain: activeApi.domain,
+};
 
 export default Config;

@@ -189,6 +189,10 @@ export const Strings = {
   staffMembers: count => `${count} staff members`,
   categoryPerformance: 'Category Performance',
   staffDetailsHeader: 'Staff Details',
+  staffDetailSelectStaff:
+    'Please select a staff member from Staff Comparison to view details.',
+  staffDetailMissingId:
+    'Staff ID is missing. Backend should send staff_id in staff comparison API.',
   dhaBranch: 'DHA Branch',
   achievedLabel: 'Achieved',
   remainingLabel: 'Remaining',

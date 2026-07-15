@@ -10,6 +10,7 @@ import SurveyProgress from '../Screens/CommonScreens/SurveyProgress';
 import Announcement from '../Screens/CommonScreens/Announcement';
 import AnnouncementDetail from '../Screens/CommonScreens/AnnouncementDetail';
 import Profile from '../Screens/CommonScreens/Profile';
+import StaffDetail from '../Screens/CommonScreens/StaffDetail';
 import SurveyResponse from '../Screens/CommonScreens/SurveyResponse';
 
 const APP_STACK = createNativeStackNavigator();
@@ -34,6 +35,7 @@ const AppNavigator = () => {
         name="BranchStaffComparison"
         component={BranchStaffComparison}
       />
+      <APP_STACK.Screen name="StaffDetail" component={StaffDetail} />
       <APP_STACK.Screen name="StaffComparison" component={StaffComparison} />
       <APP_STACK.Screen name="SurveyResponse" component={SurveyResponse} />
     </APP_STACK.Navigator>

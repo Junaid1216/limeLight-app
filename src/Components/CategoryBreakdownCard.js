@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import Toast from 'react-native-simple-toast';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { categoryColorMap } from '../Constants/CategoryColors';
@@ -9,7 +8,8 @@ import { categoryBreakdownData } from '../Constants/DummyData';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
-import Api from '../Services/Api_services';
+import Api, { isApiSuccess } from '../Services/Api_services';
+import { showApiMessageToast } from '../Utils/apiHelpers';
 
 const getCategoryDotColor = categoryName => {
   const key = categoryName?.toLowerCase?.();
@@ -67,44 +67,35 @@ const TableRow = ({ item }) => (
 
 const CategoryBreakdownCard = ({
   items,
-  isLoading: externalLoading,
   fetchEnabled = true,
   title = Strings.categoryBreakdown,
   subtitle = Strings.categoryBreakdownSub,
 }) => {
   const [breakdownData, setBreakdownData] = useState(categoryBreakdownData);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const displayData = items?.length ? items : breakdownData;
-  const showLoading = externalLoading ?? (fetchEnabled && isLoading);
+  const displayData = fetchEnabled ? breakdownData : (items ?? []);
 
   const fetchCategoryBreakdown = useCallback(async () => {
-    setIsLoading(true);
-
     try {
       const res = await Api.getCategoryBreakdown();
+      const resJson = res?.data;
 
-      if (res?.status == 200) {
-        console.log(
-          'Category Breakdown Success:',
-          JSON.stringify(res?.data, null, 2),
-        );
-        Toast.show(res?.data?.message, Toast.LONG);
-        setBreakdownData(mapCategoryBreakdown(res?.data?.data));
+      if (isApiSuccess(res)) {
+        console.log('Category Breakdown Backend Response:', resJson);
+
+        const appResponse = mapCategoryBreakdown(resJson?.data);
+        console.log('Category Breakdown App Response:', appResponse);
+
+        setBreakdownData(appResponse);
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        console.log('Category Breakdown Error Response:', resJson);
+        showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'Category Breakdown API Error:',
-        error?.response?.data || error,
+        error?.response?.data ?? error?.message ?? error,
       );
-      Toast.show(
-        error?.response?.data?.message || 'Failed to load category breakdown',
-        Toast.LONG,
-      );
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -151,21 +142,13 @@ const CategoryBreakdownCard = ({
           </View>
         </View>
 
-        {showLoading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator color={Colors.darkNavy} size="small" />
-          </View>
-        ) : (
-          <>
-            <RowDivider />
-            {displayData.map((item, index) => (
-              <React.Fragment key={item.id ?? item.categoryName ?? index}>
-                {index > 0 && <RowDivider />}
-                <TableRow item={item} />
-              </React.Fragment>
-            ))}
-          </>
-        )}
+        <RowDivider />
+        {displayData.map((item, index) => (
+          <React.Fragment key={item.id ?? item.categoryName ?? index}>
+            {index > 0 && <RowDivider />}
+            <TableRow item={item} />
+          </React.Fragment>
+        ))}
       </View>
     </View>
   );

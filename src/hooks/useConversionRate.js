@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import Toast from 'react-native-simple-toast';
-import Api from '../Services/Api_services';
-
-const getToday = () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
-};
+import Api, { isApiSuccess } from '../Services/Api_services';
+import { showApiMessageToast } from '../Utils/apiHelpers';
 
 const formatApiDate = date => {
   if (!date) {
@@ -43,55 +37,42 @@ const getConversionList = responseData => {
 
 export const useConversionRate = (fromDate, toDate) => {
   const [conversionData, setConversionData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchConversionRate = useCallback(async () => {
-    if (!fromDate) {
+    if (!fromDate || !toDate) {
+      setConversionData(null);
       return;
     }
 
-    const to = toDate || getToday();
     const fromParam = formatApiDate(fromDate);
-    const toParam = formatApiDate(to);
-
-    setIsLoading(true);
+    const toParam = formatApiDate(toDate);
 
     try {
-      console.log('Conversion Rate Request:', {
-        from: fromParam,
-        to: toParam,
-      });
-
       const res = await Api.getConversionRate(fromParam, toParam);
+      const resJson = res?.data;
 
-      if (res?.status == 200) {
-        const parsedData = getConversionList(res?.data);
-
+      if (isApiSuccess(res)) {
         console.log(
-          'Conversion Rate Success:',
-          JSON.stringify(res?.data, null, 2),
-        );
-        console.log(
-          'Conversion Rate Parsed Data:',
-          JSON.stringify(parsedData, null, 2),
+          'Conversion Rate Backend Response:',
+          JSON.stringify(resJson, null, 2),
         );
 
-        if (res?.data?.message) {
-          Toast.show(res?.data?.message, Toast.LONG);
-        }
+        const appResponse = getConversionList(resJson);
+        console.log(
+          'Conversion Rate App Response:',
+          JSON.stringify(appResponse, null, 2),
+        );
 
-        setConversionData(parsedData);
+        setConversionData(appResponse);
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        console.log('Conversion Rate Error Response:', resJson);
+        showApiMessageToast(res);
       }
     } catch (error) {
-      console.log('Conversion Rate API Error:', error?.response?.data || error);
-      Toast.show(
-        error?.response?.data?.message || 'Failed to load conversion rate',
-        Toast.LONG,
+      console.log(
+        'Conversion Rate API Error:',
+        error?.response?.data ?? error?.message ?? error,
       );
-    } finally {
-      setIsLoading(false);
     }
   }, [fromDate, toDate]);
 
@@ -101,7 +82,6 @@ export const useConversionRate = (fromDate, toDate) => {
 
   return {
     conversionData,
-    isLoading,
     refetch: fetchConversionRate,
   };
 };

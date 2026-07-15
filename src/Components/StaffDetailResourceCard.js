@@ -8,31 +8,40 @@ import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 import { Images } from '../Assets';
 
-const StaffDetailResourceCard = () => {
+const StaffDetailResourceCard = ({ profile }) => {
+  const initials = profile?.initials ?? '';
+  const name = profile?.name ?? '';
+  const designation = profile?.designation ?? '';
+  const roleBadge = profile?.roleBadge ?? designation;
+  const branch = profile?.branch ?? '';
+  const target = profile?.target ?? 0;
+  const achieved = profile?.achieved ?? 0;
+  const remaining = profile?.remaining ?? 0;
+
   return (
     <View style={styles.container}>
       <View style={styles.profileCard}>
         <View style={styles.profileRow}>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>SA</Text>
+            <Text style={styles.avatarText}>{initials}</Text>
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.staffName} numberOfLines={1}>
-              Saleem
+              {name}
             </Text>
             <Text style={styles.staffRole} numberOfLines={1}>
-              {Strings.seniorSalesStaff}
+              {designation}
             </Text>
             <View style={styles.badgeRow}>
               <View style={styles.roleBadge}>
                 <Text style={styles.roleBadgeText} numberOfLines={1}>
-                  {Strings.salesStaff}
+                  {roleBadge}
                 </Text>
               </View>
               <View style={styles.branchContainer}>
                 <Image source={Images.Location} style={styles.locationIcon} />
                 <Text style={styles.branchText} numberOfLines={1}>
-                  {Strings.dhaBranch}
+                  {branch}
                 </Text>
               </View>
             </View>
@@ -50,7 +59,7 @@ const StaffDetailResourceCard = () => {
             </Text>
           </View>
           <Text style={[styles.statsValue, { color: Colors.brightBlue }]}>
-            {'250'}
+            {String(target)}
           </Text>
         </View>
         <View style={[styles.statsBox, styles.achievedBox]}>
@@ -62,7 +71,7 @@ const StaffDetailResourceCard = () => {
             </Text>
           </View>
           <Text style={[styles.statsValue, { color: Colors.branchGreen }]}>
-            {'180'}
+            {String(achieved)}
           </Text>
         </View>
         <View style={[styles.statsBox, styles.remainingBox]}>
@@ -74,7 +83,7 @@ const StaffDetailResourceCard = () => {
             </Text>
           </View>
           <Text style={[styles.statsValue, { color: Colors.vividAmber }]}>
-            {'70'}
+            {String(remaining)}
           </Text>
         </View>
       </View>
@@ -101,9 +110,9 @@ const styles = StyleSheet.create({
     marginBottom: hp(3),
   },
   avatarCircle: {
-    width: wp(13.4),  // 56
-height: wp(13.4), // 56
-    borderRadius: wp(6.7), // 28
+    width: wp(13.4),
+    height: wp(13.4),
+    borderRadius: wp(6.7),
     backgroundColor: '#20C9971A',
     borderColor: '#20C9971A',
     borderWidth: 1,

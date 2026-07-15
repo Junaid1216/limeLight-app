@@ -1,13 +1,11 @@
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   ScrollView,
   StatusBar,
   StyleSheet,
   View,
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
@@ -17,8 +15,10 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
+import { getTrainingApiRole } from '../../Constants/roleConfig';
 import { useRole } from '../../Context/RoleContext';
-import Api from '../../Services/Api_services';
+import Api, { isApiSuccess } from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const mapSurveyQuestions = data => {
   const list = Array.isArray(data)
@@ -50,27 +50,27 @@ const SurveyProgress = () => {
   const [answers, setAnswers] = useState({});
   const [surveyTitle, setSurveyTitle] = useState(Strings.priceSatisfactionSurvey);
   const [questions, setQuestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchSurveyQuestions = useCallback(async () => {
     if (!role) {
       return;
     }
 
-    setIsLoading(true);
+    const apiRole = getTrainingApiRole(role);
     setAnswers({});
 
     try {
-      console.log('Survey Questions Request:', `survey-questions/${role}`, {
+      console.log('Survey Questions Request:', `survey-questions/${apiRole}`, {
         role,
+        apiRole,
       });
-      const res = await Api.getSurveyQuestions(role);
+      const res = await Api.getSurveyQuestions(apiRole);
       console.log(
         'Survey Questions Response:',
         JSON.stringify(res?.data, null, 2),
       );
 
-      if (res?.status == 200) {
+      if (isApiSuccess(res)) {
         const { title, questions: mappedQuestions } = mapSurveyQuestions(
           res?.data?.data,
         );
@@ -83,19 +83,16 @@ const SurveyProgress = () => {
         setSurveyTitle(title);
         setQuestions(mappedQuestions);
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        showApiMessageToast(res);
         setQuestions([]);
       }
     } catch (error) {
       console.log('Survey Questions API Error:', {
         status: error?.response?.status,
-        url: `survey-questions/${role}`,
+        url: `survey-questions/${apiRole}`,
         data: error?.response?.data || error,
       });
-      Toast.show(error?.response?.data?.message, Toast.LONG);
       setQuestions([]);
-    } finally {
-      setIsLoading(false);
     }
   }, [role]);
 
@@ -130,34 +127,24 @@ const SurveyProgress = () => {
           notificationCount={5}
         />
 
-        {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color={Colors.teal}
-            style={styles.loader}
-          />
-        ) : (
-          <>
-            <SurveyProgressBar
-              title={surveyTitle}
-              current={answeredCount}
-              total={questions.length}
-            />
+        <SurveyProgressBar
+          title={surveyTitle}
+          current={answeredCount}
+          total={questions.length}
+        />
 
-            {questions.map((item, index) => (
-              <SurveyQuestionCard
-                key={item.id}
-                qLabel={`Q${index + 1}`}
-                question={item.question}
-                options={item.options}
-                selected={answers[item.id]}
-                onSelect={option =>
-                  setAnswers(prev => ({ ...prev, [item.id]: option }))
-                }
-              />
-            ))}
-          </>
-        )}
+        {questions.map((item, index) => (
+          <SurveyQuestionCard
+            key={item.id}
+            qLabel={`Q${index + 1}`}
+            question={item.question}
+            options={item.options}
+            selected={answers[item.id]}
+            onSelect={option =>
+              setAnswers(prev => ({ ...prev, [item.id]: option }))
+            }
+          />
+        ))}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -174,7 +161,6 @@ const SurveyProgress = () => {
             })
           }
           style={styles.submitBtn}
-          loading={isLoading}
         />
       </View>
     </View>
@@ -189,9 +175,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
     paddingBottom: hp(2),
-  },
-  loader: {
-    marginTop: hp(4),
   },
   footer: {
     paddingHorizontal: wp(6),

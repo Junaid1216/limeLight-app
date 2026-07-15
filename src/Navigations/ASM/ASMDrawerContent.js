@@ -18,6 +18,8 @@ import { getRoleDisplayLabel } from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
 import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
+import { navigateToStaffDetail } from '../../Navigations/navigationHelpers';
+import { getLastSelectedStaffMember } from '../../Utils/staffHelpers';
 import Api, { setAuthToken } from '../../Services/Api_services';
 import Toast from 'react-native-simple-toast';
 import { useDispatch } from 'react-redux';
@@ -52,6 +54,20 @@ const ASMDrawerContent = ({ navigation }) => {
   const goToAppScreen = screenName => {
     navigation.closeDrawer();
     navigation.getParent()?.navigate(screenName);
+  };
+
+  const goToStaffDetailScreen = () => {
+    navigation.closeDrawer();
+
+    const member = getLastSelectedStaffMember();
+
+    if (!member) {
+      Toast.show(Strings.staffDetailSelectStaff, Toast.LONG);
+      navigation.getParent()?.navigate('BranchStaffComparison');
+      return;
+    }
+
+    navigateToStaffDetail(navigation.getParent() ?? navigation, member);
   };
 
   const handleLogout = async () => {
@@ -124,6 +140,11 @@ const ASMDrawerContent = ({ navigation }) => {
           iconName="trending-up"
           label={Strings.salesStaffPerformance}
           onPress={() => goToAppScreen('BranchStaffComparison')}
+        />
+        <MenuItem
+          iconName="user"
+          label={Strings.staffDetailsHeader}
+          onPress={goToStaffDetailScreen}
         />
         <MenuItem
           iconName="crosshair"

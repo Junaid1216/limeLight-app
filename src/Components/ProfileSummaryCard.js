@@ -10,22 +10,22 @@ import { Fonts } from '../Constants/Fonts';
 const ProfileSummaryCard = ({ name, roleTag, avatarUri, onAvatarPress }) => {
   return (
     <View style={styles.card}>
-      <View style={styles.avatarWrap}>
-        <Pressable
-          style={styles.avatar}
-          onPress={onAvatarPress}
-          disabled={!onAvatarPress}>
+      <Pressable
+        style={styles.avatarWrap}
+        onPress={onAvatarPress}
+        disabled={!onAvatarPress}>
+        <View style={styles.avatar}>
           <Image
             source={avatarUri ? { uri: avatarUri } : Images.Avatar}
             style={avatarUri ? styles.avatarPhoto : styles.avatarImage}
             resizeMode={avatarUri ? 'cover' : 'contain'}
             tintColor={avatarUri ? undefined : Colors.white}
           />
-        </Pressable>
+        </View>
         <View style={styles.lockBadge}>
           <Icon name="camera" size={wp(3)} color={Colors.white} />
         </View>
-      </View>
+      </Pressable>
 
       <Text style={styles.name} numberOfLines={1}>
         {name}

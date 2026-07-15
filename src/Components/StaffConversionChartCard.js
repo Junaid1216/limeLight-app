@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
@@ -12,9 +14,6 @@ import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 import { buildOutletChartData } from '../Utils/outletChartData';
-
-const chartWidth = wp(78);
-const chartHeight = hp(20);
 
 const formatChartMetric = value => {
   const num = Number(value);
@@ -84,9 +83,16 @@ const StaffConversionChartCard = ({
   onPressFrom,
   onPressTo,
   transactionSummary,
-  isLoading = false,
   shopName,
+  isLoading = false,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const chartHeight = hp(20);
+  const chartWidth = Math.max(
+    windowWidth - wp(4) * 2 - wp(3.6) * 2 - wp(8),
+    wp(58),
+  );
+
   const { chartData, chartData2, chartMaxValue, chartSections } = useMemo(
     () => buildOutletChartData(transactionSummary, fromDate, toDate),
     [transactionSummary, fromDate, toDate],
@@ -95,13 +101,13 @@ const StaffConversionChartCard = ({
   const chartDataWithLabels = useMemo(
     () =>
       chartData.map((point, index) => {
-        const axisLabel = point.label || point.customData?.day || '';
+        const axisLabel = point.label ?? '';
 
         return {
           ...point,
           labelComponent: () => {
             if (!axisLabel) {
-              return null;
+              return <View style={styles.hiddenAxisLabel} />;
             }
 
             return (
@@ -111,7 +117,9 @@ const StaffConversionChartCard = ({
                   index === 0 && styles.firstXAxisLabel,
                   index === chartData.length - 1 && styles.lastXAxisLabel,
                 ]}>
-                <Text style={styles.axisText}>{axisLabel}</Text>
+                <Text style={styles.axisText} numberOfLines={1}>
+                  {axisLabel}
+                </Text>
               </View>
             );
           },
@@ -125,8 +133,16 @@ const StaffConversionChartCard = ({
   const [isPointerActive, setIsPointerActive] = React.useState(false);
   const activePointerIndexRef = React.useRef(null);
   const hasChartData = chartData.length > 0 && chartData2.length > 0;
-  const chartSpacing =
-    chartData.length > 1 ? chartWidth / (chartData.length - 1) : chartWidth / 2;
+  const shouldScrollChart = chartData.length > 7;
+  const minPointSpacing = wp(10);
+  const chartSpacing = shouldScrollChart
+    ? minPointSpacing
+    : chartData.length > 1
+      ? chartWidth / (chartData.length - 1)
+      : chartWidth / 2;
+  const chartRenderWidth = shouldScrollChart
+    ? Math.max(chartWidth, minPointSpacing * Math.max(chartData.length - 1, 1) + wp(8))
+    : chartWidth;
 
   const headerMetrics =
     !isPointerActive || activePointerIndex === null
@@ -237,9 +253,9 @@ const StaffConversionChartCard = ({
         <View style={styles.chartBody}>
           {isLoading ? (
             <ActivityIndicator
-              size="large"
-              color={Colors.teal}
               style={styles.loader}
+              size="large"
+              color={Colors.green}
             />
           ) : !hasChartData ? (
             <Text style={styles.emptyText}>No chart data for selected dates.</Text>
@@ -262,58 +278,71 @@ const StaffConversionChartCard = ({
                 </View>
               ) : null}
 
-              <LineChart
-                areaChart
-                curved
-                isAnimated
-                animationDuration={700}
-                width={chartWidth}
-                height={chartHeight}
-                data={chartDataWithLabels}
-                data2={chartData2}
-                color1={Colors.chartOrange}
-                color2={Colors.green}
-                thickness1={2.5}
-                thickness2={2.5}
-                startFillColor1={Colors.chartOrange}
-                endFillColor1={Colors.chartOrange}
-                startFillColor2={Colors.green}
-                endFillColor2={Colors.green}
-                startOpacity1={0.18}
-                endOpacity1={0.04}
-                startOpacity2={0.14}
-                endOpacity2={0.02}
-                noOfSections={chartSections}
-                maxValue={chartMaxValue}
-                formatYLabel={formatChartMetric}
-                rulesColor={Colors.lightPeriwinkle}
-                rulesType="dashed"
-                yAxisColor="transparent"
-                xAxisColor={Colors.surfaceBorder}
-                yAxisTextStyle={styles.yAxisText}
-                xAxisLabelTextStyle={styles.axisText}
-                yAxisLabelWidth={wp(7)}
-                spacing={chartSpacing}
-                initialSpacing={wp(3.2)}
-                endSpacing={wp(4.2)}
-                disableScroll
-                adjustToWidth
-                hideDataPoints
-                getPointerProps={syncHeaderWithPointer}
-                pointerConfig={{
-                  pointerStripHeight: chartHeight,
-                  pointerStripColor: Colors.white,
-                  pointerStripWidth: 1,
-                  pointerColor: Colors.white,
-                  radius: 4,
-                  activatePointersOnLongPress: true,
-                  autoAdjustPointerLabelPosition: false,
-                  onTouchEnd: resetHeaderToPeak,
-                  onTouchStart: activatePointerSync,
-                  onResponderMove: activatePointerSync,
-                  onResponderGrant: activatePointerSync,
-                }}
-              />
+              <View style={styles.chartClip}>
+                <ScrollView
+                  horizontal
+                  nestedScrollEnabled
+                  showsHorizontalScrollIndicator={false}
+                  scrollEnabled={shouldScrollChart}
+                  bounces={false}
+                  contentContainerStyle={
+                    shouldScrollChart ? undefined : styles.chartScrollFill
+                  }
+                  style={styles.chartScroll}>
+                  <LineChart
+                    areaChart
+                    curved
+                    isAnimated
+                    animationDuration={700}
+                    width={shouldScrollChart ? chartRenderWidth : chartWidth}
+                    height={chartHeight}
+                    data={chartDataWithLabels}
+                    data2={chartData2}
+                    color1={Colors.chartOrange}
+                    color2={Colors.green}
+                    thickness1={2.5}
+                    thickness2={2.5}
+                    startFillColor1={Colors.chartOrange}
+                    endFillColor1={Colors.chartOrange}
+                    startFillColor2={Colors.green}
+                    endFillColor2={Colors.green}
+                    startOpacity1={0.18}
+                    endOpacity1={0.04}
+                    startOpacity2={0.14}
+                    endOpacity2={0.02}
+                    noOfSections={chartSections}
+                    maxValue={chartMaxValue}
+                    formatYLabel={formatChartMetric}
+                    rulesColor={Colors.lightPeriwinkle}
+                    rulesType="dashed"
+                    yAxisColor="transparent"
+                    xAxisColor={Colors.surfaceBorder}
+                    yAxisTextStyle={styles.yAxisText}
+                    xAxisLabelTextStyle={styles.axisText}
+                    yAxisLabelWidth={wp(7)}
+                    spacing={chartSpacing}
+                    initialSpacing={wp(2)}
+                    endSpacing={wp(2)}
+                    disableScroll
+                    adjustToWidth={!shouldScrollChart}
+                    hideDataPoints
+                    getPointerProps={syncHeaderWithPointer}
+                    pointerConfig={{
+                      pointerStripHeight: chartHeight,
+                      pointerStripColor: Colors.white,
+                      pointerStripWidth: 1,
+                      pointerColor: Colors.white,
+                      radius: 4,
+                      activatePointersOnLongPress: true,
+                      autoAdjustPointerLabelPosition: false,
+                      onTouchEnd: resetHeaderToPeak,
+                      onTouchStart: activatePointerSync,
+                      onResponderMove: activatePointerSync,
+                      onResponderGrant: activatePointerSync,
+                    }}
+                  />
+                </ScrollView>
+              </View>
             </>
           )}
         </View>
@@ -381,6 +410,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(3.6),
     paddingTop: hp(1.6),
     paddingBottom: hp(1.9),
+    overflow: 'hidden',
   },
   chartHeaderRow: {
     flexDirection: 'row',
@@ -423,6 +453,18 @@ const styles = StyleSheet.create({
     marginTop: hp(0.4),
     marginLeft: 0,
     position: 'relative',
+    width: '100%',
+    overflow: 'hidden',
+  },
+  chartClip: {
+    width: '100%',
+    overflow: 'hidden',
+  },
+  chartScroll: {
+    width: '100%',
+  },
+  chartScrollFill: {
+    flexGrow: 1,
   },
   loader: {
     marginVertical: hp(4),
@@ -435,8 +477,12 @@ const styles = StyleSheet.create({
     marginVertical: hp(4),
   },
   axisLabelContainer: {
-    width: wp(12),
+    width: wp(10),
     alignItems: 'center',
+  },
+  hiddenAxisLabel: {
+    width: wp(10),
+    height: hp(1.8),
   },
   axisText: {
     fontFamily: Fonts.poppinsMedium,
@@ -449,12 +495,10 @@ const styles = StyleSheet.create({
     color: Colors.coolGrey,
   },
   firstXAxisLabel: {
-    marginLeft: wp(4.2),
     alignItems: 'flex-start',
   },
   lastXAxisLabel: {
-    alignItems: 'flex-start',
-    marginLeft: wp(-4.7),
+    alignItems: 'flex-end',
   },
   externalTooltipCard: {
     backgroundColor: Colors.graphite,

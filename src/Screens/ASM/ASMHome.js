@@ -1,32 +1,144 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import ASMAchievementCard from '../../Components/ASMAchievementCard';
 import ASMConversionTable from '../../Components/ASMConversionTable';
 import ASMRangeToggle from '../../Components/ASMRangeToggle';
 import HomeHeaderComponent from '../../Components/HomeHeaderComponent';
+import ScreenLoader from '../../Components/ScreenLoader';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fonts } from '../../Constants/Fonts';
 import { Fontsize } from '../../Constants/Fontsize';
-import {
-  asmAccessoriesData,
-  asmConversionData,
-  asmGarmentsData,
-  asmUnstitchedData,
-} from '../../Constants/DummyData';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
+import Api from '../../Services/Api_services';
+import {
+  isApiSuccess,
+  logApiAppResponse,
+  logApiRequest,
+  mapAsmBranchComparison,
+  mapAsmBranchConversion,
+} from '../../Utils/asmMappers';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
 
-const ASMHome = props => {
-  const params = props?.route?.params;
-  const conversionData = params?.conversionData ?? asmConversionData;
-  const garmentsData = params?.garmentsData ?? asmGarmentsData;
-  const unstitchedData = params?.unstitchedData ?? asmUnstitchedData;
-  const accessoriesData = params?.accessoriesData ?? asmAccessoriesData;
+const getRangeType = range =>
+  range === Strings.weekly ? 'weekly' : 'monthly';
 
-  const [selectedRange, setSelectedRange] = useState(
-    params?.selectedRange ?? Strings.weekly,
+const ASMHome = () => {
+  const [selectedRange, setSelectedRange] = useState(Strings.weekly);
+  const [conversionData, setConversionData] = useState([]);
+  const [garmentsData, setGarmentsData] = useState([]);
+  const [unstitchedData, setUnstitchedData] = useState([]);
+  const [accessoriesData, setAccessoriesData] = useState([]);
+  const [garmentsYoursRow, setGarmentsYoursRow] = useState({
+    rank: 0,
+    name: '',
+    achieved: 0,
+    remaining: 0,
+  });
+  const [unstitchedYoursRow, setUnstitchedYoursRow] = useState({
+    rank: 0,
+    name: '',
+    achieved: 0,
+    remaining: 0,
+  });
+  const [accessoriesYoursRow, setAccessoriesYoursRow] = useState({
+    rank: 0,
+    name: '',
+    achieved: 0,
+    remaining: 0,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isConversionLoading, setIsConversionLoading] = useState(false);
+
+  const fetchAsmBranchConversion = useCallback(async () => {
+    setIsConversionLoading(true);
+
+    try {
+      const type = getRangeType(selectedRange);
+      logApiRequest('ASM Branch Conversion', `asm-branch-conversion?type=${type}`);
+
+      const res = await Api.getAsmBranchConversion(type);
+      const resJson = res?.data;
+
+      if (isApiSuccess(res)) {
+        console.log(
+          'ASM Branch Conversion Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        const appResponse = mapAsmBranchConversion(resJson?.data);
+        logApiAppResponse('ASM Branch Conversion App Response:', res, appResponse);
+
+        setConversionData(appResponse);
+      } else {
+        console.log(
+          'ASM Branch Conversion Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+        showApiMessageToast(res);
+      }
+    } catch (error) {
+      console.log(
+        'ASM Branch Conversion API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+    } finally {
+      setIsConversionLoading(false);
+    }
+  }, [selectedRange]);
+
+  const fetchAsmBranchComparison = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      logApiRequest('ASM Branch Comparison', 'asm-branch-comparison');
+
+      const res = await Api.getAsmBranchComparison();
+      const resJson = res?.data;
+
+      if (isApiSuccess(res)) {
+        console.log(
+          'ASM Branch Comparison Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        const appResponse = mapAsmBranchComparison(resJson?.data);
+        logApiAppResponse('ASM Branch Comparison App Response:', res, appResponse);
+
+        setGarmentsData(appResponse.garmentsData);
+        setUnstitchedData(appResponse.unstitchedData);
+        setAccessoriesData(appResponse.accessoriesData);
+        setGarmentsYoursRow(appResponse.garmentsYoursRow);
+        setUnstitchedYoursRow(appResponse.unstitchedYoursRow);
+        setAccessoriesYoursRow(appResponse.accessoriesYoursRow);
+      } else {
+        console.log(
+          'ASM Branch Comparison Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+        showApiMessageToast(res);
+      }
+    } catch (error) {
+      console.log(
+        'ASM Branch Comparison API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchAsmBranchComparison();
+    }, [fetchAsmBranchComparison]),
   );
+
+  useEffect(() => {
+    fetchAsmBranchConversion();
+  }, [selectedRange, fetchAsmBranchConversion]);
 
   return (
     <View style={MyStyling.container2}>
@@ -38,6 +150,7 @@ const ASMHome = props => {
       <ASMConversionTable
         data={conversionData}
         contentContainerStyle={styles.content}
+        isLoading={isConversionLoading}
         topContent={
           <>
             <Text style={styles.screenTitle} numberOfLines={1}>
@@ -59,24 +172,31 @@ const ASMHome = props => {
             <Text style={styles.sectionHeading} numberOfLines={1}>
               {Strings.branchComparison}
             </Text>
+            {isLoading ? (
+              <ScreenLoader />
+            ) : (
             <View style={styles.achievementGroup}>
-              <ASMAchievementCard
-                title={Strings.asmGarments}
-                data={garmentsData}
-                accentColor="#20C997"
-              />
-              <ASMAchievementCard
-                title={Strings.asmUnstitched}
-                data={unstitchedData}
-                accentColor={Colors.brightBlue}
-              />
-              <ASMAchievementCard
-                title={Strings.asmAccessories}
-                data={accessoriesData}
-                accentColor={Colors.vividAmber}
-                isLast
-              />
-            </View>
+                <ASMAchievementCard
+                  title={Strings.asmGarments}
+                  data={garmentsData}
+                  accentColor="#20C997"
+                  yoursRow={garmentsYoursRow}
+                />
+                <ASMAchievementCard
+                  title={Strings.asmUnstitched}
+                  data={unstitchedData}
+                  accentColor={Colors.brightBlue}
+                  yoursRow={unstitchedYoursRow}
+                />
+                <ASMAchievementCard
+                  title={Strings.asmAccessories}
+                  data={accessoriesData}
+                  accentColor={Colors.vividAmber}
+                  yoursRow={accessoriesYoursRow}
+                  isLast
+                />
+              </View>
+            )}
           </>
         }
       />

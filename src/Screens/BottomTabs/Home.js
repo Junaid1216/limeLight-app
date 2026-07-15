@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   StatusBar,
   StyleSheet,
@@ -8,7 +7,6 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import Toast from 'react-native-simple-toast';
 import CategoryBreakdownCard from '../../Components/CategoryBreakdownCard';
 import CommissionCard from '../../Components/CommissionCard';
 import HomeHeaderComponent from '../../Components/HomeHeaderComponent';
@@ -30,7 +28,9 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import Api from '../../Services/Api_services';
+import Api, { isApiSuccess } from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
+import { resolveIncentiveSlab } from '../../Utils/incentiveSlab';
 
 const defaultTargetData = [garmentsTarget, unstitchedTarget, accessoriesTarget];
 
@@ -137,7 +137,7 @@ const mapSlipBoundIncentive = items =>
       id: String(item?.invoice_id ?? index + 1),
       dateDay,
       dateYear,
-      slab: item?.slab ?? 'A',
+      slab: resolveIncentiveSlab(item?.slab, item?.net_sale),
       invoice: String(item?.invoice_id ?? ''),
       salesId: String(item?.sales_id ?? ''),
       netSale: formatSaleAmount(item?.net_sale),
@@ -161,60 +161,61 @@ const StaffHomeContent = () => {
   const [targetData, setTargetData] = useState(defaultTargetData);
   const [commission, setCommission] = useState(commissionData);
   const [incentiveData, setIncentiveData] = useState(slipBoundIncentiveData);
-  const [isDashboardLoading, setIsDashboardLoading] = useState(false);
-  const [isIncentiveLoading, setIsIncentiveLoading] = useState(false);
 
   const fetchDashboard = useCallback(async () => {
-    setIsDashboardLoading(true);
-
     try {
       const res = await Api.getDashboard();
+      const resJson = res?.data;
 
-      if (res?.status == 200) {
-        console.log('Dashboard Success:', JSON.stringify(res?.data, null, 2));
-        Toast.show(res?.data?.message, Toast.LONG);
+      if (isApiSuccess(res)) {
+        console.log('Dashboard Backend Response:', resJson);
 
-        const dashboard = res?.data?.data ?? {};
-        setTargetData(mapTargetVsAchievement(dashboard.target_vs_achievement));
-        setCommission(mapCommission(dashboard.commission));
+        const dashboard = resJson?.data ?? {};
+        const targetMapped = mapTargetVsAchievement(
+          dashboard.target_vs_achievement,
+        );
+        const commissionMapped = mapCommission(dashboard.commission);
+
+        console.log('Dashboard App Response:', {
+          target_vs_achievement: targetMapped,
+          commission: commissionMapped,
+        });
+
+        setTargetData(targetMapped);
+        setCommission(commissionMapped);
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        console.log('Dashboard Error Response:', resJson);
+        showApiMessageToast(res);
       }
     } catch (error) {
-      console.log('Dashboard API Error:', error?.response?.data || error);
-      Toast.show(error?.response?.data?.message, Toast.LONG);
-    } finally {
-      setIsDashboardLoading(false);
+      console.log(
+        'Dashboard API Error:',
+        error?.response?.data ?? error?.message ?? error,
+      );
     }
   }, []);
 
   const fetchSlipBoundIncentive = useCallback(async () => {
-    setIsIncentiveLoading(true);
-
     try {
       const res = await Api.getSlipBoundIncentive();
+      const resJson = res?.data;
 
-      if (res?.status == 200) {
-        console.log(
-          'Slip Bound Incentive Success:',
-          JSON.stringify(res?.data, null, 2),
-        );
-        Toast.show(res?.data?.message, Toast.LONG);
-        setIncentiveData(mapSlipBoundIncentive(getIncentiveList(res?.data)));
+      if (isApiSuccess(res)) {
+        console.log('Slip Bound Incentive Backend Response:', resJson);
+
+        const appResponse = mapSlipBoundIncentive(getIncentiveList(resJson));
+        console.log('Slip Bound Incentive App Response:', appResponse);
+
+        setIncentiveData(appResponse);
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        console.log('Slip Bound Incentive Error Response:', resJson);
+        showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'Slip Bound Incentive API Error:',
-        error?.response?.data || error,
+        error?.response?.data ?? error?.message ?? error,
       );
-      Toast.show(
-        error?.response?.data?.message || 'Failed to load slip bound incentive',
-        Toast.LONG,
-      );
-    } finally {
-      setIsIncentiveLoading(false);
     }
   }, []);
 
@@ -235,11 +236,8 @@ const StaffHomeContent = () => {
           <Text style={styles.pageTitle} numberOfLines={1}>
             {Strings.myPerformance}
           </Text>
-          <TargetVsAchievementCard
-            items={targetData}
-            isLoading={isDashboardLoading}
-          />
-          <CommissionCard data={commission} isLoading={isDashboardLoading} />
+          <TargetVsAchievementCard items={targetData} />
+          <CommissionCard data={commission} />
           <CategoryBreakdownCard />
 
           <Text style={styles.sectionTitle} numberOfLines={1}>
@@ -249,11 +247,6 @@ const StaffHomeContent = () => {
             {Strings.slipBoundIncentiveSub}
           </Text>
           <SlipBoundIncentiveHeader />
-          {isIncentiveLoading && (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator color={Colors.darkNavy} size="small" />
-            </View>
-          )}
         </View>
       }
       showsVerticalScrollIndicator={false}
@@ -299,11 +292,6 @@ const styles = StyleSheet.create({
     color: Colors.steelGray,
     marginTop: hp(0.4),
     marginBottom: hp(1.2),
-  },
-  loaderContainer: {
-    paddingVertical: hp(1.5),
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

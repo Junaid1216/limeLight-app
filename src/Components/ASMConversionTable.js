@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ASMConversionRow from './ASMConversionRow';
 import RegionConversionRow from './RegionConversionRow';
 import { hp, wp } from '../Assets/Responsive';
@@ -141,6 +141,7 @@ const ASMConversionTable = ({
   showLegend = true,
   useRegionRow = false,
   yoursRow,
+  isLoading = false,
 }) => (
   <ScrollView
     style={styles.list}
@@ -149,12 +150,20 @@ const ASMConversionTable = ({
     nestedScrollEnabled
   >
     {topContent}
-    <ConversionCard
-      data={data}
-      showLegend={showLegend}
-      useRegionRow={useRegionRow}
-      yoursRow={yoursRow}
-    />
+    {isLoading ? (
+      <ActivityIndicator
+        style={styles.sectionLoader}
+        size="large"
+        color={Colors.green}
+      />
+    ) : (
+      <ConversionCard
+        data={data}
+        showLegend={showLegend}
+        useRegionRow={useRegionRow}
+        yoursRow={yoursRow}
+      />
+    )}
     {bottomContent}
   </ScrollView>
 );
@@ -162,6 +171,9 @@ const ASMConversionTable = ({
 const styles = StyleSheet.create({
   list: {
     flex: 1,
+  },
+  sectionLoader: {
+    marginVertical: hp(4),
   },
   card: {
     backgroundColor: Colors.white,

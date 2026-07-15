@@ -1,17 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
-  ActivityIndicator,
   Image,
   StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenLoader from '../../Components/ScreenLoader';
 import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
@@ -20,7 +19,10 @@ import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
-import Api from '../../Services/Api_services';
+import { getTrainingApiRole } from '../../Constants/roleConfig';
+import { navigateToSurveyProgress } from '../../Navigations/navigationHelpers';
+import Api, { isApiSuccess } from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const mapSurveyQuestions = data => {
   const list = Array.isArray(data)
@@ -57,19 +59,21 @@ const Survey = () => {
       return;
     }
 
+    const apiRole = getTrainingApiRole(role);
     setIsLoading(true);
 
     try {
-      console.log('Survey Questions Request:', `survey-questions/${role}`, {
+      console.log('Survey Questions Request:', `survey-questions/${apiRole}`, {
         role,
+        apiRole,
       });
-      const res = await Api.getSurveyQuestions(role);
+      const res = await Api.getSurveyQuestions(apiRole);
       console.log(
         'Survey Questions Response:',
         JSON.stringify(res?.data, null, 2),
       );
 
-      if (res?.status == 200) {
+      if (isApiSuccess(res)) {
         const { title, questions: mappedQuestions } = mapSurveyQuestions(
           res?.data?.data,
         );
@@ -81,17 +85,31 @@ const Survey = () => {
 
         setSurveyTitle(title);
         setQuestions(mappedQuestions);
+
+        if (mappedQuestions.length === 0) {
+          console.log(
+            'Survey Questions Empty:',
+            JSON.stringify(
+              {
+                apiRole,
+                message: res?.data?.message,
+                data: res?.data?.data,
+              },
+              null,
+              2,
+            ),
+          );
+        }
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        showApiMessageToast(res);
         setQuestions([]);
       }
     } catch (error) {
       console.log('Survey Questions API Error:', {
         status: error?.response?.status,
-        url: `survey-questions/${role}`,
+        url: `survey-questions/${apiRole}`,
         data: error?.response?.data || error,
       });
-      Toast.show(error?.response?.data?.message, Toast.LONG);
       setQuestions([]);
     } finally {
       setIsLoading(false);
@@ -117,11 +135,7 @@ const Survey = () => {
         />
 
         {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color={Colors.teal}
-            style={styles.loader}
-          />
+          <ScreenLoader />
         ) : questions.length > 0 ? (
           <View style={styles.card}>
             <View style={styles.cardTopRow}>
@@ -157,7 +171,7 @@ const Survey = () => {
             <Btn
               title={Strings.openSurvey}
               onPress={() =>
-                navigation.navigate('SurveyProgress', {
+                navigateToSurveyProgress(navigation, {
                   surveyTitle,
                   questions,
                 })
@@ -165,7 +179,11 @@ const Survey = () => {
               style={styles.openSurveyBtn}
             />
           </View>
-        ) : null}
+        ) : (
+          <Text style={styles.emptyText}>
+            No survey questions available right now.
+          </Text>
+        )}
       </ScreenScrollView>
     </View>
   );
@@ -241,6 +259,13 @@ const styles = StyleSheet.create({
   },
   openSurveyBtn: {
     marginTop: hp(2),
+  },
+  emptyText: {
+    marginTop: hp(4),
+    textAlign: 'center',
+    fontSize: Fontsize.sm,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.mediumGrey,
   },
 });
 

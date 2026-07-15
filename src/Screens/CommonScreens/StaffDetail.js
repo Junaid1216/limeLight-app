@@ -1,59 +1,123 @@
-import React from 'react';
-import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
-import { Images } from '../../Assets';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenLoader from '../../Components/ScreenLoader';
 import StaffDetailResourceCard from '../../Components/StaffDetailResourceCard';
 import StaffDetailCategoryCard from '../../Components/StaffDetailCategoryCard';
 import { MyStyling } from '../../Constants/Styling';
+import { useRole } from '../../Context/RoleContext';
+import Api, { isApiSuccess } from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
+import {
+  logApiAppResponse,
+  logApiRequest,
+  logApiResponse,
+} from '../../Utils/asmMappers';
+import {
+  resolveStaffId,
+  getValidStaffId,
+  getStaffDetailsEndpoint,
+} from '../../Utils/staffHelpers';
+import { mapStaffDetails } from '../../Utils/staffMappers';
 
-const garmentsCard = {
-  title: Strings.garments,
-  achievement: '75% Achievement',
-  target: 100,
-  achieved: 75,
-  remaining: 25,
-  iconSource: Images.Garments,
-  iconBg: Colors.darkgreen,
-  borderRadius: wp(2.67),
-  progressColor: Colors.branchGreen,
-  borderColor: Colors.lightGray,
-  achievedColor: Colors.branchGreen,
-};
+const StaffDetail = ({ route }) => {
+  const { role } = useRole();
+  const userData = useSelector(state => state.AUTH?.userData);
+  const staffId = resolveStaffId(route?.params, userData, role);
+  const validStaffId = getValidStaffId({ staff_id: staffId });
+  const [profile, setProfile] = useState(null);
+  const [garmentsCard, setGarmentsCard] = useState(null);
+  const [unstitchedCard, setUnstitchedCard] = useState(null);
+  const [accessoriesCard, setAccessoriesCard] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-const unstitchedCard = {
-  title: Strings.unstitched,
-  achievement: '67% Achievement',
-  target: 100,
-  achieved: 65,
-  remaining: 35,
-  iconSource: Images.unstiched,
-  iconBg: Colors.whiteOrange,
-  progressColor: Colors.vividAmber,
-  borderColor: Colors.lightGray,
-  iconTintColor: Colors.vividAmber,
-  achievedColor: Colors.vividAmber,
-};
+  const fetchStaffDetails = useCallback(async () => {
+    const endpoint = validStaffId
+      ? getStaffDetailsEndpoint(validStaffId, role)
+      : null;
 
-const accessoriesCard = {
-  title: Strings.accessories,
-  achievement: '80% Achievement',
-  target: 50,
-  achieved: 40,
-  remaining: 10,
-  iconSource: Images.Accesories,
-  iconBg: Colors.lightBlue,
-  progressColor: Colors.brightBlue,
-  borderColor: Colors.lightGray,
-  iconTintColor: Colors.brightBlue,
-  achievedColor: Colors.brightBlue,
-};
+    console.log(
+      'Staff Details Screen Open:',
+      JSON.stringify(
+        {
+          validStaffId,
+          staffId,
+          role,
+          userType: userData?.type,
+          endpoint,
+          routeParams: route?.params,
+        },
+        null,
+        2,
+      ),
+    );
 
-const StaffDetail = ({ navigation }) => {
+    if (!validStaffId || !endpoint) {
+      console.log(
+        'Staff Details API skipped:',
+        JSON.stringify(
+          {
+            reason: 'Missing staff id',
+            hint: 'Branch Comparison se staff row tap karo, phir Staff Details kholo',
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      logApiRequest('Staff Details', endpoint, { staffId: validStaffId, role });
+
+      const res = await Api.getStaffDetails(validStaffId, role);
+      const resJson = res?.data;
+
+      logApiResponse('Staff Details Backend Response:', resJson);
+
+      if (isApiSuccess(res)) {
+        const appResponse = mapStaffDetails(resJson?.data);
+        logApiAppResponse('Staff Details App Response:', res, appResponse);
+
+        setProfile(appResponse.profile);
+        setGarmentsCard(appResponse.garmentsCard);
+        setUnstitchedCard(appResponse.unstitchedCard);
+        setAccessoriesCard(appResponse.accessoriesCard);
+      } else {
+        logApiResponse('Staff Details Error Response:', resJson);
+        showApiMessageToast(res);
+      }
+    } catch (error) {
+      logApiResponse(
+        'Staff Details API Error:',
+        error?.response?.data ?? error?.message ?? error,
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [role, route?.params, staffId, userData?.type, validStaffId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchStaffDetails();
+    }, [fetchStaffDetails]),
+  );
+
   return (
     <View style={[MyStyling.container2, styles.container]}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
@@ -64,19 +128,31 @@ const StaffDetail = ({ navigation }) => {
         />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <StaffDetailResourceCard />
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle} numberOfLines={1}>
-            {Strings.categoryPerformance}
-          </Text>
+      {!validStaffId ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>{Strings.staffDetailSelectStaff}</Text>
         </View>
+      ) : isLoading ? (
+        <ScreenLoader />
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <StaffDetailResourceCard profile={profile} />
 
-        <StaffDetailCategoryCard item={garmentsCard} />
-        <StaffDetailCategoryCard item={unstitchedCard} />
-        <StaffDetailCategoryCard item={accessoriesCard} />
-      </ScrollView>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle} numberOfLines={1}>
+              {Strings.categoryPerformance}
+            </Text>
+          </View>
+
+          {garmentsCard ? <StaffDetailCategoryCard item={garmentsCard} /> : null}
+          {unstitchedCard ? (
+            <StaffDetailCategoryCard item={unstitchedCard} />
+          ) : null}
+          {accessoriesCard ? (
+            <StaffDetailCategoryCard item={accessoriesCard} />
+          ) : null}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -92,6 +168,19 @@ const styles = StyleSheet.create({
   headerWrap: {
     paddingHorizontal: wp(5),
     paddingTop: hp(3),
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: wp(8),
+  },
+  emptyStateText: {
+    fontSize: Fontsize.sm,
+    fontFamily: Fonts.poppinsRegular,
+    color: Colors.mediumGrey,
+    textAlign: 'center',
+    lineHeight: Fontsize.sm * 1.5,
   },
   sectionHeader: {
     marginTop: hp(1.5),

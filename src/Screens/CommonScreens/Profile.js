@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
+  PermissionsAndroid,
+  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -10,15 +11,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { launchImageLibrary } from 'react-native-image-picker';
 import Toast from 'react-native-simple-toast';
-import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenLoader from '../../Components/ScreenLoader';
 import ProfileChangePasswordCard from '../../Components/ProfileChangePasswordCard';
 import ProfileInformationCard from '../../Components/ProfileInformationCard';
 import ProfileSummaryCard from '../../Components/ProfileSummaryCard';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import {
-  ROLES,
   getProfileInfo,
   mapProfileData,
   normalizeAuthUser,
@@ -56,6 +56,27 @@ const getAvatarDisplayUri = profileImage => {
   return profileImage.uri ?? null;
 };
 
+const requestGalleryPermission = async () => {
+  if (Platform.OS !== 'android') {
+    return true;
+  }
+
+  const permission =
+    Platform.Version >= 33
+      ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+      : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+  const hasPermission = await PermissionsAndroid.check(permission);
+
+  if (hasPermission) {
+    return true;
+  }
+
+  const result = await PermissionsAndroid.request(permission);
+
+  return result === PermissionsAndroid.RESULTS.GRANTED;
+};
+
 const Profile = () => {
   const dispatch = useDispatch();
   const { role } = useRole();
@@ -64,9 +85,7 @@ const Profile = () => {
   const [profile, setProfile] = useState(
     () => userData || getProfileInfo(role),
   );
-  const [profileImage, setProfileImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
 
   const applyProfileData = useCallback(
     data => {
@@ -77,7 +96,6 @@ const Profile = () => {
         ...profileData,
         avatarUri: getAvatarDisplayUri(serverImage),
       });
-      setProfileImage(serverImage);
     },
     [role],
   );
@@ -115,7 +133,6 @@ const Profile = () => {
           } else {
             Toast.show(res?.data?.message, Toast.LONG);
             setProfile(getProfileInfo(role));
-            setProfileImage(null);
           }
         } catch (error) {
           if (!isActive) {
@@ -148,12 +165,20 @@ const Profile = () => {
     dispatch(UPDATE_USER_FIELD({ field, value }));
   };
 
-  const handlePickImage = () => {
+  const handlePickImage = async () => {
+    const hasPermission = await requestGalleryPermission();
+
+    if (!hasPermission) {
+      Toast.show('Gallery permission is required to select a photo', Toast.LONG);
+      return;
+    }
+
     launchImageLibrary(
       {
         mediaType: 'photo',
         selectionLimit: 1,
         quality: 0.8,
+        includeBase64: false,
       },
       response => {
         if (response.didCancel) {
@@ -171,93 +196,10 @@ const Profile = () => {
         const asset = response.assets?.[0];
 
         if (asset?.uri) {
-          setProfileImage(asset);
           setProfile(prev => ({ ...prev, avatarUri: asset.uri }));
         }
       },
     );
-  };
-
-  const handleUpdateProfile = async () => {
-    if (isUpdating) {
-      return;
-    }
-
-    if (!profile.name?.trim()) {
-      Toast.show('Please enter name', Toast.LONG);
-      return;
-    }
-
-    if (!profile.branchValue?.trim()) {
-      Toast.show(
-        role === ROLES.ASM ? 'Please enter region' : 'Please enter branch',
-        Toast.LONG,
-      );
-      return;
-    }
-
-    if (!profile.designation?.trim()) {
-      Toast.show('Please enter designation', Toast.LONG);
-      return;
-    }
-
-    setIsUpdating(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('type', role);
-      formData.append('name', profile.name.trim());
-      formData.append('designation', profile.designation.trim());
-
-      if (role === ROLES.ASM) {
-        formData.append('region_name', profile.branchValue.trim());
-      } else {
-        formData.append('branch_name', profile.branchValue.trim());
-      }
-
-      if (profileImage && typeof profileImage !== 'string') {
-        formData.append('image', {
-          uri: profileImage.uri,
-          type: profileImage.type || 'image/jpeg',
-          name: profileImage.fileName || 'profile.jpg',
-        });
-      }
-
-      const res = await Api.updateProfile(formData);
-      console.log(
-        'Update Profile Response:',
-        JSON.stringify(res?.data, null, 2),
-      );
-
-      if (res?.status == 200) {
-        const data = res?.data?.data || {};
-        applyProfileData(data);
-
-        const profileData = mapProfileData(data, role);
-        dispatch(
-          USER_DATA({
-            ...normalizeAuthUser(userData),
-            ...profileData,
-            avatarUri: getProfileImagePath(data),
-          }),
-        );
-
-        Toast.show(
-          res?.data?.message || 'Profile updated successfully',
-          Toast.LONG,
-        );
-      } else {
-        Toast.show(res?.data?.message, Toast.LONG);
-      }
-    } catch (error) {
-      console.log('Update Profile API Error:', error?.response?.data || error);
-      Toast.show(
-        error?.response?.data?.message || 'Failed to update profile',
-        Toast.LONG,
-      );
-    } finally {
-      setIsUpdating(false);
-    }
   };
 
   return (
@@ -272,9 +214,7 @@ const Profile = () => {
       </View>
 
       {isLoading ? (
-        <View style={styles.loaderWrap}>
-          <ActivityIndicator size="large" color={Colors.green} />
-        </View>
+        <ScreenLoader />
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -295,12 +235,6 @@ const Profile = () => {
             onFieldChange={handleFieldChange}
           />
           <ProfileChangePasswordCard />
-          <Btn
-            title={isUpdating ? 'Updating...' : Strings.updateProfile}
-            onPress={handleUpdateProfile}
-            loading={isUpdating}
-            style={styles.updateBtn}
-          />
         </ScrollView>
       )}
     </View>
@@ -317,15 +251,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(5),
     paddingTop: hp(1),
     paddingBottom: hp(4),
-  },
-  loaderWrap: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  updateBtn: {
-    marginTop: hp(2),
-    marginBottom: hp(2),
   },
 });
 

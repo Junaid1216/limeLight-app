@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ASMAchievementRow from './ASMAchievementRow';
-import { asmYoursAchievementRow } from '../Constants/DummyData';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
@@ -9,14 +8,27 @@ import { Strings } from '../Constants/Strings';
 
 const CARD_BORDER = '#3B82F6';
 const CARD_BG = '#F5FAFF';
+const VISIBLE_ROWS = 6;
+const ROW_HEIGHT = hp(5.5);
+
+const EMPTY_YOURS_ROW = { rank: 0, name: '', achieved: 0, remaining: 0 };
 
 const ASMAchievementCard = ({
   title,
   data,
   accentColor = '#20C997',
-  yoursRow = asmYoursAchievementRow,
+  yoursRow = EMPTY_YOURS_ROW,
   isLast = false,
 }) => {
+  const rows = data ?? [];
+  const hasYoursRow = Boolean(yoursRow?.name);
+  const listContent = rows.map((item, index) => (
+    <ASMAchievementRow
+      key={`${item?.rank ?? index}-${item?.name}`}
+      item={item}
+    />
+  ));
+
   return (
     <View style={[styles.card, isLast && styles.cardLast]}>
       <View style={[styles.titlePill, { borderColor: accentColor }]}>
@@ -25,9 +37,11 @@ const ASMAchievementCard = ({
         </Text>
       </View>
 
-      <View style={styles.yoursRow}>
-        <ASMAchievementRow item={yoursRow} />
-      </View>
+      {hasYoursRow ? (
+        <View style={styles.yoursRow}>
+          <ASMAchievementRow item={yoursRow} />
+        </View>
+      ) : null}
 
       <View style={styles.tableHeader}>
         <Text style={[styles.headerText, styles.rankCol]} numberOfLines={1}>
@@ -57,12 +71,17 @@ const ASMAchievementCard = ({
         </View>
       </View>
 
-      <ASMAchievementRow item={data?.[0]} />
-      <ASMAchievementRow item={data?.[1]} />
-      <ASMAchievementRow item={data?.[2]} />
-      <ASMAchievementRow item={data?.[3]} />
-      <ASMAchievementRow item={data?.[4]} />
-      <ASMAchievementRow item={data?.[5]} />
+      {rows.length > VISIBLE_ROWS ? (
+        <ScrollView
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          style={styles.rowsScroll}
+        >
+          {listContent}
+        </ScrollView>
+      ) : (
+        listContent
+      )}
     </View>
   );
 };
@@ -94,6 +113,9 @@ const styles = StyleSheet.create({
   },
   yoursRow: {
     marginBottom: hp(0.4),
+  },
+  rowsScroll: {
+    maxHeight: ROW_HEIGHT * VISIBLE_ROWS,
   },
   tableHeader: {
     flexDirection: 'row',

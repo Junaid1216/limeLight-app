@@ -17,12 +17,16 @@ import Toast from 'react-native-simple-toast';
 import { useRole } from '../../Context/RoleContext';
 import { USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
-import { normalizeAuthUser } from '../../Constants/roleConfig';
+import { mapApiTypeToRole, normalizeAuthUser, getTrainingApiRole } from '../../Constants/roleConfig';
+import {
+  navigateAfterLogin,
+  resetToRoute,
+} from '../../Navigations/navigationHelpers';
 
 const Login = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const { role } = useRole();
+  const { role, setRole } = useRole();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -34,10 +38,7 @@ const Login = () => {
   useFocusEffect(
     useCallback(() => {
       if (!role) {
-        navigation.getParent()?.getParent()?.reset({
-          index: 0,
-          routes: [{ name: 'Role' }],
-        });
+        resetToRoute(navigation, 'Role');
       } else {
         setError({ emailError: '', passwordError: '' });
       }
@@ -80,31 +81,49 @@ const Login = () => {
         const res = await Api.login(formData);
         console.log('Login success:', JSON.stringify(res?.data, null, 2));
 
-        if (res?.status == 200) {
-          console.log('Login Response:', JSON.stringify(res?.data, null, 2));
-          Toast.show(res?.data?.message, Toast.LONG);
-          setAuthToken(res?.data?.data?.token);
-          dispatch(USER_DATA(normalizeAuthUser(res?.data?.data)));
-          console.log('userData', normalizeAuthUser(res?.data?.data));
+        const token = res?.data?.data?.token ?? res?.data?.token;
+        const isSuccess =
+          res?.status === 200 && Boolean(token ?? res?.data?.data);
 
-          navigation.navigate('Drawer', {
-            screen: 'BottomNavigation',
-            params: { screen: 'Home' },
-          });
+        if (isSuccess) {
+          const user = normalizeAuthUser(res?.data?.data);
+          const apiRole = mapApiTypeToRole(user?.type) ?? role;
+          const userWithType = {
+            ...user,
+            type: user?.type ?? getTrainingApiRole(apiRole),
+          };
+
+          console.log('Login Response:', JSON.stringify(res?.data, null, 2));
+          Toast.show(res?.data?.message ?? 'Login successful', Toast.LONG);
+          setAuthToken(token);
+          dispatch(USER_DATA(userWithType));
+          console.log('userData', userWithType);
+
+          if (apiRole !== role) {
+            console.log('Login role synced from API:', {
+              selectedRole: role,
+              apiRole,
+              userType: userWithType?.type,
+            });
+          }
+          setRole(apiRole);
+
+          navigateAfterLogin(navigation);
         } else {
-          Toast.show(res?.data?.message, Toast.LONG);
-          setError({
-            emailError: res?.data?.message,
-            passwordError: '',
-          });
+          Toast.show(res?.data?.message || 'Invalid credentials', Toast.LONG);
         }
       } catch (error) {
         console.log('Login API Error:', error?.response?.data || error);
-        Toast.show(error?.response?.data?.message, Toast.LONG);
-        setError({
-          emailError: error?.response?.data?.message,
-          passwordError: '',
-        });
+
+        const message =
+          error?.response?.data?.message ||
+          (error?.code === 'ECONNABORTED'
+            ? 'Request timeout. Server respond nahi kar raha.'
+            : !error?.response
+              ? 'Server tak connection nahi ho raha. Internet ya backend check karein.'
+              : 'Invalid credentials');
+
+        Toast.show(message, Toast.LONG);
       } finally {
         setIsLoading(false);
       }

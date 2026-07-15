@@ -89,18 +89,25 @@ const getDummyTimeLabel = index => {
 const getSparseLabelIndices = length => {
   if (length <= 1) {
     return [0];
-  } else if (length <= 7) {
-    return Array.from({ length }, (_, index) => index);
-  } else {
-    const lastIndex = length - 1;
-    return [
-      0,
-      Math.round(lastIndex * 0.25),
-      Math.round(lastIndex * 0.5),
-      Math.round(lastIndex * 0.75),
-      lastIndex,
-    ].filter((value, index, array) => array.indexOf(value) === index);
   }
+
+  if (length <= 7) {
+    return Array.from({ length }, (_, index) => index);
+  }
+
+  const lastIndex = length - 1;
+  const step = length <= 14 ? 2 : Math.ceil(length / 5);
+
+  const indices = [];
+  for (let index = 0; index <= lastIndex; index += step) {
+    indices.push(index);
+  }
+
+  if (indices[indices.length - 1] !== lastIndex) {
+    indices.push(lastIndex);
+  }
+
+  return indices;
 };
 
 const toLocalDate = value => {
@@ -196,6 +203,10 @@ const normalizeTransactionSummary = summary => {
 
   if (Array.isArray(summary)) {
     return summary;
+  }
+
+  if (Array.isArray(summary?.chart)) {
+    return summary.chart;
   }
 
   if (Array.isArray(summary?.data)) {

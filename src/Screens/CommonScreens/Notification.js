@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import NotificationCard from '../../Components/NotificationCard';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import { hp, wp } from '../../Assets/Responsive';
@@ -9,8 +10,32 @@ import { Strings } from '../../Constants/Strings';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { MyStyling } from '../../Constants/Styling';
+import {
+  navigateToSurveyProgress,
+  navigateToSurveyTab,
+} from '../../Navigations/navigationHelpers';
 
 const Notification = () => {
+  const navigation = useNavigation();
+
+  const handleNotificationPress = item => {
+    if (item?.category === 'Surveys' || item?.icon === 'Survey') {
+      navigateToSurveyTab(navigation);
+      return;
+    }
+
+    if (item?.category === 'Feedback') {
+      navigation.navigate('FeedBack');
+      return;
+    }
+
+    if (item?.title?.toLowerCase?.().includes('survey')) {
+      navigateToSurveyProgress(navigation, {
+        surveyTitle: Strings.priceSatisfactionSurvey,
+      });
+    }
+  };
+
   return (
     <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
@@ -18,7 +43,9 @@ const Notification = () => {
       <FlatList
         data={notificationData}
         keyExtractor={item => item?.id}
-        renderItem={({ item }) => <NotificationCard item={item} />}
+        renderItem={({ item }) => (
+          <NotificationCard item={item} onPress={handleNotificationPress} />
+        )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         ListHeaderComponent={

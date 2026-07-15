@@ -1,8 +1,17 @@
+import Toast from 'react-native-simple-toast';
+import { Strings } from '../Constants/Strings';
+import {
+  getLastSelectedStaffMember,
+  getValidStaffId,
+  setLastSelectedStaff,
+} from '../Utils/staffHelpers';
+
 const APP_STACK_ROUTE_NAMES = new Set([
   'TargetAssignment',
   'BranchTargets',
   'BranchStaffComparison',
   'StaffComparison',
+  'StaffDetail',
   'Announcement',
   'AnnouncementDetail',
   'Profile',
@@ -10,6 +19,41 @@ const APP_STACK_ROUTE_NAMES = new Set([
   'SurveyProgress',
   'SurveyResponse',
 ]);
+
+export const findNavigatorWithRoute = (navigation, routeName) => {
+  let nav = navigation;
+
+  while (nav) {
+    const routeNames = nav.getState()?.routeNames ?? [];
+
+    if (routeNames.includes(routeName)) {
+      return nav;
+    }
+
+    nav = nav.getParent();
+  }
+
+  return null;
+};
+
+export const resetToRoute = (navigation, routeName) => {
+  const nav = findNavigatorWithRoute(navigation, routeName);
+
+  if (!nav) {
+    return false;
+  }
+
+  nav.reset({
+    index: 0,
+    routes: [{ name: routeName }],
+  });
+
+  return true;
+};
+
+export const navigateAfterLogin = navigation => {
+  resetToRoute(navigation, 'Drawer');
+};
 
 export const navigateToProfile = navigation => {
   if (!navigation) {
@@ -27,6 +71,98 @@ export const navigateToProfile = navigation => {
     }
 
     nav = nav.getParent();
+  }
+};
+
+export const navigateToStaffDetail = (navigation, member) => {
+  const selectedMember = member ?? getLastSelectedStaffMember();
+  const staffId = getValidStaffId(selectedMember);
+
+  console.log(
+    'Staff Details Navigate:',
+    JSON.stringify(
+      {
+        staffId,
+        memberName: selectedMember?.name ?? selectedMember?.staff_name,
+        member: selectedMember,
+      },
+      null,
+      2,
+    ),
+  );
+
+  if (!staffId) {
+    console.log(
+      'Staff Details Navigate blocked:',
+      JSON.stringify(
+        {
+          reason: 'Missing staff id',
+          member: selectedMember,
+        },
+        null,
+        2,
+      ),
+    );
+    Toast.show(Strings.staffDetailMissingId, Toast.LONG);
+    return;
+  }
+
+  setLastSelectedStaff({ ...selectedMember, staff_id: staffId, id: String(staffId) });
+
+  const params = {
+    member: { ...selectedMember, staff_id: staffId, id: String(staffId) },
+    staffId,
+  };
+  const nav = findNavigatorWithRoute(navigation, 'StaffDetail');
+  const parentNav = navigation?.getParent?.();
+
+  if (nav) {
+    nav.navigate('StaffDetail', params);
+    return;
+  }
+
+  if (parentNav?.getState?.()?.routeNames?.includes('StaffDetail')) {
+    parentNav.navigate('StaffDetail', params);
+    return;
+  }
+
+  console.log(
+    'Staff Details navigation failed:',
+    JSON.stringify({ reason: 'StaffDetail route not found' }, null, 2),
+  );
+};
+
+export const navigateToSurveyTab = navigation => {
+  if (!navigation) {
+    return;
+  }
+
+  const tabNav = findNavigatorWithRoute(navigation, 'Survey');
+
+  if (tabNav) {
+    tabNav.navigate('Survey', { screen: 'SurveyMain' });
+    return;
+  }
+
+  navigation.navigate('Survey', { screen: 'SurveyMain' });
+};
+
+export const navigateToSurveyProgress = (navigation, params = {}) => {
+  if (!navigation) {
+    return;
+  }
+
+  const nav = findNavigatorWithRoute(navigation, 'SurveyProgress');
+
+  if (nav) {
+    nav.navigate('SurveyProgress', params);
+    return;
+  }
+
+  const parentNav = navigation.getParent?.();
+
+  if (parentNav?.getState?.()?.routeNames?.includes('SurveyProgress')) {
+    parentNav.navigate('SurveyProgress', params);
   }
 };
 

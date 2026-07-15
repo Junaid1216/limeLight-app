@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
@@ -23,7 +23,9 @@ import { employeeIdRegex } from '../../Constants/Regex';
 import { ROLES, getProfileInfo, mapProfileData, normalizeAuthUser } from '../../Constants/roleConfig';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
-import Api, { getAuthToken } from '../../Services/Api_services';
+import Api, { getAuthToken, isApiSuccess } from '../../Services/Api_services';
+import { navigateToSurveyTab } from '../../Navigations/navigationHelpers';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const getFormFromUserData = (userData, role) => {
   const normalized = normalizeAuthUser(userData);
@@ -44,6 +46,7 @@ const getFormFromUserData = (userData, role) => {
 };
 
 const FeedBack = () => {
+  const navigation = useNavigation();
   const { role } = useRole();
   const isAsm = role === ROLES.ASM;
   const locationLabel = isAsm ? Strings.region : Strings.branchLabel;
@@ -168,12 +171,7 @@ const FeedBack = () => {
         feedbackError: 'Please enter feedback',
       });
     } else if (!getAuthToken()) {
-      setError({
-        codeError: '',
-        nameError: '',
-        branchError: '',
-        feedbackError: 'Please login again',
-      });
+      Toast.show('Please login again', Toast.LONG);
     } else {
       setError({
         codeError: '',
@@ -202,34 +200,25 @@ const FeedBack = () => {
           JSON.stringify(res?.data, null, 2),
         );
 
-        if (res?.status == 200) {
+        if (isApiSuccess(res)) {
           console.log(
             `${feedbackLabel} Success:`,
             JSON.stringify(res?.data, null, 2),
           );
-          Toast.show(res?.data?.message, Toast.LONG);
+          Toast.show(
+            res?.data?.message || 'Feedback submitted successfully',
+            Toast.LONG,
+          );
           setForm(prev => ({ ...prev, feedback: '' }));
+          navigateToSurveyTab(navigation);
         } else {
-          Toast.show(res?.data?.message, Toast.LONG);
-          setError({
-            codeError: '',
-            nameError: '',
-            branchError: '',
-            feedbackError: res?.data?.message,
-          });
+          showApiMessageToast(res);
         }
       } catch (error) {
         console.log(`${feedbackLabel} API Error:`, {
           status: error?.response?.status,
           url: feedbackEndpoint,
           data: error?.response?.data || error,
-        });
-        Toast.show(error?.response?.data?.message, Toast.LONG);
-        setError({
-          codeError: '',
-          nameError: '',
-          branchError: '',
-          feedbackError: error?.response?.data?.message,
         });
       } finally {
         setIsLoading(false);

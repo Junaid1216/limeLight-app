@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -8,7 +7,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
-import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
@@ -27,7 +25,8 @@ import TrainingProductCard from '../../Components/TrainingProductCard';
 import TrainingStatusChips from '../../Components/TrainingStatusChips';
 import TrainingTabs from '../../Components/TrainingTabs';
 import { useRole } from '../../Context/RoleContext';
-import Api from '../../Services/Api_services';
+import Api, { isApiSuccess } from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const customerImages = [
   Images.CustomerService,
@@ -204,7 +203,6 @@ const Training = () => {
   const [customerData, setCustomerData] = useState(trainingCustomerData);
   const [productData, setProductData] = useState(trainingProductData);
   const [displayData, setDisplayData] = useState(trainingDisplayData);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchTrainingVideos = useCallback(async () => {
     if (!role) {
@@ -212,7 +210,6 @@ const Training = () => {
     }
 
     const apiRole = getTrainingApiRole(role);
-    setIsLoading(true);
 
     try {
       console.log('Training Videos Request:', `training-videos?role=${apiRole}`, {
@@ -224,7 +221,7 @@ const Training = () => {
         JSON.stringify(res?.data, null, 2),
       );
 
-      if (res?.status == 200) {
+      if (isApiSuccess(res)) {
         const mapped = mapTrainingVideos(res?.data?.data ?? res?.data);
         console.log('Training Videos Success:', JSON.stringify(mapped, null, 2));
 
@@ -238,7 +235,7 @@ const Training = () => {
           setDisplayData(mapped.display);
         }
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        showApiMessageToast(res);
       }
     } catch (error) {
       console.log('Training Videos API Error:', {
@@ -246,9 +243,6 @@ const Training = () => {
         url: `training-videos?role=${apiRole}`,
         data: error?.response?.data || error,
       });
-      Toast.show(error?.response?.data?.message, Toast.LONG);
-    } finally {
-      setIsLoading(false);
     }
   }, [role]);
 
@@ -298,34 +292,24 @@ const Training = () => {
 
         <TrainingStatusChips active={activeStatus} onChange={setActiveStatus} />
 
-        {isLoading ? (
-          <ActivityIndicator
-            size="large"
-            color={Colors.teal}
-            style={styles.loader}
-          />
-        ) : (
-          <>
-            {activeTab === 'Customer' &&
-              filteredCustomer.map(item => (
-                <TrainingCustomerCard key={item.id} item={item} />
-              ))}
+        {activeTab === 'Customer' &&
+          filteredCustomer.map(item => (
+            <TrainingCustomerCard key={item.id} item={item} />
+          ))}
 
-            {activeTab === 'Product' &&
-              filteredProduct.map(item => (
-                <TrainingProductCard
-                  key={item.id}
-                  item={item}
-                  onViewDetail={openDetail}
-                />
-              ))}
+        {activeTab === 'Product' &&
+          filteredProduct.map(item => (
+            <TrainingProductCard
+              key={item.id}
+              item={item}
+              onViewDetail={openDetail}
+            />
+          ))}
 
-            {activeTab === 'Display' &&
-              filteredDisplay.map(item => (
-                <TrainingDisplayCard key={item.id} item={item} />
-              ))}
-          </>
-        )}
+        {activeTab === 'Display' &&
+          filteredDisplay.map(item => (
+            <TrainingDisplayCard key={item.id} item={item} />
+          ))}
       </ScrollView>
 
       <TrainingDetailModal

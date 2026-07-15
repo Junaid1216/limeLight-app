@@ -6,6 +6,24 @@ export const ROLES = {
   ASM: 'asm',
 };
 
+export const mapApiTypeToRole = type => {
+  const value = String(type ?? '').toLowerCase();
+
+  if (value === 'asm') {
+    return ROLES.ASM;
+  }
+
+  if (value === 'manager' || value === 'branch_manager') {
+    return ROLES.MANAGER;
+  }
+
+  if (value === 'staff' || value === 'sales_staff') {
+    return ROLES.STAFF;
+  }
+
+  return null;
+};
+
 export const getTrainingApiRole = role => {
   switch (role) {
     case ROLES.MANAGER:
