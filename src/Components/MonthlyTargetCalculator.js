@@ -6,7 +6,35 @@ import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 import { Fontsize } from '../Constants/Fontsize';
 
-const MonthlyTargetCalculator = () => {
+const CATEGORY_ROWS = [
+  {
+    key: 'garments',
+    label: Strings.garments,
+    icon: require('../Assets/Icons/Garments.png'),
+  },
+  {
+    key: 'unstitched',
+    label: Strings.unstitched,
+    icon: require('../Assets/Icons/Garments.png'),
+  },
+  {
+    key: 'accessories',
+    label: Strings.accessories,
+    icon: require('../Assets/Icons/Garments.png'),
+  },
+];
+
+const MonthlyTargetCalculator = ({ summary }) => {
+  const categories = summary?.categories ?? [];
+  const totalAssigned = summary?.totalAssigned ?? 0;
+
+  const getCategoryValues = key =>
+    categories.find(item => item.key === key) ?? {
+      target: 0,
+      assigned: 0,
+      left: 0,
+    };
+
   return (
     <View style={styles.boxContainer}>
       <View style={styles.headerRow}>
@@ -40,92 +68,46 @@ const MonthlyTargetCalculator = () => {
 
       <View style={styles.divider} />
 
-      <View style={styles.rowItem}>
-        <View style={styles.categoryContainer}>
-          <View style={styles.iconWrapper}>
-            <Image
-              source={require('../Assets/Icons/Garments.png')}
-              style={styles.GarmentsStyle}
-            />
+      {CATEGORY_ROWS.map((category, index) => {
+        const values = getCategoryValues(category.key);
+
+        return (
+          <View key={category.key}>
+            {index > 0 ? <View style={styles.dividertwo} /> : null}
+
+            <View style={styles.rowItem}>
+              <View style={styles.categoryContainer}>
+                <View style={styles.iconWrapper}>
+                  <Image source={category.icon} style={styles.GarmentsStyle} />
+                </View>
+
+                <Text style={styles.categoryName} numberOfLines={1}>
+                  {category.label}
+                </Text>
+              </View>
+
+              <View style={styles.targetBox}>
+                <Text style={styles.targetText}>{values.target}</Text>
+              </View>
+
+              <View style={styles.assignedBox}>
+                <Text style={styles.assignedText}>{values.assigned}</Text>
+              </View>
+
+              <View style={styles.leftBox}>
+                <Text style={styles.leftText}>{values.left}</Text>
+              </View>
+            </View>
           </View>
+        );
+      })}
 
-          <Text style={styles.categoryName} numberOfLines={1}>
-            {Strings.garments}
-          </Text>
-        </View>
-
-        <View style={styles.targetBox}>
-          <Text style={styles.targetText}>300</Text>
-        </View>
-
-        <View style={styles.assignedBox}>
-          <Text style={styles.assignedText}>160</Text>
-        </View>
-
-        <View style={styles.leftBox}>
-          <Text style={styles.leftText}>140</Text>
-        </View>
-      </View>
-      <View style={styles.dividertwo} />
-      <View style={styles.rowItem}>
-        <View style={styles.categoryContainer}>
-          <View style={styles.iconWrapper}>
-            <Image
-              source={require('../Assets/Icons/Garments.png')}
-              style={styles.GarmentsStyle}
-            />
-          </View>
-
-          <Text style={styles.categoryName} numberOfLines={1}>
-            {Strings.unstitched}
-          </Text>
-        </View>
-
-        <View style={styles.targetBox}>
-          <Text style={styles.targetText}>300</Text>
-        </View>
-
-        <View style={styles.assignedBox}>
-          <Text style={styles.assignedText}>160</Text>
-        </View>
-
-        <View style={styles.leftBox}>
-          <Text style={styles.leftText}>140</Text>
-        </View>
-      </View>
-      <View style={styles.dividertwo} />
-      <View style={styles.rowItem}>
-        <View style={styles.categoryContainer}>
-          <View style={styles.iconWrapper}>
-            <Image
-              source={require('../Assets/Icons/Garments.png')}
-              style={styles.GarmentsStyle}
-            />
-          </View>
-
-          <Text style={styles.categoryName} numberOfLines={1}>
-            {Strings.accessories}
-          </Text>
-        </View>
-
-        <View style={styles.targetBox}>
-          <Text style={styles.targetText}>300</Text>
-        </View>
-
-        <View style={styles.assignedBox}>
-          <Text style={styles.assignedText}>160</Text>
-        </View>
-
-        <View style={styles.leftBox}>
-          <Text style={styles.leftText}>140</Text>
-        </View>
-      </View>
       <View style={styles.dividertwo} />
 
       <View style={styles.totalRow}>
         <Text style={styles.totalAssignedText}>{Strings.totalAssigned}</Text>
 
-        <Text style={styles.totalValue}>660</Text>
+        <Text style={styles.totalValue}>{totalAssigned}</Text>
       </View>
     </View>
   );
@@ -137,10 +119,10 @@ const styles = StyleSheet.create({
   boxContainer: {
     backgroundColor: Colors.darkblue,
     width: wp(89),
-    height: wp(88),
     borderRadius: wp(5),
     paddingTop: wp(6),
     paddingHorizontal: wp(6),
+    paddingBottom: wp(4),
   },
 
   headerRow: {
@@ -194,17 +176,10 @@ const styles = StyleSheet.create({
     paddingBottom: wp(3),
   },
 
-  tableHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: wp(8),
-    paddingBottom: wp(3),
-  },
-
   headerText: {
     flex: 1,
     color: '#8A94B3',
-    fontSize: Fontsize.xm0, // thoda chhota
+    fontSize: Fontsize.xm0,
     fontFamily: Fonts.poppinsRegular,
     textAlign: 'center',
   },
@@ -233,7 +208,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: wp(3),
-    marginLeft: wp(2),
+    marginHorizontal: wp(2),
   },
 
   iconWrapper: {
@@ -243,12 +218,6 @@ const styles = StyleSheet.create({
     borderRadius: wp(2),
     justifyContent: 'center',
     alignItems: 'center',
-  },
-
-  GarmentsStyle: {
-    width: wp(4),
-    height: wp(4),
-    resizeMode: 'contain',
   },
 
   categoryName: {
@@ -262,12 +231,6 @@ const styles = StyleSheet.create({
     flex: 2.2,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  rowItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: wp(3),
-    marginHorizontal: wp(2),
   },
 
   targetBox: {
@@ -287,7 +250,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    // marginLeft: wp(1),
     marginRight: wp(3.5),
   },
 
@@ -334,7 +296,7 @@ const styles = StyleSheet.create({
 
   totalValue: {
     color: Colors.white,
-    fontFamily: Fonts.poppinsRegular, // agar hai
+    fontFamily: Fonts.poppinsRegular,
     fontSize: wp(2.9),
   },
 });

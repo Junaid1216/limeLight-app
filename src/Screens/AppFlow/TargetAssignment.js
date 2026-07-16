@@ -6,7 +6,9 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-simple-toast';
 
 import { MyStyling } from '../../Constants/Styling';
 import { Colors } from '../../Constants/Colors';
@@ -15,13 +17,32 @@ import { Strings } from '../../Constants/Strings';
 import { hp, wp } from '../../Assets/Responsive';
 
 import MonthlyTargetCalculator from '../../Components/MonthlyTargetCalculator';
-import MonthlyTargetAssignment from '../../Components/MonthlyTargetAssignment';
+import MonthlyTargetAssignment, {
+  defaultStaffRows,
+} from '../../Components/MonthlyTargetAssignment';
 import Btn from '../../Components/Btn';
+import Api from '../../Services/Api_services';
+import {
+  buildBranchManagerAssignTargetsPayload,
+  getCurrentMonthYearLabels,
+} from '../../Utils/branchManagerMappers';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const BUTTONS_BOTTOM = 20;
 
+const getEmptyStaffRows = () =>
+  defaultStaffRows.map(row => ({
+    ...row,
+    garments: '',
+    unstitched: '',
+    accessories: '',
+  }));
+
 const TargetAssignment = () => {
+  const navigation = useNavigation();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [staffRows, setStaffRows] = useState(getEmptyStaffRows);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', event => {
@@ -36,6 +57,58 @@ const TargetAssignment = () => {
       hideSub.remove();
     };
   }, []);
+
+  const handleUpdateField = (id, field, value) => {
+    setStaffRows(prev =>
+      prev.map(row => (row.id === id ? { ...row, [field]: value } : row)),
+    );
+  };
+
+  const handleReset = () => {
+    setStaffRows(getEmptyStaffRows());
+  };
+
+  const handleSaveTargets = async () => {
+    const { month, year } = getCurrentMonthYearLabels();
+    const payload = buildBranchManagerAssignTargetsPayload(staffRows, month, year);
+
+    if (!payload.targets.length) {
+      Toast.show('Please enter at least one target value', Toast.LONG);
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const res = await Api.assignBranchManagerTargets(payload);
+      const resJson = res?.data;
+
+      if (res?.status == 200) {
+        console.log(
+          'Branch Manager Target Assignment App Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        Toast.show(resJson?.message || 'Targets saved successfully', Toast.LONG);
+        handleReset();
+        navigation.goBack();
+      } else {
+        console.log(
+          'Branch Manager Target Assignment Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+        showApiMessageToast(res);
+      }
+    } catch (error) {
+      console.log(
+        'Branch Manager Target Assignment API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+      showApiMessageToast(null, error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <SafeAreaView style={MyStyling.container2}>
@@ -55,14 +128,27 @@ const TargetAssignment = () => {
         showsVerticalScrollIndicator={false}>
         <MonthlyTargetCalculator />
 
-        <MonthlyTargetAssignment />
+        <MonthlyTargetAssignment
+          rows={staffRows}
+          onUpdateField={handleUpdateField}
+        />
       </ScrollView>
 
       <View
         style={[styles.bottomButtons, { bottom: BUTTONS_BOTTOM - keyboardHeight }]}>
-        <Btn title="↺ Reset" style={styles.resetBtn} />
+        <Btn
+          title="↺ Reset"
+          style={styles.resetBtn}
+          onPress={handleReset}
+          loading={isSaving}
+        />
 
-        <Btn title="Save Targets" style={styles.saveBtn} />
+        <Btn
+          title="Save Targets"
+          style={styles.saveBtn}
+          onPress={handleSaveTargets}
+          loading={isSaving}
+        />
       </View>
     </SafeAreaView>
   );

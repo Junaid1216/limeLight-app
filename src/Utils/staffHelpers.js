@@ -18,10 +18,11 @@ export const getStaffIdFromRawApiItem = item => {
   const candidates = [
     item?.staff_id,
     item?.sale_staff_id,
-    item?.id,
+    item?.sales_staff_id,
     item?.employee_id,
     item?.user_id,
     item?.staffId,
+    item?.id,
   ];
 
   for (const value of candidates) {

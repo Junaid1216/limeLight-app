@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, TextInput, View, Image } from 'react-native';
 
 import { Colors } from '../Constants/Colors';
@@ -6,100 +6,43 @@ import { wp } from '../Assets/Responsive';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 
-const staffData = [
+export const defaultStaffRows = [
   {
-    id: '1',
+    id: '13',
+    sale_staff_id: 13,
     initials: 'MU',
     name: 'Mudassar',
-    g: 10,
-    u: 20,
-    a: 20,
     color: '#CFF5EA',
+    garments: '',
+    unstitched: '',
+    accessories: '',
   },
   {
-    id: '2',
+    id: '14',
+    sale_staff_id: 14,
     initials: 'AT',
     name: 'Atique',
-    g: 15,
-    u: 25,
-    a: 25,
     color: '#DDE3FF',
+    garments: '',
+    unstitched: '',
+    accessories: '',
   },
   {
-    id: '3',
+    id: '15',
+    sale_staff_id: 15,
     initials: 'ZA',
     name: 'Zain',
-    g: 20,
-    u: 30,
-    a: 30,
     color: '#FFE8BF',
-  },
-  {
-    id: '4',
-    initials: 'KO',
-    name: 'Komal',
-    g: 25,
-    u: 35,
-    a: 35,
-    color: '#F2D8FF',
-  },
-  {
-    id: '5',
-    initials: 'AY',
-    name: 'Ayesha',
-    g: 30,
-    u: 40,
-    a: 40,
-    color: '#FFD8E3',
-  },
-  {
-    id: '6',
-    initials: 'AZ',
-    name: 'Azhar',
-    g: 35,
-    u: 45,
-    a: 50,
-    color: '#D4F5E9',
-  },
-  {
-    id: '7',
-    initials: 'RI',
-    name: 'Rizwan',
-    g: 25,
-    u: 45,
-    a: 60,
-    color: '#D8E1FF',
-  },
-  {
-    id: '8',
-    initials: 'RI',
-    name: 'Rizwan',
-    g: 25,
-    u: 45,
-    a: 60,
-    color: '#D8E1FF',
-  },
-  {
-    id: '9',
-    initials: 'RI',
-    name: 'Rizwan',
-    g: 25,
-    u: 45,
-    a: 60,
-    color: '#D8E1FF',
+    garments: '',
+    unstitched: '',
+    accessories: '',
   },
 ];
 
-const MonthlyTargetAssignment = () => {
-  const [rows, setRows] = useState(
-    staffData.map(item => ({ ...item, g: '', u: '', a: '' })),
-  );
-
+const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
   const updateField = (id, field, value) => {
     const cleaned = value.replace(/[^0-9]/g, '');
-    setRows(prev =>
-      prev.map(row => (row.id === id ? { ...row, [field]: cleaned } : row)),
-    );
+    onUpdateField?.(id, field, cleaned);
   };
 
   const renderRow = item => (
@@ -114,8 +57,8 @@ const MonthlyTargetAssignment = () => {
 
       <TextInput
         style={styles.inputBox}
-        value={item.g}
-        onChangeText={text => updateField(item.id, 'g', text)}
+        value={item.garments}
+        onChangeText={text => updateField(item.id, 'garments', text)}
         keyboardType="number-pad"
         textAlign="center"
         maxLength={4}
@@ -125,8 +68,8 @@ const MonthlyTargetAssignment = () => {
 
       <TextInput
         style={styles.inputBox}
-        value={item.u}
-        onChangeText={text => updateField(item.id, 'u', text)}
+        value={item.unstitched}
+        onChangeText={text => updateField(item.id, 'unstitched', text)}
         keyboardType="number-pad"
         textAlign="center"
         maxLength={4}
@@ -136,8 +79,8 @@ const MonthlyTargetAssignment = () => {
 
       <TextInput
         style={styles.inputBox}
-        value={item.a}
-        onChangeText={text => updateField(item.id, 'a', text)}
+        value={item.accessories}
+        onChangeText={text => updateField(item.id, 'accessories', text)}
         keyboardType="number-pad"
         textAlign="center"
         maxLength={4}
@@ -151,14 +94,7 @@ const MonthlyTargetAssignment = () => {
     <View style={styles.boxContainer}>
       <View style={styles.topContainer}>
         <View style={styles.titleContainer}>
-          <View
-            style={{
-              backgroundColor: '#F59E0B26',
-              width: 28,
-              height: 28,
-              borderRadius: 7,
-            }}
-          >
+          <View style={styles.iconWrap}>
             <Image
               source={require('../Assets/Icons/MultiplePeople.png')}
               style={styles.icon}
@@ -172,7 +108,7 @@ const MonthlyTargetAssignment = () => {
         </View>
 
         <View style={styles.countBox}>
-          <Text style={styles.countText}>7</Text>
+          <Text style={styles.countText}>{rows.length}</Text>
         </View>
       </View>
 
@@ -216,7 +152,6 @@ const styles = StyleSheet.create({
   subHeading: {
     fontSize: wp(2.9),
     color: '#9CA3AF',
-
     fontFamily: Fonts.poppinsRegular,
   },
 
@@ -251,7 +186,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: Fontsize.x0,
     color: '#9CA3AF',
-    // fontWeight: '600',
   },
 
   row: {
@@ -285,7 +219,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: Fontsize.xs4,
     color: '#111827',
- 
   },
 
   inputBox: {
@@ -307,6 +240,13 @@ const styles = StyleSheet.create({
 
   textContainer: {
     marginLeft: wp(2),
+  },
+
+  iconWrap: {
+    backgroundColor: '#F59E0B26',
+    width: 28,
+    height: 28,
+    borderRadius: 7,
   },
 
   icon: {

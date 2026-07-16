@@ -2,7 +2,7 @@ import { Images } from '../Assets';
 import { Colors } from '../Constants/Colors';
 import { categoryColorMap } from '../Constants/CategoryColors';
 import { Strings } from '../Constants/Strings';
-import { getStaffIdFromRawApiItem } from './staffHelpers';
+import { getStaffIdFromRawApiItem, getValidStaffId } from './staffHelpers';
 
 const CATEGORY_ORDER = ['garments', 'unstitched', 'accessories'];
 
@@ -372,3 +372,122 @@ export const buildCategoryWeeklyChartData = categoryItem => {
     chartSections: chartMaxValue <= 25 ? 4 : 5,
   };
 };
+
+const MONTH_NAMES = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+const ASSIGNMENT_AVATAR_COLORS = [
+  '#CFF5EA',
+  '#DDE3FF',
+  '#FFE8BF',
+  '#F2D8FF',
+  '#FFD8E3',
+  '#D4F5E9',
+  '#D8E1FF',
+];
+
+const getStaffInitials = name => {
+  if (!name) {
+    return '';
+  }
+
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(word => word[0]?.toUpperCase() ?? '')
+    .join('');
+};
+
+export const getCurrentMonthYearLabels = () => {
+  const now = new Date();
+
+  return {
+    month: MONTH_NAMES[now.getMonth()],
+    year: now.getFullYear(),
+  };
+};
+
+export const mapBranchManagerStaffForAssignment = items =>
+  (items ?? []).map((item, index) => {
+    const staffId = getStaffIdFromRawApiItem(item);
+
+    return {
+      id: staffId != null ? String(staffId) : `staff-row-${index}`,
+      sale_staff_id: staffId,
+      name: item?.staff_name ?? item?.name ?? '',
+      initials: getStaffInitials(item?.staff_name ?? item?.name),
+      color: ASSIGNMENT_AVATAR_COLORS[index % ASSIGNMENT_AVATAR_COLORS.length],
+      garments: item?.garments != null ? String(item.garments) : '',
+      unstitched: item?.unstitched != null ? String(item.unstitched) : '',
+      accessories: item?.accessories != null ? String(item.accessories) : '',
+    };
+  });
+
+const hasAssignmentValues = row =>
+  Number(row?.garments || 0) > 0 ||
+  Number(row?.unstitched || 0) > 0 ||
+  Number(row?.accessories || 0) > 0;
+
+export const sumAssignmentTargets = rows =>
+  (rows ?? []).reduce(
+    (acc, row) => ({
+      garments: acc.garments + Number(row?.garments || 0),
+      unstitched: acc.unstitched + Number(row?.unstitched || 0),
+      accessories: acc.accessories + Number(row?.accessories || 0),
+    }),
+    { garments: 0, unstitched: 0, accessories: 0 },
+  );
+
+export const mapBranchManagerTargetSummary = (categoryItems, assignedTotals) => {
+  const findCategory = key =>
+    (categoryItems ?? []).find(item => getCategoryKey(item?.title) === key);
+
+  const buildRow = key => {
+    const category = findCategory(key);
+    const target = Number(category?.target ?? 0);
+    const assigned = Number(assignedTotals?.[key] ?? 0);
+
+    return {
+      key,
+      target,
+      assigned,
+      left: Math.max(0, target - assigned),
+    };
+  };
+
+  const garments = buildRow('garments');
+  const unstitched = buildRow('unstitched');
+  const accessories = buildRow('accessories');
+
+  return {
+    categories: [garments, unstitched, accessories],
+    totalAssigned:
+      garments.assigned + unstitched.assigned + accessories.assigned,
+  };
+};
+
+export const buildBranchManagerAssignTargetsPayload = (rows, month, year) => ({
+  month,
+  year,
+  targets: (rows ?? [])
+    .filter(row => getValidStaffId(row) && hasAssignmentValues(row))
+    .map(row => ({
+      sale_staff_id: getValidStaffId(row),
+      garments: Number(row.garments || 0),
+      unstitched: Number(row.unstitched || 0),
+      accessories: Number(row.accessories || 0),
+    })),
+});

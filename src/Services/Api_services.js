@@ -116,6 +116,8 @@ const Api = {
     requests.get('branch-manager-staff-comparison'),
   getBranchManagerBranchComparison: () =>
     requests.get('branch-manager-branch-comparison'),
+  assignBranchManagerTargets: data =>
+    requests.post('branch-manager/assign-targets', data),
   getAsmBranchComparison: () => requests.get('asm-branch-comparison'),
   getAsmBranchConversion: type =>
     requests.get(`asm-branch-conversion?type=${type}`),
