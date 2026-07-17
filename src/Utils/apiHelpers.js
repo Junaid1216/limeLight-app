@@ -1,5 +1,4 @@
 import Toast from 'react-native-simple-toast';
-import { isApiSuccess } from '../Services/Api_services';
 
 const normalizeMessage = message => {
   if (message == null || message === '') {
@@ -20,17 +19,22 @@ const normalizeMessage = message => {
 
 export const getApiMessage = (response, error) => {
   if (error) {
+    const data = error?.response?.data;
+
     return normalizeMessage(
-      error?.response?.data?.message ??
-        error?.response?.data?.error ??
-        (typeof error?.response?.data === 'string'
-          ? error.response.data
-          : null) ??
+      data?.message ??
+        data?.error ??
+        (typeof data === 'string' ? data : null) ??
+        (typeof data?.data === 'string' ? data.data : null) ??
         error?.message,
     );
   }
 
-  return normalizeMessage(response?.data?.message);
+  const data = response?.data;
+
+  return normalizeMessage(
+    data?.message ?? (typeof data?.data === 'string' ? data.data : null),
+  );
 };
 
 export const showApiMessageToast = (response, error) => {
@@ -42,7 +46,7 @@ export const showApiMessageToast = (response, error) => {
 };
 
 export const notifyApiFailure = (response, error) => {
-  if (error || !isApiSuccess(response)) {
+  if (error || response?.status != 200) {
     showApiMessageToast(response, error);
     return true;
   }

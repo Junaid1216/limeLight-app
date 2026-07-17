@@ -8,7 +8,7 @@ import { categoryBreakdownData } from '../Constants/DummyData';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
-import Api, { isApiSuccess } from '../Services/Api_services';
+import Api from '../Services/Api_services';
 import { showApiMessageToast } from '../Utils/apiHelpers';
 
 const getCategoryDotColor = categoryName => {
@@ -80,21 +80,30 @@ const CategoryBreakdownCard = ({
       const res = await Api.getCategoryBreakdown();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
-        console.log('Category Breakdown Backend Response:', resJson);
+      console.log(
+        'Category Breakdown Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
+        console.log(
+          'Category Breakdown Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
         const appResponse = mapCategoryBreakdown(resJson?.data);
-        console.log('Category Breakdown App Response:', appResponse);
-
         setBreakdownData(appResponse);
       } else {
-        console.log('Category Breakdown Error Response:', resJson);
+        console.log(
+          'Category Breakdown Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'Category Breakdown API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
   }, []);

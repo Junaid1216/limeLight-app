@@ -15,6 +15,25 @@ export const getStaffIdFromApiItem = item => {
 };
 
 export const getStaffIdFromRawApiItem = item => {
+  if (!item) {
+    return null;
+  }
+
+  const nested =
+    item?.sale_staff ??
+    item?.sales_staff ??
+    item?.staff ??
+    item?.employee ??
+    item?.user;
+
+  if (nested && typeof nested === 'object') {
+    const nestedId = getStaffIdFromRawApiItem(nested);
+
+    if (nestedId) {
+      return nestedId;
+    }
+  }
+
   const candidates = [
     item?.staff_id,
     item?.sale_staff_id,
@@ -51,6 +70,62 @@ export const normalizeStaffId = value => {
 };
 
 export const getValidStaffId = member => getStaffIdFromRawApiItem(member);
+
+const normalizeStaffName = value => {
+  if (value == null) {
+    return '';
+  }
+
+  const trimmed = String(value).trim();
+  return trimmed || '';
+};
+
+export const getStaffNameFromRawApiItem = item => {
+  if (!item) {
+    return '';
+  }
+
+  const nested =
+    item?.sale_staff ??
+    item?.sales_staff ??
+    item?.staff ??
+    item?.employee ??
+    item?.user ??
+    {};
+
+  const firstName = normalizeStaffName(
+    item?.first_name ?? nested?.first_name,
+  );
+  const lastName = normalizeStaffName(item?.last_name ?? nested?.last_name);
+  const combinedName = [firstName, lastName].filter(Boolean).join(' ');
+
+  const candidates = [
+    item?.staff_name,
+    item?.sale_staff_name,
+    item?.sales_staff_name,
+    item?.name,
+    item?.employee_name,
+    item?.full_name,
+    item?.user_name,
+    item?.staffName,
+    nested?.staff_name,
+    nested?.sale_staff_name,
+    nested?.name,
+    nested?.employee_name,
+    nested?.full_name,
+    combinedName,
+  ];
+
+  for (const value of candidates) {
+    const normalized = normalizeStaffName(value);
+
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return '';
+};
 
 export const setLastSelectedStaff = member => {
   const staffId = getValidStaffId(member);

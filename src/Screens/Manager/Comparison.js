@@ -12,12 +12,7 @@ import { Fonts } from '../../Constants/Fonts';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import Api, { isApiSuccess } from '../../Services/Api_services';
-import {
-  logApiAppResponse,
-  logApiRequest,
-  logApiResponse,
-} from '../../Utils/asmMappers';
+import Api from '../../Services/Api_services';
 import {
   mapBranchManagerBranchComparison,
   mapBranchManagerStaffComparison,
@@ -68,36 +63,29 @@ const Comparison = props => {
 
   const fetchStaffComparison = useCallback(async () => {
     try {
-      logApiRequest(
-        'Branch Manager Staff Comparison',
-        'branch-manager-staff-comparison',
-      );
-
       const res = await Api.getBranchManagerStaffComparison();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
-        logApiResponse('Branch Manager Staff Comparison Backend Response:', resJson);
+      console.log(
+        'Branch Manager Staff Comparison Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
 
-        const rawData = resJson?.data ?? [];
-
-        if (rawData[0]) {
-          console.log(
-            'Branch Manager Staff Comparison raw staff item:',
-            JSON.stringify(rawData[0], null, 2),
-          );
-        }
-
-        const appResponse = mapBranchManagerStaffComparison(rawData);
-        logApiAppResponse(
-          'Branch Manager Staff Comparison App Response:',
-          res,
-          appResponse,
+      if (res?.status == 200) {
+        console.log(
+          'Branch Manager Staff Comparison Response:',
+          JSON.stringify(resJson, null, 2),
         );
 
+        const rawData = resJson?.data ?? [];
+        const appResponse = mapBranchManagerStaffComparison(rawData);
         setStaffData(appResponse);
+        setExpandedId(appResponse[0]?.id ?? null);
       } else {
-        logApiResponse('Branch Manager Staff Comparison Error Response:', resJson);
+        console.log(
+          'Branch Manager Staff Comparison Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
@@ -108,9 +96,9 @@ const Comparison = props => {
         );
       }
 
-      logApiResponse(
+      console.log(
         'Branch Manager Staff Comparison API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
   }, []);
@@ -120,26 +108,18 @@ const Comparison = props => {
       const res = await Api.getBranchManagerBranchComparison();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'Branch Manager Branch Comparison Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'Branch Manager Branch Comparison Backend Response:',
+          'Branch Manager Branch Comparison Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapBranchManagerBranchComparison(resJson?.data);
-        console.log(
-          'Branch Manager Branch Comparison App Response:',
-          JSON.stringify(
-            {
-              status: resJson?.status ?? res?.status,
-              message: resJson?.message,
-              data: appResponse,
-            },
-            null,
-            2,
-          ),
-        );
-
         setGarmentsData(appResponse.garmentsData);
         setUnstitchedData(appResponse.unstitchedData);
         setAccessoriesData(appResponse.accessoriesData);
@@ -163,11 +143,7 @@ const Comparison = props => {
 
       console.log(
         'Branch Manager Branch Comparison API Error:',
-        JSON.stringify(
-          error?.response?.data ?? error?.message ?? error,
-          null,
-          2,
-        ),
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
   }, []);

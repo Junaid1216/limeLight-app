@@ -1,12 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import {
-  FlatList,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import CategoryBreakdownCard from '../../Components/CategoryBreakdownCard';
 import CommissionCard from '../../Components/CommissionCard';
 import HomeHeaderComponent from '../../Components/HomeHeaderComponent';
@@ -28,7 +23,11 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import Api, { isApiSuccess } from '../../Services/Api_services';
+import Api, {
+  getAuthToken,
+  getSlipBoundIncentiveList,
+  setAuthToken,
+} from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 import { resolveIncentiveSlab } from '../../Utils/incentiveSlab';
 
@@ -145,30 +144,36 @@ const mapSlipBoundIncentive = items =>
     };
   });
 
-const getIncentiveList = responseData => {
-  if (Array.isArray(responseData)) {
-    return responseData;
-  }
-
-  return responseData?.data ?? [];
-};
-
 const renderIncentiveItem = ({ item }) => (
   <SlipBoundIncentiveItem item={item} />
 );
 
 const StaffHomeContent = () => {
+  const authToken = useSelector(state => state.AUTH.userData?.token);
   const [targetData, setTargetData] = useState(defaultTargetData);
   const [commission, setCommission] = useState(commissionData);
   const [incentiveData, setIncentiveData] = useState(slipBoundIncentiveData);
 
+  const ensureAuthToken = useCallback(() => {
+    if (authToken && !getAuthToken()) {
+      setAuthToken(authToken);
+    }
+  }, [authToken]);
+
   const fetchDashboard = useCallback(async () => {
+    ensureAuthToken();
+
     try {
       const res = await Api.getDashboard();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
-        console.log('Dashboard Backend Response:', resJson);
+      console.log(
+        'Dashboard Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
+        console.log('Dashboard Response:', JSON.stringify(resJson, null, 2));
 
         const dashboard = resJson?.data ?? {};
         const targetMapped = mapTargetVsAchievement(
@@ -176,54 +181,74 @@ const StaffHomeContent = () => {
         );
         const commissionMapped = mapCommission(dashboard.commission);
 
-        console.log('Dashboard App Response:', {
-          target_vs_achievement: targetMapped,
-          commission: commissionMapped,
-        });
-
         setTargetData(targetMapped);
         setCommission(commissionMapped);
       } else {
-        console.log('Dashboard Error Response:', resJson);
+        console.log(
+          'Dashboard Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'Dashboard API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
-  }, []);
+  }, [ensureAuthToken]);
 
   const fetchSlipBoundIncentive = useCallback(async () => {
+    if (!authToken) {
+      console.log('[Slip Bound Incentive] Skipped: auth token missing');
+      return;
+    }
+
+    ensureAuthToken();
+
     try {
       const res = await Api.getSlipBoundIncentive();
-      const resJson = res?.data;
+      const resJson = res?.data ?? {};
 
-      if (isApiSuccess(res)) {
-        console.log('Slip Bound Incentive Backend Response:', resJson);
+      console.log(
+        'Slip Bound Incentive Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
 
-        const appResponse = mapSlipBoundIncentive(getIncentiveList(resJson));
-        console.log('Slip Bound Incentive App Response:', appResponse);
+      if (res?.status == 200) {
+        console.log(
+          'Slip Bound Incentive Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        const incentiveItems = getSlipBoundIncentiveList(resJson);
+        const appResponse = mapSlipBoundIncentive(incentiveItems);
 
         setIncentiveData(appResponse);
       } else {
-        console.log('Slip Bound Incentive Error Response:', resJson);
+        console.log(
+          'Slip Bound Incentive Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'Slip Bound Incentive API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
-  }, []);
+  }, [authToken, ensureAuthToken]);
 
   useFocusEffect(
     useCallback(() => {
+      if (!authToken) {
+        return;
+      }
+
       fetchDashboard();
       fetchSlipBoundIncentive();
-    }, [fetchDashboard, fetchSlipBoundIncentive]),
+    }, [authToken, fetchDashboard, fetchSlipBoundIncentive]),
   );
 
   return (

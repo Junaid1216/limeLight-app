@@ -25,7 +25,7 @@ import TrainingProductCard from '../../Components/TrainingProductCard';
 import TrainingStatusChips from '../../Components/TrainingStatusChips';
 import TrainingTabs from '../../Components/TrainingTabs';
 import { useRole } from '../../Context/RoleContext';
-import Api, { isApiSuccess } from '../../Services/Api_services';
+import Api from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const customerImages = [
@@ -212,18 +212,21 @@ const Training = () => {
     const apiRole = getTrainingApiRole(role);
 
     try {
-      console.log('Training Videos Request:', `training-videos?role=${apiRole}`, {
-        role: apiRole,
-      });
       const res = await Api.getTrainingVideos(apiRole);
+      const resJson = res?.data ?? {};
+
       console.log(
-        'Training Videos Response:',
-        JSON.stringify(res?.data, null, 2),
+        'Training Videos Backend Response:',
+        JSON.stringify(resJson, null, 2),
       );
 
-      if (isApiSuccess(res)) {
-        const mapped = mapTrainingVideos(res?.data?.data ?? res?.data);
-        console.log('Training Videos Success:', JSON.stringify(mapped, null, 2));
+      if (res?.status == 200) {
+        console.log(
+          'Training Videos Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        const mapped = mapTrainingVideos(resJson?.data ?? resJson);
 
         if (
           mapped.customer.length ||
@@ -235,14 +238,17 @@ const Training = () => {
           setDisplayData(mapped.display);
         }
       } else {
+        console.log(
+          'Training Videos Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
-      console.log('Training Videos API Error:', {
-        status: error?.response?.status,
-        url: `training-videos?role=${apiRole}`,
-        data: error?.response?.data || error,
-      });
+      console.log(
+        'Training Videos API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
     }
   }, [role]);
 

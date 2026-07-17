@@ -18,6 +18,7 @@ import { useRole } from '../../Context/RoleContext';
 import { USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 import { mapApiTypeToRole, normalizeAuthUser, getTrainingApiRole } from '../../Constants/roleConfig';
+import { getApiMessage } from '../../Utils/apiHelpers';
 import {
   navigateAfterLogin,
   resetToRoute,
@@ -49,25 +50,33 @@ const Login = () => {
     if (isLoading) {
       return;
     } else if (!role) {
+      const message = 'Please select your role first';
       setError({
-        emailError: 'Please select your role first',
+        emailError: message,
         passwordError: '',
       });
+      Toast.show(message, Toast.LONG);
     } else if (!form.email.trim()) {
+      const message = 'Please enter email or employee ID';
       setError({
-        emailError: 'Please enter email or employee ID',
+        emailError: message,
         passwordError: '',
       });
+      Toast.show(message, Toast.LONG);
     } else if (!isValidLogin(form.email.trim())) {
+      const message = 'Please enter a valid email or employee ID';
       setError({
-        emailError: 'Please enter a valid email or employee ID',
+        emailError: message,
         passwordError: '',
       });
+      Toast.show(message, Toast.LONG);
     } else if (!form.password) {
+      const message = 'Please enter password';
       setError({
         emailError: '',
-        passwordError: 'Please enter password',
+        passwordError: message,
       });
+      Toast.show(message, Toast.LONG);
     } else {
       setError({ emailError: '', passwordError: '' });
       setIsLoading(true);
@@ -79,51 +88,71 @@ const Login = () => {
 
       try {
         const res = await Api.login(formData);
-        console.log('Login success:', JSON.stringify(res?.data, null, 2));
+        const resJson = res?.data ?? {};
 
-        const token = res?.data?.data?.token ?? res?.data?.token;
-        const isSuccess =
-          res?.status === 200 && Boolean(token ?? res?.data?.data);
+        console.log(
+          'Login Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
-        if (isSuccess) {
-          const user = normalizeAuthUser(res?.data?.data);
-          const apiRole = mapApiTypeToRole(user?.type) ?? role;
-          const userWithType = {
-            ...user,
-            type: user?.type ?? getTrainingApiRole(apiRole),
-          };
+        if (res?.status == 200) {
+          console.log('Login Response:', JSON.stringify(resJson, null, 2));
 
-          console.log('Login Response:', JSON.stringify(res?.data, null, 2));
-          Toast.show(res?.data?.message ?? 'Login successful', Toast.LONG);
-          setAuthToken(token);
-          dispatch(USER_DATA(userWithType));
-          console.log('userData', userWithType);
+          const token = resJson?.data?.token ?? resJson?.token;
+          const isSuccess =
+            resJson?.status !== 'error' &&
+            Boolean(token ?? resJson?.data);
 
-          if (apiRole !== role) {
-            console.log('Login role synced from API:', {
-              selectedRole: role,
-              apiRole,
-              userType: userWithType?.type,
-            });
+          if (isSuccess) {
+            const user = normalizeAuthUser(resJson?.data);
+            const apiRole = mapApiTypeToRole(user?.type) ?? role;
+            const userWithType = {
+              ...user,
+              type: user?.type ?? getTrainingApiRole(apiRole),
+              token: token ?? user?.token,
+            };
+
+            Toast.show(resJson?.message ?? 'Login successful', Toast.LONG);
+            setAuthToken(token);
+            dispatch(USER_DATA(userWithType));
+
+            if (apiRole !== role) {
+              console.log('Login role synced from API:', {
+                selectedRole: role,
+                apiRole,
+                userType: userWithType?.type,
+              });
+            }
+            setRole(apiRole);
+
+            navigateAfterLogin(navigation);
+          } else {
+            Toast.show(getApiMessage(res) ?? resJson?.message, Toast.LONG);
           }
-          setRole(apiRole);
-
-          navigateAfterLogin(navigation);
         } else {
-          Toast.show(res?.data?.message || 'Invalid credentials', Toast.LONG);
+          console.log(
+            'Login Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
+          Toast.show(getApiMessage(res) ?? resJson?.message, Toast.LONG);
         }
       } catch (error) {
-        console.log('Login API Error:', error?.response?.data || error);
+        console.log(
+          'Login API Error:',
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
 
         const message =
-          error?.response?.data?.message ||
+          getApiMessage(null, error) ??
           (error?.code === 'ECONNABORTED'
             ? 'Request timeout. Server respond nahi kar raha.'
             : !error?.response
               ? 'Server tak connection nahi ho raha. Internet ya backend check karein.'
-              : 'Invalid credentials');
+              : null);
 
-        Toast.show(message, Toast.LONG);
+        if (message) {
+          Toast.show(message, Toast.LONG);
+        }
       } finally {
         setIsLoading(false);
       }

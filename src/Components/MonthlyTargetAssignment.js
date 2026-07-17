@@ -6,39 +6,6 @@ import { wp } from '../Assets/Responsive';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 
-export const defaultStaffRows = [
-  {
-    id: '13',
-    sale_staff_id: 13,
-    initials: 'MU',
-    name: 'Mudassar',
-    color: '#CFF5EA',
-    garments: '',
-    unstitched: '',
-    accessories: '',
-  },
-  {
-    id: '14',
-    sale_staff_id: 14,
-    initials: 'AT',
-    name: 'Atique',
-    color: '#DDE3FF',
-    garments: '',
-    unstitched: '',
-    accessories: '',
-  },
-  {
-    id: '15',
-    sale_staff_id: 15,
-    initials: 'ZA',
-    name: 'Zain',
-    color: '#FFE8BF',
-    garments: '',
-    unstitched: '',
-    accessories: '',
-  },
-];
-
 const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
   const updateField = (id, field, value) => {
     const cleaned = value.replace(/[^0-9]/g, '');
@@ -52,7 +19,9 @@ const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
           <Text style={styles.avatarText}>{item.initials}</Text>
         </View>
 
-        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+          {item.name}
+        </Text>
       </View>
 
       <TextInput
@@ -217,7 +186,10 @@ const styles = StyleSheet.create({
   },
 
   name: {
+    flex: 1,
+    flexShrink: 1,
     fontSize: Fontsize.xs4,
+    fontFamily: Fonts.poppinsMedium,
     color: '#111827',
   },
 

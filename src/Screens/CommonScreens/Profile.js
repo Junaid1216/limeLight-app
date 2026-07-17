@@ -113,13 +113,19 @@ const Profile = () => {
             return;
           }
 
+          const resJson = res?.data;
           console.log(
-            'Get Profile Response:',
-            JSON.stringify(res?.data, null, 2),
+            'Get Profile Backend Response:',
+            JSON.stringify(resJson, null, 2),
           );
 
           if (res?.status == 200) {
-            const data = res?.data?.data || {};
+            console.log(
+              'Get Profile Response:',
+              JSON.stringify(resJson, null, 2),
+            );
+
+            const data = resJson?.data || {};
             applyProfileData(data);
 
             const profileData = mapProfileData(data, role);
@@ -131,6 +137,10 @@ const Profile = () => {
               }),
             );
           } else {
+            console.log(
+              'Get Profile Error Response:',
+              JSON.stringify(resJson, null, 2),
+            );
             Toast.show(res?.data?.message, Toast.LONG);
             setProfile(getProfileInfo(role));
           }
@@ -138,7 +148,10 @@ const Profile = () => {
           if (!isActive) {
             return;
           }
-          console.log('Get Profile API Error:', error?.response?.data || error);
+          console.log(
+            'Get Profile API Error:',
+            JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+          );
           Toast.show(error?.response?.data?.message, Toast.LONG);
           setProfile(prev => prev || getProfileInfo(role));
         } finally {

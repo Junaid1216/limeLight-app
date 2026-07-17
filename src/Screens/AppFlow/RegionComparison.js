@@ -12,9 +12,8 @@ import { Fonts } from '../../Constants/Fonts';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import Api, { isApiSuccess } from '../../Services/Api_services';
+import Api from '../../Services/Api_services';
 import {
-  logApiRequest,
   mapAsmRegionComparison,
   mapAsmRegionConversion,
 } from '../../Utils/asmMappers';
@@ -47,26 +46,22 @@ const RegionComparison = props => {
 
     try {
       const type = getRangeType(selectedRange);
-      logApiRequest(
-        'ASM Region Conversion',
-        `asm-region-comparison?type=${type}`,
-      );
 
       const res = await Api.getAsmRegionConversion(type);
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'ASM Region Conversion Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'ASM Region Conversion Backend Response:',
+          'ASM Region Conversion Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapAsmRegionConversion(resJson?.data);
-        console.log(
-          'ASM Region Conversion App Response:',
-          JSON.stringify(appResponse, null, 2),
-        );
-
         setConversionData(appResponse.rows);
         setConversionYoursRow(appResponse.yoursRow);
       } else {
@@ -79,11 +74,7 @@ const RegionComparison = props => {
     } catch (error) {
       console.log(
         'ASM Region Conversion API Error:',
-        JSON.stringify(
-          error?.response?.data ?? error?.message ?? error,
-          null,
-          2,
-        ),
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     } finally {
       setIsConversionLoading(false);
@@ -94,23 +85,21 @@ const RegionComparison = props => {
     setIsLoading(true);
 
     try {
-      logApiRequest('ASM Region Comparison', 'asm-regions-comparison');
-
       const res = await Api.getAsmRegionComparison();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'ASM Region Comparison Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'ASM Region Comparison Backend Response:',
+          'ASM Region Comparison Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapAsmRegionComparison(resJson?.data);
-        console.log(
-          'ASM Region Comparison App Response:',
-          JSON.stringify(appResponse, null, 2),
-        );
-
         setGarmentsData(appResponse.garmentsData);
         setUnstitchedData(appResponse.unstitchedData);
         setAccessoriesData(appResponse.accessoriesData);
@@ -127,11 +116,7 @@ const RegionComparison = props => {
     } catch (error) {
       console.log(
         'ASM Region Comparison API Error:',
-        JSON.stringify(
-          error?.response?.data ?? error?.message ?? error,
-          null,
-          2,
-        ),
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     } finally {
       setIsLoading(false);

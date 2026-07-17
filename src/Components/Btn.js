@@ -13,13 +13,14 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 
 const Btn = props => {
-  const { loading, title, onPress, style, icon } = props;
+  const { loading, title, onPress, style, icon, disabled } = props;
+  const isDisabled = loading || disabled;
 
   return (
     <Pressable
-      style={[styles.btn, style, loading && styles.btnDisabled]}
+      style={[styles.btn, style, isDisabled && styles.btnDisabled]}
       onPress={onPress}
-      disabled={loading}>
+      disabled={isDisabled}>
       <View style={styles.content}>
         {loading ? (
           <ActivityIndicator color={Colors.white} size="small" />

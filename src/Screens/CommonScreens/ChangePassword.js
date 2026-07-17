@@ -92,19 +92,25 @@ const ChangePassword = () => {
 
       try {
         const res = await Api.changePassword(formData);
+        const resJson = res?.data;
+
         console.log(
-          'Change Password Response:',
-          JSON.stringify(res?.data, null, 2),
+          'Change Password Backend Response:',
+          JSON.stringify(resJson, null, 2),
         );
 
         if (res?.status == 200) {
           console.log(
-            'Change Password Success:',
-            JSON.stringify(res?.data, null, 2),
+            'Change Password Response:',
+            JSON.stringify(resJson, null, 2),
           );
-          Toast.show(res?.data?.message, Toast.LONG);
+          Toast.show(resJson?.message, Toast.LONG);
           navigation.goBack();
         } else {
+          console.log(
+            'Change Password Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
           Toast.show(res?.data?.message, Toast.LONG);
           setError({
             newPasswordError: res?.data?.message,
@@ -112,7 +118,10 @@ const ChangePassword = () => {
           });
         }
       } catch (error) {
-        console.log('Change Password API Error:', error?.response?.data || error);
+        console.log(
+          'Change Password API Error:',
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
         Toast.show(error?.response?.data?.message, Toast.LONG);
         setError({
           newPasswordError: error?.response?.data?.message,

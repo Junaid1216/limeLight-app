@@ -1,7 +1,7 @@
-import { formatApiAppResponse, isApiSuccess } from '../Services/Api_services';
+import { formatApiAppResponse } from '../Services/Api_services';
 import { getStaffIdFromRawApiItem } from './staffHelpers';
 
-export { formatApiAppResponse, isApiSuccess };
+export { formatApiAppResponse };
 
 const getCategoryKey = categoryName =>
   categoryName?.toLowerCase?.().replace(/\s+/g, '') ?? '';

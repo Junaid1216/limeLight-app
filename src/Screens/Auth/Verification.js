@@ -68,18 +68,30 @@ const Verification = () => {
 
       try {
         const res = await Api.resendOtp(formData);
-        console.log('Resend OTP Response:', JSON.stringify(res?.data, null, 2));
+        const resJson = res?.data;
+
+        console.log(
+          'Resend OTP Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
         if (res?.status == 200) {
-          console.log('Resend OTP Success:', JSON.stringify(res?.data, null, 2));
-          Toast.show(res?.data?.message, Toast.LONG);
+          console.log('Resend OTP Response:', JSON.stringify(resJson, null, 2));
+          Toast.show(resJson?.message, Toast.LONG);
           setResendTimer(RESEND_TIMER_SECONDS);
         } else {
+          console.log(
+            'Resend OTP Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
           Toast.show(res?.data?.message, Toast.LONG);
           setError({ otpError: res?.data?.message });
         }
       } catch (error) {
-        console.log('Resend OTP API Error:', error?.response?.data || error);
+        console.log(
+          'Resend OTP API Error:',
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
         Toast.show(error?.response?.data?.message, Toast.LONG);
         setError({ otpError: error?.response?.data?.message });
       }
@@ -108,22 +120,34 @@ const Verification = () => {
 
       try {
         const res = await Api.verifyOtp(formData);
-        console.log('Verify OTP Response:', JSON.stringify(res?.data, null, 2));
+        const resJson = res?.data;
+
+        console.log(
+          'Verify OTP Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
         if (res?.status == 200) {
-          console.log('Verify OTP Success:', JSON.stringify(res?.data, null, 2));
-          Toast.show(res?.data?.message, Toast.LONG);
+          console.log('Verify OTP Response:', JSON.stringify(resJson, null, 2));
+          Toast.show(resJson?.message, Toast.LONG);
           navigation.navigate('ResetPassword', {
             login,
             type,
             otp: otpValue,
           });
         } else {
+          console.log(
+            'Verify OTP Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
           Toast.show(res?.data?.message, Toast.LONG);
           setError({ otpError: res?.data?.message });
         }
       } catch (error) {
-        console.log('Verify OTP API Error:', error?.response?.data || error);
+        console.log(
+          'Verify OTP API Error:',
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
         Toast.show(error?.response?.data?.message, Toast.LONG);
         setError({ otpError: error?.response?.data?.message });
       } finally {

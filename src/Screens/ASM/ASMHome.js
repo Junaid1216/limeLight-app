@@ -14,9 +14,6 @@ import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import Api from '../../Services/Api_services';
 import {
-  isApiSuccess,
-  logApiAppResponse,
-  logApiRequest,
   mapAsmBranchComparison,
   mapAsmBranchConversion,
 } from '../../Utils/asmMappers';
@@ -57,20 +54,22 @@ const ASMHome = () => {
 
     try {
       const type = getRangeType(selectedRange);
-      logApiRequest('ASM Branch Conversion', `asm-branch-conversion?type=${type}`);
 
       const res = await Api.getAsmBranchConversion(type);
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'ASM Branch Conversion Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'ASM Branch Conversion Backend Response:',
+          'ASM Branch Conversion Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapAsmBranchConversion(resJson?.data);
-        logApiAppResponse('ASM Branch Conversion App Response:', res, appResponse);
-
         setConversionData(appResponse);
       } else {
         console.log(
@@ -93,20 +92,21 @@ const ASMHome = () => {
     setIsLoading(true);
 
     try {
-      logApiRequest('ASM Branch Comparison', 'asm-branch-comparison');
-
       const res = await Api.getAsmBranchComparison();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'ASM Branch Comparison Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'ASM Branch Comparison Backend Response:',
+          'ASM Branch Comparison Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapAsmBranchComparison(resJson?.data);
-        logApiAppResponse('ASM Branch Comparison App Response:', res, appResponse);
-
         setGarmentsData(appResponse.garmentsData);
         setUnstitchedData(appResponse.unstitchedData);
         setAccessoriesData(appResponse.accessoriesData);

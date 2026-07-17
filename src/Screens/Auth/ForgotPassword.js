@@ -48,23 +48,35 @@ const ForgotPassword = () => {
 
       try {
         const res = await Api.sendOtp(formData);
-        console.log('Send OTP Response:', JSON.stringify(res?.data, null, 2));
+        const resJson = res?.data;
+
+        console.log(
+          'Send OTP Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
         if (res?.status == 200) {
-          console.log('Send OTP Success:', JSON.stringify(res?.data, null, 2));
-          Toast.show(res?.data?.message, Toast.LONG);
+          console.log('Send OTP Response:', JSON.stringify(resJson, null, 2));
+          Toast.show(resJson?.message, Toast.LONG);
           navigation.navigate('Verification', {
             login: form.email.trim(),
             type: role,
           });
         } else {
+          console.log(
+            'Send OTP Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
           Toast.show(res?.data?.message, Toast.LONG);
           setError({
             emailError: res?.data?.message,
           });
         }
       } catch (error) {
-        console.log('Send OTP API Error:', error?.response?.data || error);
+        console.log(
+          'Send OTP API Error:',
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
         Toast.show(error?.response?.data?.message, Toast.LONG);
         setError({ emailError: error?.response?.data?.message });
       } finally {

@@ -21,7 +21,7 @@ import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
 import { getTrainingApiRole } from '../../Constants/roleConfig';
 import { navigateToSurveyProgress } from '../../Navigations/navigationHelpers';
-import Api, { isApiSuccess } from '../../Services/Api_services';
+import Api from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 
 const mapSurveyQuestions = data => {
@@ -63,53 +63,39 @@ const Survey = () => {
     setIsLoading(true);
 
     try {
-      console.log('Survey Questions Request:', `survey-questions/${apiRole}`, {
-        role,
-        apiRole,
-      });
       const res = await Api.getSurveyQuestions(apiRole);
+      const resJson = res?.data ?? {};
+
       console.log(
-        'Survey Questions Response:',
-        JSON.stringify(res?.data, null, 2),
+        'Survey Questions Backend Response:',
+        JSON.stringify(resJson, null, 2),
       );
 
-      if (isApiSuccess(res)) {
-        const { title, questions: mappedQuestions } = mapSurveyQuestions(
-          res?.data?.data,
+      if (res?.status == 200) {
+        console.log(
+          'Survey Questions Response:',
+          JSON.stringify(resJson, null, 2),
         );
 
-        console.log(
-          'Survey Questions Success:',
-          JSON.stringify(mappedQuestions, null, 2),
+        const { title, questions: mappedQuestions } = mapSurveyQuestions(
+          resJson?.data,
         );
 
         setSurveyTitle(title);
         setQuestions(mappedQuestions);
-
-        if (mappedQuestions.length === 0) {
-          console.log(
-            'Survey Questions Empty:',
-            JSON.stringify(
-              {
-                apiRole,
-                message: res?.data?.message,
-                data: res?.data?.data,
-              },
-              null,
-              2,
-            ),
-          );
-        }
       } else {
+        console.log(
+          'Survey Questions Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
         setQuestions([]);
       }
     } catch (error) {
-      console.log('Survey Questions API Error:', {
-        status: error?.response?.status,
-        url: `survey-questions/${apiRole}`,
-        data: error?.response?.data || error,
-      });
+      console.log(
+        'Survey Questions API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
       setQuestions([]);
     } finally {
       setIsLoading(false);

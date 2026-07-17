@@ -77,7 +77,25 @@ export const isApiSuccess = response => {
   const httpStatus = response?.status;
   const bodyStatus = response?.data?.status;
 
-  return httpStatus == 200 || bodyStatus == 200;
+  if (httpStatus == 200) {
+    return true;
+  }
+
+  return bodyStatus == 200;
+};
+
+export const getSlipBoundIncentiveList = responseData => {
+  if (Array.isArray(responseData)) {
+    return responseData;
+  }
+
+  const payload = responseData?.data;
+
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  return payload?.incentives ?? payload?.slip_bound_incentive ?? [];
 };
 
 export const formatApiAppResponse = (response, data) => {
@@ -116,12 +134,13 @@ const Api = {
     requests.get('branch-manager-staff-comparison'),
   getBranchManagerBranchComparison: () =>
     requests.get('branch-manager-branch-comparison'),
+  getMonthlyTargets: () => requests.get('monthly-targets'),
   assignBranchManagerTargets: data =>
     requests.post('branch-manager/assign-targets', data),
   getAsmBranchComparison: () => requests.get('asm-branch-comparison'),
   getAsmBranchConversion: type =>
     requests.get(`asm-branch-conversion?type=${type}`),
-  getAsmRegionComparison: () => requests.get('asm-regions-comparisorn'),
+  getAsmRegionComparison: () => requests.get('asm-regions-comparison'),
   getAsmRegionConversion: type =>
     requests.get(`asm-region-comparison?type=${type}`),
   getAsmStaffComparison: () => requests.get('asm-staff-comparison'),

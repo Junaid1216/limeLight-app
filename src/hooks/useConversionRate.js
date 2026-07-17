@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import Api, { isApiSuccess } from '../Services/Api_services';
+import Api from '../Services/Api_services';
 import { showApiMessageToast } from '../Utils/apiHelpers';
 
 const formatApiDate = date => {
@@ -51,27 +51,30 @@ export const useConversionRate = (fromDate, toDate) => {
       const res = await Api.getConversionRate(fromParam, toParam);
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'Conversion Rate Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'Conversion Rate Backend Response:',
+          'Conversion Rate Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = getConversionList(resJson);
-        console.log(
-          'Conversion Rate App Response:',
-          JSON.stringify(appResponse, null, 2),
-        );
-
         setConversionData(appResponse);
       } else {
-        console.log('Conversion Rate Error Response:', resJson);
+        console.log(
+          'Conversion Rate Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'Conversion Rate API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
   }, [fromDate, toDate]);

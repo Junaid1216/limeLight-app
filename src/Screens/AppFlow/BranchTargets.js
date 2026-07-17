@@ -12,12 +12,11 @@ import { Strings } from '../../Constants/Strings';
 import { hp, wp } from '../../Assets/Responsive';
 import Api from '../../Services/Api_services';
 import {
-  isApiSuccess,
-  logApiAppResponse,
-  logApiResponse,
   mapAsmBranchTargets,
 } from '../../Utils/asmMappers';
-import { showApiMessageToast } from '../../Utils/apiHelpers';
+import {
+  showApiMessageToast,
+} from '../../Utils/apiHelpers';
 
 const BranchTargets = () => {
   const [branchesData, setBranchesData] = useState([]);
@@ -31,21 +30,30 @@ const BranchTargets = () => {
       const res = await Api.getAsmBranchTargets();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
-        logApiResponse('ASM Branch Targets Backend Response:', resJson);
+      console.log(
+        'ASM Branch Targets Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
+        console.log(
+          'ASM Branch Targets Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
         const appResponse = mapAsmBranchTargets(resJson?.data);
-        logApiAppResponse('ASM Branch Targets App Response:', res, appResponse);
-
         setBranchesData(appResponse);
       } else {
-        logApiResponse('ASM Branch Targets Error Response:', resJson);
+        console.log(
+          'ASM Branch Targets Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
-      logApiResponse(
+      console.log(
         'ASM Branch Targets API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     } finally {
       setIsLoading(false);

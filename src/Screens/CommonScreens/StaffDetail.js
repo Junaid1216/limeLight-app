@@ -19,13 +19,10 @@ import StaffDetailResourceCard from '../../Components/StaffDetailResourceCard';
 import StaffDetailCategoryCard from '../../Components/StaffDetailCategoryCard';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
-import Api, { isApiSuccess } from '../../Services/Api_services';
-import { showApiMessageToast } from '../../Utils/apiHelpers';
+import Api from '../../Services/Api_services';
 import {
-  logApiAppResponse,
-  logApiRequest,
-  logApiResponse,
-} from '../../Utils/asmMappers';
+  showApiMessageToast,
+} from '../../Utils/apiHelpers';
 import {
   resolveStaffId,
   getValidStaffId,
@@ -83,29 +80,36 @@ const StaffDetail = ({ route }) => {
     setIsLoading(true);
 
     try {
-      logApiRequest('Staff Details', endpoint, { staffId: validStaffId, role });
-
       const res = await Api.getStaffDetails(validStaffId, role);
       const resJson = res?.data;
 
-      logApiResponse('Staff Details Backend Response:', resJson);
+      console.log(
+        'Staff Details Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
 
-      if (isApiSuccess(res)) {
+      if (res?.status == 200) {
+        console.log(
+          'Staff Details Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
         const appResponse = mapStaffDetails(resJson?.data);
-        logApiAppResponse('Staff Details App Response:', res, appResponse);
-
         setProfile(appResponse.profile);
         setGarmentsCard(appResponse.garmentsCard);
         setUnstitchedCard(appResponse.unstitchedCard);
         setAccessoriesCard(appResponse.accessoriesCard);
       } else {
-        logApiResponse('Staff Details Error Response:', resJson);
+        console.log(
+          'Staff Details Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
-      logApiResponse(
+      console.log(
         'Staff Details API Error:',
-        error?.response?.data ?? error?.message ?? error,
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     } finally {
       setIsLoading(false);

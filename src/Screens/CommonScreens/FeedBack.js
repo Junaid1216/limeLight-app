@@ -23,7 +23,7 @@ import { employeeIdRegex } from '../../Constants/Regex';
 import { ROLES, getProfileInfo, mapProfileData, normalizeAuthUser } from '../../Constants/roleConfig';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
-import Api, { getAuthToken, isApiSuccess } from '../../Services/Api_services';
+import Api, { getAuthToken } from '../../Services/Api_services';
 import { navigateToSurveyTab } from '../../Navigations/navigationHelpers';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 
@@ -91,21 +91,33 @@ const FeedBack = () => {
             return;
           }
 
+          const resJson = res?.data;
           console.log(
-            'Feedback getProfile Response:',
-            JSON.stringify(res?.data, null, 2),
+            'Feedback getProfile Backend Response:',
+            JSON.stringify(resJson, null, 2),
           );
 
           if (res?.status == 200) {
-            applyFormFromUserData(res?.data?.data || {}, 'api');
+            console.log(
+              'Feedback getProfile Response:',
+              JSON.stringify(resJson, null, 2),
+            );
+            applyFormFromUserData(resJson?.data || {}, 'api');
           } else {
+            console.log(
+              'Feedback getProfile Error Response:',
+              JSON.stringify(resJson, null, 2),
+            );
             applyFormFromUserData(null, 'fallback');
           }
         } catch (err) {
           if (!isActive) {
             return;
           }
-          console.log('Get Profile API Error:', err?.response?.data || err);
+          console.log(
+            'Feedback getProfile API Error:',
+            JSON.stringify(err?.response?.data ?? err?.message ?? err, null, 2),
+          );
           applyFormFromUserData(null, 'fallback');
         }
       };
@@ -188,38 +200,42 @@ const FeedBack = () => {
       formData.append('feedback', form.feedback.trim());
 
       const feedbackLabel = isAsm ? 'ASM Feedback' : 'Staff Feedback';
-      const feedbackEndpoint = isAsm ? 'asm-feedback' : 'staff-feedback';
 
       try {
-        console.log(`${feedbackLabel} Request:`, feedbackEndpoint);
         const res = isAsm
           ? await Api.asmFeedback(formData)
           : await Api.staffFeedback(formData);
+        const resJson = res?.data ?? {};
+
         console.log(
-          `${feedbackLabel} Response:`,
-          JSON.stringify(res?.data, null, 2),
+          `${feedbackLabel} Backend Response:`,
+          JSON.stringify(resJson, null, 2),
         );
 
-        if (isApiSuccess(res)) {
+        if (res?.status == 200) {
           console.log(
-            `${feedbackLabel} Success:`,
-            JSON.stringify(res?.data, null, 2),
+            `${feedbackLabel} Response:`,
+            JSON.stringify(resJson, null, 2),
           );
+
           Toast.show(
-            res?.data?.message || 'Feedback submitted successfully',
+            resJson?.message || 'Feedback submitted successfully',
             Toast.LONG,
           );
           setForm(prev => ({ ...prev, feedback: '' }));
           navigateToSurveyTab(navigation);
         } else {
+          console.log(
+            `${feedbackLabel} Error Response:`,
+            JSON.stringify(resJson, null, 2),
+          );
           showApiMessageToast(res);
         }
       } catch (error) {
-        console.log(`${feedbackLabel} API Error:`, {
-          status: error?.response?.status,
-          url: feedbackEndpoint,
-          data: error?.response?.data || error,
-        });
+        console.log(
+          `${feedbackLabel} API Error:`,
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
       } finally {
         setIsLoading(false);
       }

@@ -2,7 +2,7 @@ import { Images } from '../Assets';
 import { Colors } from '../Constants/Colors';
 import { categoryColorMap } from '../Constants/CategoryColors';
 import { Strings } from '../Constants/Strings';
-import { getStaffIdFromRawApiItem, getValidStaffId } from './staffHelpers';
+import { getStaffIdFromRawApiItem, getStaffNameFromRawApiItem, getValidStaffId } from './staffHelpers';
 
 const CATEGORY_ORDER = ['garments', 'unstitched', 'accessories'];
 
@@ -29,6 +29,33 @@ const categoryStyleMap = {
 
 const getCategoryKey = categoryName =>
   categoryName?.toLowerCase?.().replace(/\s+/g, '') ?? '';
+
+const formatCategoryTitle = category => {
+  const value = String(category ?? '').trim();
+
+  if (!value) {
+    return '';
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+};
+
+const isMonthlyTargetCategoryList = data =>
+  Array.isArray(data) &&
+  data.length > 0 &&
+  data.every(
+    item =>
+      item?.category != null &&
+      (item?.monthly_target != null ||
+        item?.target != null ||
+        item?.monthlyTarget != null),
+  );
+
+const mapMonthlyTargetCategoriesFromList = items =>
+  (items ?? []).map(item => ({
+    title: formatCategoryTitle(item?.category ?? item?.name ?? ''),
+    target: Number(item?.monthly_target ?? item?.target ?? item?.monthlyTarget ?? 0),
+  }));
 
 const getCategoryDotColor = categoryName => {
   const key = getCategoryKey(categoryName);
@@ -147,7 +174,7 @@ export const mapBranchManagerStaffComparison = items =>
       id: staffId != null ? String(staffId) : `staff-row-${index}`,
       staff_id: staffId,
       rank: item?.rank ?? index + 1,
-      name: item?.staff_name ?? '',
+      name: getStaffNameFromRawApiItem(item) || item?.staff_name || '',
       achieved: item?.achieved_percentage ?? 0,
       remaining: item?.remaining_percentage ?? 0,
       commission: formatCommission(item?.commission ?? 0),
@@ -420,21 +447,165 @@ export const getCurrentMonthYearLabels = () => {
   };
 };
 
-export const mapBranchManagerStaffForAssignment = items =>
+export const mapBranchManagerStaffForAssignment = (items, nameLookup = new Map()) =>
   (items ?? []).map((item, index) => {
     const staffId = getStaffIdFromRawApiItem(item);
+    const name =
+      getStaffNameFromRawApiItem(item) ||
+      (staffId != null ? nameLookup.get(staffId) : '') ||
+      (staffId != null ? `Staff ${staffId}` : `Staff ${index + 1}`);
 
     return {
       id: staffId != null ? String(staffId) : `staff-row-${index}`,
       sale_staff_id: staffId,
-      name: item?.staff_name ?? item?.name ?? '',
-      initials: getStaffInitials(item?.staff_name ?? item?.name),
+      name,
+      initials: getStaffInitials(name),
       color: ASSIGNMENT_AVATAR_COLORS[index % ASSIGNMENT_AVATAR_COLORS.length],
       garments: item?.garments != null ? String(item.garments) : '',
       unstitched: item?.unstitched != null ? String(item.unstitched) : '',
       accessories: item?.accessories != null ? String(item.accessories) : '',
     };
   });
+
+const buildStaffNameLookup = data => {
+  const lookup = new Map();
+  const staffSources = [
+    data?.staff,
+    data?.sales_staff,
+    data?.staff_list,
+    data?.staff_members,
+    data?.targets,
+    data?.staff_targets,
+    data?.assignments,
+  ].filter(Array.isArray);
+
+  staffSources.forEach(list => {
+    list.forEach(member => {
+      const staffId = getStaffIdFromRawApiItem(member);
+      const name = getStaffNameFromRawApiItem(member);
+
+      if (staffId != null && name) {
+        lookup.set(staffId, name);
+      }
+    });
+  });
+
+  return lookup;
+};
+
+const mergeMonthlyTargetStaffRows = data => {
+  if (Array.isArray(data)) {
+    if (isMonthlyTargetCategoryList(data)) {
+      return [];
+    }
+
+    return data;
+  }
+
+  if (!data || typeof data !== 'object') {
+    return [];
+  }
+
+  const staffItems = [
+    ...(data?.staff ?? []),
+    ...(data?.sales_staff ?? []),
+    ...(data?.staff_list ?? []),
+    ...(data?.staff_members ?? []),
+  ];
+
+  const targetItems = [
+    ...(data?.targets ?? []),
+    ...(data?.staff_targets ?? []),
+    ...(data?.assignments ?? []),
+  ];
+
+  if (!staffItems.length && !targetItems.length) {
+    return [];
+  }
+
+  if (!staffItems.length) {
+    return targetItems;
+  }
+
+  if (!targetItems.length) {
+    return staffItems;
+  }
+
+  const mergedById = new Map();
+
+  [...staffItems, ...targetItems].forEach(item => {
+    const staffId = getStaffIdFromRawApiItem(item);
+
+    if (staffId == null) {
+      return;
+    }
+
+    mergedById.set(staffId, {
+      ...(mergedById.get(staffId) || {}),
+      ...item,
+    });
+  });
+
+  if (mergedById.size) {
+    return Array.from(mergedById.values());
+  }
+
+  const maxLen = Math.max(staffItems.length, targetItems.length);
+
+  return Array.from({ length: maxLen }, (_, index) => ({
+    ...(staffItems[index] || {}),
+    ...(targetItems[index] || {}),
+  }));
+};
+
+export const getMonthlyTargetsStaffList = data => mergeMonthlyTargetStaffRows(data);
+
+export const mapMonthlyTargets = data => {
+  const nameLookup = buildStaffNameLookup(data);
+  const staffList = getMonthlyTargetsStaffList(data);
+
+  return {
+    staff: mapBranchManagerStaffForAssignment(staffList, nameLookup),
+    categories: mapMonthlyTargetCategories(data),
+  };
+};
+
+export const mapTargetAssignmentScreenData = (monthlyData, staffItems = []) => {
+  const staffSource = Array.isArray(staffItems) ? staffItems : [];
+
+  return {
+    staff: mapBranchManagerStaffForAssignment(staffSource),
+    categories: mapMonthlyTargetCategories(monthlyData),
+  };
+};
+
+export const mapMonthlyTargetCategories = data => {
+  if (isMonthlyTargetCategoryList(data)) {
+    return mapMonthlyTargetCategoriesFromList(data);
+  }
+
+  if (Array.isArray(data?.categories)) {
+    return data.categories.map(item => ({
+      title: item?.category ?? item?.name ?? '',
+      target: Number(item?.target ?? 0),
+    }));
+  }
+
+  return [
+    {
+      title: 'Garments',
+      target: Number(data?.garments_target ?? data?.garments ?? 0),
+    },
+    {
+      title: 'Unstitched',
+      target: Number(data?.unstitched_target ?? data?.unstitched ?? 0),
+    },
+    {
+      title: 'Accessories',
+      target: Number(data?.accessories_target ?? data?.accessories ?? 0),
+    },
+  ];
+};
 
 const hasAssignmentValues = row =>
   Number(row?.garments || 0) > 0 ||
@@ -491,3 +662,49 @@ export const buildBranchManagerAssignTargetsPayload = (rows, month, year) => ({
       accessories: Number(row.accessories || 0),
     })),
 });
+
+export const isAssignTargetsSuccess = resJson =>
+  resJson?.status == null ||
+  resJson?.status === undefined ||
+  resJson?.status == 200;
+
+export const getAssignTargetsValidationError = rows => {
+  const rowsWithValues = (rows ?? []).filter(hasAssignmentValues);
+
+  if (!rowsWithValues.length) {
+    return 'Please enter at least one target value';
+  }
+
+  const rowsWithStaffId = rowsWithValues.filter(row => getValidStaffId(row));
+
+  if (!rowsWithStaffId.length) {
+    return 'Staff ID not found. Please reopen Target Assignment screen.';
+  }
+
+  return null;
+};
+
+export const mapBranchManagerAssignTargetsResponse = data => {
+  if (data == null) {
+    return {};
+  }
+
+  if (Array.isArray(data)) {
+    return {
+      targets: mapBranchManagerStaffForAssignment(data),
+    };
+  }
+
+  const targetsList = getMonthlyTargetsStaffList(data);
+
+  return {
+    month: data?.month ?? null,
+    year: data?.year ?? null,
+    total:
+      data?.total ??
+      data?.total_assigned ??
+      data?.assigned_count ??
+      null,
+    targets: mapBranchManagerStaffForAssignment(targetsList),
+  };
+};

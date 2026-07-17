@@ -54,16 +54,28 @@ const SalesStaffDrawerContent = ({ navigation }) => {
 
     try {
       const res = await Api.logout();
-      console.log('Logout Response:', JSON.stringify(res?.data, null, 2));
+      const resJson = res?.data;
+
+      console.log(
+        'Logout Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
 
       if (res?.status == 200) {
-        console.log('Logout Success:', JSON.stringify(res?.data, null, 2));
-        Toast.show(res?.data?.message, Toast.LONG);
+        console.log('Logout Response:', JSON.stringify(resJson, null, 2));
+        Toast.show(resJson?.message, Toast.LONG);
       } else {
-        Toast.show(res?.data?.message, Toast.LONG);
+        console.log(
+          'Logout Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+        Toast.show(resJson?.message, Toast.LONG);
       }
     } catch (error) {
-      console.log('Logout API Error:', error?.response?.data || error);
+      console.log(
+        'Logout API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
       Toast.show(error?.response?.data?.message, Toast.LONG);
     }
 

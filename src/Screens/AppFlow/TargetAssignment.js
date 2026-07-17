@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Keyboard,
   ScrollView,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-simple-toast';
 
@@ -17,32 +17,117 @@ import { Strings } from '../../Constants/Strings';
 import { hp, wp } from '../../Assets/Responsive';
 
 import MonthlyTargetCalculator from '../../Components/MonthlyTargetCalculator';
-import MonthlyTargetAssignment, {
-  defaultStaffRows,
-} from '../../Components/MonthlyTargetAssignment';
+import MonthlyTargetAssignment from '../../Components/MonthlyTargetAssignment';
 import Btn from '../../Components/Btn';
+import ScreenLoader from '../../Components/ScreenLoader';
 import Api from '../../Services/Api_services';
 import {
   buildBranchManagerAssignTargetsPayload,
+  getAssignTargetsValidationError,
   getCurrentMonthYearLabels,
+  isAssignTargetsSuccess,
+  mapTargetAssignmentScreenData,
+  mapBranchManagerTargetSummary,
+  sumAssignmentTargets,
 } from '../../Utils/branchManagerMappers';
-import { showApiMessageToast } from '../../Utils/apiHelpers';
+import {
+  showApiMessageToast,
+} from '../../Utils/apiHelpers';
 
 const BUTTONS_BOTTOM = 20;
-
-const getEmptyStaffRows = () =>
-  defaultStaffRows.map(row => ({
-    ...row,
-    garments: '',
-    unstitched: '',
-    accessories: '',
-  }));
 
 const TargetAssignment = () => {
   const navigation = useNavigation();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [staffRows, setStaffRows] = useState(getEmptyStaffRows);
+  const [staffRows, setStaffRows] = useState([]);
+  const [categoryTargets, setCategoryTargets] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const assignedTotals = useMemo(
+    () => sumAssignmentTargets(staffRows),
+    [staffRows],
+  );
+
+  const targetSummary = useMemo(
+    () => mapBranchManagerTargetSummary(categoryTargets, assignedTotals),
+    [categoryTargets, assignedTotals],
+  );
+
+  const fetchMonthlyTargets = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const [monthlyRes, staffRes] = await Promise.all([
+        Api.getMonthlyTargets(),
+        Api.getBranchManagerStaffComparison(),
+      ]);
+      const monthlyJson = monthlyRes?.data;
+      const staffJson = staffRes?.data;
+
+      console.log(
+        'Branch Manager Monthly Targets Backend Response:',
+        JSON.stringify(monthlyJson, null, 2),
+      );
+
+      console.log(
+        'Branch Manager Staff Comparison Backend Response:',
+        JSON.stringify(staffJson, null, 2),
+      );
+
+      if (monthlyRes?.status == 200) {
+        console.log(
+          'Branch Manager Monthly Targets Response:',
+          JSON.stringify(monthlyJson, null, 2),
+        );
+
+        const staffList = staffRes?.status == 200 ? staffJson?.data ?? [] : [];
+        const appResponse = mapTargetAssignmentScreenData(
+          monthlyJson?.data,
+          staffList,
+        );
+
+        if (staffRes?.status != 200) {
+          console.log(
+            'Branch Manager Staff Comparison Error Response:',
+            JSON.stringify(staffJson, null, 2),
+          );
+          showApiMessageToast(staffRes);
+        }
+
+        console.log(
+          'Branch Manager Target Assignment App Response:',
+          JSON.stringify(appResponse, null, 2),
+        );
+
+        setStaffRows(appResponse.staff);
+        setCategoryTargets(appResponse.categories);
+      } else {
+        console.log(
+          'Branch Manager Monthly Targets Error Response:',
+          JSON.stringify(monthlyJson, null, 2),
+        );
+        showApiMessageToast(monthlyRes);
+        setStaffRows([]);
+        setCategoryTargets([]);
+      }
+    } catch (error) {
+      console.log(
+        'Branch Manager Monthly Targets API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+      setStaffRows([]);
+      setCategoryTargets([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchMonthlyTargets();
+    }, [fetchMonthlyTargets]),
+  );
 
   useEffect(() => {
     const showSub = Keyboard.addListener('keyboardDidShow', event => {
@@ -65,43 +150,70 @@ const TargetAssignment = () => {
   };
 
   const handleReset = () => {
-    setStaffRows(getEmptyStaffRows());
+    setStaffRows(prev =>
+      prev.map(row => ({
+        ...row,
+        garments: '',
+        unstitched: '',
+        accessories: '',
+      })),
+    );
   };
 
   const handleSaveTargets = async () => {
     const { month, year } = getCurrentMonthYearLabels();
-    const payload = buildBranchManagerAssignTargetsPayload(staffRows, month, year);
+    const validationError = getAssignTargetsValidationError(staffRows);
 
-    if (!payload.targets.length) {
-      Toast.show('Please enter at least one target value', Toast.LONG);
+    if (validationError) {
+      Toast.show(validationError, Toast.LONG);
       return;
     }
+
+    const payload = buildBranchManagerAssignTargetsPayload(staffRows, month, year);
 
     setIsSaving(true);
 
     try {
+      console.log(
+        'BranchManagerTarget Request:',
+        JSON.stringify(payload, null, 2),
+      );
+
       const res = await Api.assignBranchManagerTargets(payload);
       const resJson = res?.data;
 
+      console.log(
+        'BranchManagerTarget Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
       if (res?.status == 200) {
         console.log(
-          'Branch Manager Target Assignment App Response:',
+          'BranchManagerTarget Response:',
           JSON.stringify(resJson, null, 2),
         );
 
-        Toast.show(resJson?.message || 'Targets saved successfully', Toast.LONG);
-        handleReset();
-        navigation.goBack();
+        if (isAssignTargetsSuccess(resJson)) {
+          Toast.show(resJson?.message || 'Targets saved successfully', Toast.LONG);
+          handleReset();
+          navigation.goBack();
+        } else {
+          console.log(
+            'BranchManagerTarget Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
+          Toast.show(resJson?.message || 'Unable to save targets', Toast.LONG);
+        }
       } else {
         console.log(
-          'Branch Manager Target Assignment Error Response:',
+          'BranchManagerTarget Error Response:',
           JSON.stringify(resJson, null, 2),
         );
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
-        'Branch Manager Target Assignment API Error:',
+        'BranchManagerTarget API Error:',
         JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
       showApiMessageToast(null, error);
@@ -121,18 +233,22 @@ const TargetAssignment = () => {
         />
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
-        <MonthlyTargetCalculator />
+      {isLoading ? (
+        <ScreenLoader />
+      ) : (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <MonthlyTargetCalculator summary={targetSummary} />
 
-        <MonthlyTargetAssignment
-          rows={staffRows}
-          onUpdateField={handleUpdateField}
-        />
-      </ScrollView>
+          <MonthlyTargetAssignment
+            rows={staffRows}
+            onUpdateField={handleUpdateField}
+          />
+        </ScrollView>
+      )}
 
       <View
         style={[styles.bottomButtons, { bottom: BUTTONS_BOTTOM - keyboardHeight }]}>
@@ -140,7 +256,7 @@ const TargetAssignment = () => {
           title="↺ Reset"
           style={styles.resetBtn}
           onPress={handleReset}
-          loading={isSaving}
+          disabled={isSaving}
         />
 
         <Btn

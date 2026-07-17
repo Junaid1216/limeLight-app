@@ -14,7 +14,7 @@ import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import Api, { isApiSuccess } from '../../Services/Api_services';
+import Api from '../../Services/Api_services';
 import Config from '../../Services/Config';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 import {
@@ -124,26 +124,18 @@ const BranchManager = () => {
       const res = await Api.getBranchManagerDashboard();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'Branch Manager Dashboard Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'Branch Manager Dashboard Backend Response:',
+          'Branch Manager Dashboard Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapBranchManagerDashboard(resJson?.data);
-        console.log(
-          'Branch Manager Dashboard App Response:',
-          JSON.stringify(
-            {
-              status: resJson?.status ?? res?.status,
-              message: resJson?.message,
-              data: appResponse,
-            },
-            null,
-            2,
-          ),
-        );
-
         setPerformanceSummary(appResponse);
       } else {
         console.log(
@@ -161,11 +153,7 @@ const BranchManager = () => {
       } else {
         console.log(
           'Branch Manager Dashboard API Error:',
-          JSON.stringify(
-            error?.response?.data ?? error?.message ?? error,
-            null,
-            2,
-          ),
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
         );
       }
     }
@@ -176,26 +164,18 @@ const BranchManager = () => {
       const res = await Api.getBranchManagerCommission();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'Branch Manager Commission Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'Branch Manager Commission Backend Response:',
+          'Branch Manager Commission Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapBranchManagerCommission(resJson?.data);
-        console.log(
-          'Branch Manager Commission App Response:',
-          JSON.stringify(
-            {
-              status: resJson?.status ?? res?.status,
-              message: resJson?.message,
-              data: appResponse,
-            },
-            null,
-            2,
-          ),
-        );
-
         setCommissionData(appResponse);
       } else {
         console.log(
@@ -213,11 +193,7 @@ const BranchManager = () => {
       } else {
         console.log(
           'Branch Manager Commission API Error:',
-          JSON.stringify(
-            error?.response?.data ?? error?.message ?? error,
-            null,
-            2,
-          ),
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
         );
       }
     }
@@ -228,26 +204,18 @@ const BranchManager = () => {
       const res = await Api.getBranchManagerCategoryPerformance();
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'Branch Manager Category Performance Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
         console.log(
-          'Branch Manager Category Performance Backend Response:',
+          'Branch Manager Category Performance Response:',
           JSON.stringify(resJson, null, 2),
         );
 
         const appResponse = mapBranchManagerCategoryPerformance(resJson?.data);
-        console.log(
-          'Branch Manager Category Performance App Response:',
-          JSON.stringify(
-            {
-              status: resJson?.status ?? res?.status,
-              message: resJson?.message,
-              data: appResponse,
-            },
-            null,
-            2,
-          ),
-        );
-
         setCategoryPerformance(appResponse);
       } else {
         console.log(
@@ -265,11 +233,7 @@ const BranchManager = () => {
       } else {
         console.log(
           'Branch Manager Category Performance API Error:',
-          JSON.stringify(
-            error?.response?.data ?? error?.message ?? error,
-            null,
-            2,
-          ),
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
         );
       }
     }
@@ -290,40 +254,20 @@ const BranchManager = () => {
       const res = await Api.getConversionRate(from, to);
       const resJson = res?.data;
 
-      if (isApiSuccess(res)) {
+      console.log(
+        'Conversion Rate Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
+        console.log(
+          'Conversion Rate Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
         const list = Array.isArray(resJson)
           ? resJson
           : resJson?.chart ?? resJson?.data ?? [];
-
-        console.log(
-          'Conversion Rate Backend Response:',
-          JSON.stringify(
-            {
-              status: resJson?.status ?? res?.status,
-              ...(!Array.isArray(resJson) ? resJson : { data: resJson }),
-            },
-            null,
-            2,
-          ),
-        );
-
-        const appResponse = Array.isArray(resJson)
-          ? {
-              status: res?.status,
-              data: list,
-            }
-          : {
-              status: resJson?.status ?? res?.status,
-              from: resJson?.from ?? from,
-              to: resJson?.to ?? to,
-              peak: resJson?.peak,
-              chart: list,
-            };
-
-        console.log(
-          'Conversion Rate App Response:',
-          JSON.stringify(appResponse, null, 2),
-        );
 
         setConversionData(list);
       } else {
@@ -337,11 +281,7 @@ const BranchManager = () => {
     } catch (error) {
       console.log(
         'Conversion Rate API Error:',
-        JSON.stringify(
-          error?.response?.data ?? error?.message ?? error,
-          null,
-          2,
-        ),
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
       setConversionData([]);
     } finally {
