@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useFocusEffect } from '@react-navigation/native';
 import { hp, wp } from '../../Assets/Responsive';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
+import ScreenLoader from '../../Components/ScreenLoader';
 import StaffComparisonTabs from '../../Components/StaffComparisonTabs';
 import StaffConversionChartCard from '../../Components/StaffConversionChartCard';
 import StaffPerformanceCard from '../../Components/StaffPerformanceCard';
-import { staffComparisonRankData } from '../../Constants/DummyData';
+import { Colors } from '../../Constants/Colors';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import { Colors } from '../../Constants/Colors';
+import Api from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
+import { mapSalesStaffComparison } from '../../Utils/salesStaffMappers';
 
 const StaffComparison = props => {
   const params = props?.route?.params;
   const title = params?.title ?? props?.title ?? Strings.staffComparisonHeader;
-  const rankData = params?.rankData ?? staffComparisonRankData;
 
   const [selectedTab, setSelectedTab] = useState(
     params?.selectedTab ?? Strings.weekly,
@@ -23,12 +26,60 @@ const StaffComparison = props => {
   const [toDate, setToDate] = useState(null);
   const [datePickerKey, setDatePickerKey] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [yourData, setYourData] = useState(null);
+  const [rankData, setRankData] = useState([]);
+  const [topPerformer, setTopPerformer] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const topPerformer = params?.topPerformer ?? rankData?.[1];
 
   const formatDate = date => date.toLocaleDateString('en-GB');
+
+  const fetchSalesStaffComparison = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const res = await Api.getSalesStaffComparison();
+      const resJson = res?.data;
+
+      console.log(
+        'Sales Staff Comparison Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (res?.status == 200) {
+        console.log(
+          'Sales Staff Comparison Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        const mapped = mapSalesStaffComparison(resJson?.data ?? resJson);
+        setYourData(mapped.yourData);
+        setRankData(mapped.rankData);
+        setTopPerformer(mapped.topPerformer);
+      } else {
+        console.log(
+          'Sales Staff Comparison Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+        showApiMessageToast(res);
+      }
+    } catch (error) {
+      console.log(
+        'Sales Staff Comparison API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchSalesStaffComparison();
+    }, [fetchSalesStaffComparison]),
+  );
 
   const handleDateChange = (event, selectedDate) => {
     if (event.type === 'dismissed') {
@@ -75,11 +126,16 @@ const StaffComparison = props => {
           onPressMonthly={() => setSelectedTab(Strings.monthly)}
         />
 
-        <StaffPerformanceCard
-          topPerformer={topPerformer}
-          rankData={rankData}
-          labels={params?.labels ?? Strings}
-        />
+        {isLoading ? (
+          <ScreenLoader />
+        ) : (
+          <StaffPerformanceCard
+            topPerformer={topPerformer}
+            rankData={rankData}
+            yourData={yourData}
+            labels={params?.labels ?? Strings}
+          />
+        )}
 
         <StaffConversionChartCard
           labels={params?.labels ?? Strings}
@@ -93,7 +149,11 @@ const StaffComparison = props => {
         {showPicker && (
           <DateTimePicker
             mode="date"
-            value={datePickerKey === 'from' ? fromDate || today : toDate || fromDate || today}
+            value={
+              datePickerKey === 'from'
+                ? fromDate || today
+                : toDate || fromDate || today
+            }
             minimumDate={datePickerKey === 'to' ? fromDate || today : today}
             display="default"
             onChange={handleDateChange}

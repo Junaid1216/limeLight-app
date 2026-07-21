@@ -44,8 +44,11 @@ axios.interceptors.response.use(
   error => {
     const requestUrl = String(error?.config?.url ?? '');
     const isLoginRequest = requestUrl.includes('login');
+    const isApiRequest =
+      requestUrl.startsWith(Config.baseURL) ||
+      requestUrl.includes('/limelight/api/');
 
-    if (!isLoginRequest) {
+    if (isApiRequest && !isLoginRequest) {
       const message = getApiMessage(null, error);
 
       if (message) {
@@ -121,6 +124,23 @@ const Api = {
   asmFeedback: data => requests.post('asm-feedback', data),
   getSurveyQuestions: role => requests.get(`survey-questions/${role}`),
   getTrainingVideos: role => requests.get(`training-videos?role=${role}`),
+  getProductTraining: role => {
+    const query = role ? `?role=${encodeURIComponent(role)}` : '';
+
+    return requests.get(`product-training${query}`);
+  },
+  getTrainingDisplay: category => {
+    const query = category
+      ? `?category=${encodeURIComponent(category)}`
+      : '';
+
+    return requests.get(`training-display${query}`);
+  },
+  getAnnouncements: category => {
+    const query = category ? `?category=${encodeURIComponent(category)}` : '';
+
+    return requests.get(`announcements${query}`);
+  },
   getCategoryBreakdown: () => requests.get('category-breakdown'),
   getDashboard: () => requests.get('dashboard'),
   getSlipBoundIncentive: () => requests.get('slip-bound-incentive'),
@@ -144,6 +164,7 @@ const Api = {
   getAsmRegionConversion: type =>
     requests.get(`asm-region-comparison?type=${type}`),
   getAsmStaffComparison: () => requests.get('asm-staff-comparison'),
+  getSalesStaffComparison: () => requests.get('sales-staff-comparison'),
   getAsmBranchTargets: () => requests.get('asm-branch-targets'),
   getStaffDetails: (id, role) =>
     requests.get(getStaffDetailsEndpoint(id, role)),

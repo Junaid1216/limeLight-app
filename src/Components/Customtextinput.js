@@ -64,7 +64,11 @@ const Customtextinput = props => {
         ) : null}
 
         <TextInput
-          style={[styles.input, props?.multiline && styles.multilineInput]}
+          style={[
+            styles.input,
+            props?.multiline && styles.multilineInput,
+            props?.editable === false && styles.inputDisabled,
+          ]}
           placeholder={props?.placeholder}
           placeholderTextColor={Colors.grey}
           value={props?.value}
@@ -73,6 +77,7 @@ const Customtextinput = props => {
           keyboardType={props?.keyboardType}
           multiline={props?.multiline}
           textAlignVertical={props?.multiline ? 'top' : 'center'}
+          editable={props?.editable !== false}
         />
 
         {props?.secureTextEntry ? (
@@ -184,6 +189,9 @@ const styles = StyleSheet.create({
   },
   multilineInput: {
     minHeight: hp(12),
+  },
+  inputDisabled: {
+    color: Colors.zinc,
   },
   eyeIcon: {
     marginLeft: wp(2),

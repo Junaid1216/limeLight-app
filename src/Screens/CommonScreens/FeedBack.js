@@ -7,8 +7,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
 import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
@@ -19,46 +19,29 @@ import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
-import { employeeIdRegex } from '../../Constants/Regex';
-import { ROLES, getProfileInfo, mapProfileData, normalizeAuthUser } from '../../Constants/roleConfig';
+import { mapProfileData, normalizeAuthUser, ROLES } from '../../Constants/roleConfig';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
+import { USER_DATA } from '../../Redux/Slices/AuthSlice';
+import { store } from '../../Redux/Store';
+import {
+  selectFeedbackProfile,
+} from '../../Redux/selectors/authSelectors';
 import Api, { getAuthToken } from '../../Services/Api_services';
-import { navigateToSurveyTab } from '../../Navigations/navigationHelpers';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 
-const getFormFromUserData = (userData, role) => {
-  const normalized = normalizeAuthUser(userData);
-  const profile = normalized
-    ? mapProfileData(normalized, role)
-    : getProfileInfo(role);
-
-  return {
-    code:
-      normalized?.employee_id ??
-      normalized?.code ??
-      normalized?.login ??
-      '',
-    name: profile?.name ?? '',
-    branch: profile?.branchValue ?? '',
-    feedback: '',
-  };
-};
-
 const FeedBack = () => {
-  const navigation = useNavigation();
+  const dispatch = useDispatch();
   const { role } = useRole();
   const isAsm = role === ROLES.ASM;
   const locationLabel = isAsm ? Strings.region : Strings.branchLabel;
 
-  const userData = useSelector(state => state?.AUTH?.userData);
+  const { code: userCode, name: userName, location: userLocation } =
+    useSelector(state => selectFeedbackProfile(state, role));
 
-  const [form, setForm] = useState(() => getFormFromUserData(userData, role));
+  const [form, setForm] = useState({ feedback: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({
-    codeError: '',
-    nameError: '',
-    branchError: '',
     feedbackError: '',
   });
 
@@ -66,25 +49,7 @@ const FeedBack = () => {
     useCallback(() => {
       let isActive = true;
 
-      const applyFormFromUserData = (data, source) => {
-        const nextForm = getFormFromUserData(data, role);
-        console.log(`Feedback prefill (${source}):`, JSON.stringify(nextForm, null, 2));
-        setForm(prev => ({
-          ...nextForm,
-          feedback: prev.feedback,
-        }));
-      };
-
-      const loadProfileIfNeeded = async () => {
-        if (userData) {
-          console.log(
-            'Feedback Redux userData:',
-            JSON.stringify(normalizeAuthUser(userData), null, 2),
-          );
-          applyFormFromUserData(userData, 'redux');
-          return;
-        }
-
+      const loadProfile = async () => {
         try {
           const res = await Api.getProfile();
           if (!isActive) {
@@ -98,17 +63,47 @@ const FeedBack = () => {
           );
 
           if (res?.status == 200) {
+            const data = resJson?.data || {};
+            const profileData = mapProfileData(data, role);
+            const normalized = normalizeAuthUser(store.getState()?.AUTH?.userData);
+
             console.log(
               'Feedback getProfile Response:',
               JSON.stringify(resJson, null, 2),
             );
-            applyFormFromUserData(resJson?.data || {}, 'api');
+
+            dispatch(
+              USER_DATA({
+                ...normalized,
+                ...profileData,
+                employee_id:
+                  data?.employee_id ??
+                  data?.code ??
+                  normalized?.employee_id ??
+                  normalized?.code ??
+                  normalized?.login,
+                code:
+                  data?.code ??
+                  data?.employee_id ??
+                  normalized?.code ??
+                  normalized?.employee_id ??
+                  normalized?.login,
+                login: normalized?.login ?? data?.login ?? data?.code,
+                region_name:
+                  data?.region_name ??
+                  data?.region ??
+                  normalized?.region_name,
+                region:
+                  data?.region ??
+                  data?.region_name ??
+                  normalized?.region,
+              }),
+            );
           } else {
             console.log(
               'Feedback getProfile Error Response:',
               JSON.stringify(resJson, null, 2),
             );
-            applyFormFromUserData(null, 'fallback');
           }
         } catch (err) {
           if (!isActive) {
@@ -118,85 +113,39 @@ const FeedBack = () => {
             'Feedback getProfile API Error:',
             JSON.stringify(err?.response?.data ?? err?.message ?? err, null, 2),
           );
-          applyFormFromUserData(null, 'fallback');
         }
       };
 
-      loadProfileIfNeeded();
-
-      setError({
-        codeError: '',
-        nameError: '',
-        branchError: '',
-        feedbackError: '',
-      });
+      loadProfile();
 
       return () => {
         isActive = false;
       };
-    }, [userData, role]),
+    }, [role, dispatch]),
   );
 
   const handleSubmit = async () => {
     if (isLoading) {
       return;
-    } else if (!form.code.trim()) {
-      setError({
-        codeError: 'Please enter code',
-        nameError: '',
-        branchError: '',
-        feedbackError: '',
-      });
-    } else if (!employeeIdRegex.test(form.code.trim())) {
-      setError({
-        codeError: 'Please enter a valid code',
-        nameError: '',
-        branchError: '',
-        feedbackError: '',
-      });
-    } else if (!/[A-Za-z]/.test(form.code.trim())) {
-      setError({
-        codeError: 'Code must contain at least one letter',
-        nameError: '',
-        branchError: '',
-        feedbackError: '',
-      });
-    } else if (!form.name.trim()) {
-      setError({
-        codeError: '',
-        nameError: 'Please enter name',
-        branchError: '',
-        feedbackError: '',
-      });
-    } else if (!form.branch.trim()) {
-      setError({
-        codeError: '',
-        nameError: '',
-        branchError: isAsm ? 'Please enter region' : 'Please enter branch',
-        feedbackError: '',
-      });
     } else if (!form.feedback.trim()) {
       setError({
-        codeError: '',
-        nameError: '',
-        branchError: '',
         feedbackError: 'Please enter feedback',
       });
     } else if (!getAuthToken()) {
       Toast.show('Please login again', Toast.LONG);
     } else {
       setError({
-        codeError: '',
-        nameError: '',
-        branchError: '',
         feedbackError: '',
       });
       setIsLoading(true);
 
       const formData = new FormData();
-      formData.append('code', form.code.trim());
-      formData.append('name', form.name.trim());
-      formData.append(isAsm ? 'region_name' : 'branch_name', form.branch.trim());
+      formData.append('code', userCode.trim());
+      formData.append('name', userName.trim());
+      formData.append(
+        isAsm ? 'region_name' : 'branch_name',
+        userLocation.trim(),
+      );
       formData.append('feedback', form.feedback.trim());
 
       const feedbackLabel = isAsm ? 'ASM Feedback' : 'Staff Feedback';
@@ -223,7 +172,6 @@ const FeedBack = () => {
             Toast.LONG,
           );
           setForm(prev => ({ ...prev, feedback: '' }));
-          navigateToSurveyTab(navigation);
         } else {
           console.log(
             `${feedbackLabel} Error Response:`,
@@ -269,24 +217,16 @@ const FeedBack = () => {
               feedbackStyle
               icon={Images.Hash}
               label={Strings.codeLabel}
-              value={form.code}
-              onChangeText={text => {
-                setForm({ ...form, code: text });
-                setError({ ...error, codeError: '' });
-              }}
-              error={error.codeError}
+              value={userCode}
+              editable={false}
               wrapperStyle={styles.halfInput}
             />
             <Customtextinput
               feedbackStyle
               label={Strings.nameLabel}
               icon={Images.Person}
-              value={form.name}
-              onChangeText={text => {
-                setForm({ ...form, name: text });
-                setError({ ...error, nameError: '' });
-              }}
-              error={error.nameError}
+              value={userName}
+              editable={false}
               wrapperStyle={styles.halfInput}
             />
           </View>
@@ -295,12 +235,8 @@ const FeedBack = () => {
             feedbackStyle
             label={locationLabel}
             icon={Images.Branch}
-            value={form.branch}
-            onChangeText={text => {
-              setForm({ ...form, branch: text });
-              setError({ ...error, branchError: '' });
-            }}
-            error={error.branchError}
+            value={userLocation}
+            editable={false}
             iconTint={Colors.branchGreen}
             wrapperStyle={styles.inputSideSpace}
           />
@@ -312,8 +248,10 @@ const FeedBack = () => {
             multiline
             value={form.feedback}
             onChangeText={text => {
-              setForm({ ...form, feedback: text });
-              setError({ ...error, feedbackError: '' });
+              setForm(prev => ({ ...prev, feedback: text }));
+              if (text.length > 0) {
+                setError(prev => ({ ...prev, feedbackError: '' }));
+              }
             }}
             error={error.feedbackError}
             wrapperStyle={[styles.inputSideSpace, styles.lastInput]}

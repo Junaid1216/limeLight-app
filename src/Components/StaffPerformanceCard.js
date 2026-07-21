@@ -54,30 +54,35 @@ const RankItem = ({ item, index, totalItems, achievedSuffix }) => {
 
 const StaffPerformanceCard = ({
   topPerformer,
-  rankData,
+  rankData = [],
+  yourData,
   labels,
 }) => {
+  const meName = yourData?.name
+    ? `${yourData.name} (You)`
+    : labels?.saleemYou;
+
   return (
     <View style={styles.performanceCard}>
       <View style={styles.meRow}>
         <View style={styles.meBadge}>
           <Text style={styles.meBadgeText} numberOfLines={1}>
-            33
+            {yourData?.rank ?? '-'}
           </Text>
         </View>
         <View style={styles.meInfoWrap}>
           <Text style={styles.meName} numberOfLines={1}>
-            {labels?.saleemYou}
+            {meName}
           </Text>
           <Text style={styles.meAchievement} numberOfLines={1}>
-            25 {labels?.achievedSuffix}
+            {yourData?.achieved ?? 0} {labels?.achievedSuffix}
           </Text>
         </View>
         <Text style={styles.meTarget} numberOfLines={1}>
-          {topPerformer?.target}
+          {yourData?.target ?? topPerformer?.target ?? 0}
         </Text>
         <Text style={styles.meCommission} numberOfLines={1}>
-          {topPerformer?.commission}
+          {yourData?.commission ?? topPerformer?.commission ?? 'Rs. 0'}
         </Text>
       </View>
 

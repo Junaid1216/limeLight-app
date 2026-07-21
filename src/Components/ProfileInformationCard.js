@@ -28,21 +28,21 @@ const ProfileInformationCard = props => {
           iconSource={Images.BranchIcon}
           label={props?.branchLabel}
           value={props?.branchValue}
-          onChangeText={text => props?.onFieldChange?.('branchValue', text)}
+          editable={false}
         />
         <View style={styles.divider} />
         <ProfileInfoRow
           iconSource={Images.Staff}
           label={Strings.roleLabel}
           value={props?.roleValue}
-          onChangeText={text => props?.onFieldChange?.('roleValue', text)}
+          editable={false}
         />
         <View style={styles.divider} />
         <ProfileInfoRow
           iconSource={Images.Designation}
           label={Strings.designation}
           value={props?.designation}
-          onChangeText={text => props?.onFieldChange?.('designation', text)}
+          editable={false}
         />
       </View>
     </View>

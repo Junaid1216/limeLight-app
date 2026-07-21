@@ -27,7 +27,6 @@ import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
 import {
-  UPDATE_USER_FIELD,
   USER_DATA,
 } from '../../Redux/Slices/AuthSlice';
 import Api from '../../Services/Api_services';
@@ -169,15 +168,6 @@ const Profile = () => {
     }, [role, dispatch, applyProfileData]),
   );
 
-  const handleFieldChange = (field, value) => {
-    if (field === 'name') {
-      return;
-    }
-
-    setProfile(prev => ({ ...prev, [field]: value }));
-    dispatch(UPDATE_USER_FIELD({ field, value }));
-  };
-
   const handlePickImage = async () => {
     const hasPermission = await requestGalleryPermission();
 
@@ -245,7 +235,6 @@ const Profile = () => {
             branchValue={profile.branchValue}
             roleValue={profile.roleValue}
             designation={profile.designation}
-            onFieldChange={handleFieldChange}
           />
           <ProfileChangePasswordCard />
         </ScrollView>

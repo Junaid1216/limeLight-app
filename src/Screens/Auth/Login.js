@@ -110,6 +110,10 @@ const Login = () => {
               ...user,
               type: user?.type ?? getTrainingApiRole(apiRole),
               token: token ?? user?.token,
+              login: user?.login ?? form.email.trim(),
+              code: user?.code ?? user?.employee_id ?? form.email.trim(),
+              employee_id:
+                user?.employee_id ?? user?.code ?? form.email.trim(),
             };
 
             Toast.show(resJson?.message ?? 'Login successful', Toast.LONG);

@@ -3,19 +3,18 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
+  Text,
   View,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
-import { Images } from '../../Assets';
+import Toast from 'react-native-simple-toast';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
-import {
-  trainingCustomerData,
-  trainingDisplayData,
-  trainingProductData,
-} from '../../Constants/DummyData';
-import { getTrainingApiRole } from '../../Constants/roleConfig';
+import { Fontsize } from '../../Constants/Fontsize';
+import { Fonts } from '../../Constants/Fonts';
+import { getTrainingApiRole, getProductTrainingRoleCandidates } from '../../Constants/roleConfig';
 import TrainingCustomerCard from '../../Components/TrainingCustomerCard';
 import TrainingDetailModal from '../../Components/TrainingDetailModal';
 import TrainingDisplayCard from '../../Components/TrainingDisplayCard';
@@ -24,158 +23,18 @@ import TrainingHeader from '../../Components/TrainingHeader';
 import TrainingProductCard from '../../Components/TrainingProductCard';
 import TrainingStatusChips from '../../Components/TrainingStatusChips';
 import TrainingTabs from '../../Components/TrainingTabs';
+import TrainingVideoModal from '../../Components/TrainingVideoModal';
 import { useRole } from '../../Context/RoleContext';
 import Api from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
-
-const customerImages = [
-  Images.CustomerService,
-  Images.GreetingCustomers,
-  Images.HandlingComplaints,
-];
-
-const displayImages = [Images.WindowDisplay, Images.VisualMerchandising];
-
-const toImageSource = (value, fallback) => {
-  if (!value) {
-    return fallback;
-  }
-
-  if (typeof value === 'string') {
-    return { uri: value };
-  }
-
-  return value;
-};
-
-const normalizeStatus = value => {
-  const status = String(value ?? 'New').trim();
-
-  if (/complete/i.test(status)) {
-    return 'Completed';
-  }
-
-  if (/pending/i.test(status)) {
-    return 'Pending';
-  }
-
-  return 'New';
-};
-
-const mapTrainingVideos = data => {
-  const empty = { customer: [], product: [], display: [] };
-
-  if (!data) {
-    return empty;
-  }
-
-  if (Array.isArray(data)) {
-    return partitionTrainingList(data);
-  }
-
-  if (
-    data?.customer ||
-    data?.customer_service ||
-    data?.product ||
-    data?.product_training ||
-    data?.display ||
-    data?.display_training
-  ) {
-    return {
-      customer: mapCustomerList(data?.customer ?? data?.customer_service ?? []),
-      product: mapProductList(data?.product ?? data?.product_training ?? []),
-      display: mapDisplayList(data?.display ?? data?.display_training ?? []),
-    };
-  }
-
-  const list = data?.videos ?? data?.training_videos ?? [];
-
-  if (Array.isArray(list)) {
-    return partitionTrainingList(list);
-  }
-
-  return empty;
-};
-
-const mapCustomerList = list =>
-  list.map((item, index) => ({
-    id: String(item?.id ?? `c-${index}`),
-    image: toImageSource(
-      item?.image ?? item?.thumbnail ?? item?.video_thumbnail,
-      customerImages[index % customerImages.length],
-    ),
-    title: item?.title ?? item?.name ?? '',
-    description: item?.description ?? '',
-    date: item?.date ?? item?.created_at?.slice(0, 10) ?? '',
-    status: normalizeStatus(item?.status),
-  }));
-
-const mapProductList = list =>
-  list.map((item, index) => ({
-    id: String(item?.id ?? `p-${index}`),
-    swatch: item?.swatch ?? item?.color_code ?? '#E6DCC6',
-    title: item?.title ?? item?.name ?? '',
-    code: item?.code ?? item?.product_code ?? '',
-    tags: item?.tags ?? [],
-    price: item?.price ?? '',
-    audio: item?.audio ?? item?.audio_duration ?? '',
-    highlight: item?.highlight ?? item?.description ?? '',
-    status: normalizeStatus(item?.status),
-    detail: item?.detail ?? item,
-  }));
-
-const mapDisplayList = list =>
-  list.map((item, index) => ({
-    id: String(item?.id ?? `d-${index}`),
-    image: toImageSource(
-      item?.image ?? item?.thumbnail ?? item?.video_thumbnail,
-      displayImages[index % displayImages.length],
-    ),
-    location: item?.location ?? item?.section ?? '',
-    category: item?.category ?? item?.category_name ?? '',
-    title: item?.title ?? item?.name ?? '',
-    description: item?.description ?? '',
-    progress: Number(item?.progress ?? 0),
-    duration: item?.duration ?? item?.audio_duration ?? '',
-    status: normalizeStatus(item?.status),
-  }));
-
-const partitionTrainingList = list => {
-  const customer = [];
-  const product = [];
-  const display = [];
-
-  list.forEach((item, index) => {
-    const type = String(
-      item?.type ??
-        item?.training_type ??
-        item?.tab ??
-        item?.category_type ??
-        item?.video_type ??
-        '',
-    ).toLowerCase();
-
-    if (type.includes('product')) {
-      product.push(mapProductList([item])[0]);
-      return;
-    }
-
-    if (type.includes('display') || type.includes('merchandis')) {
-      display.push(mapDisplayList([item])[0]);
-      return;
-    }
-
-    if (
-      type.includes('customer') ||
-      type.includes('service') ||
-      !type
-    ) {
-      customer.push(mapCustomerList([item])[0]);
-    }
-  });
-
-  return { customer, product, display };
-};
+import {
+  getProductTrainingItemsFromVideos,
+  isExternalVideoLink,
+  mapProductTraining,
+  mapTrainingDisplay,
+  mapTrainingVideos,
+  toDisplayApiCategory,
+} from '../../Utils/trainingMappers';
 
 const filterByStatus = (items, status) =>
   items.filter(
@@ -183,13 +42,6 @@ const filterByStatus = (items, status) =>
       !item?.status ||
       item.status === status ||
       item.status?.toLowerCase() === status.toLowerCase(),
-  );
-
-const filterDisplayByCategory = (items, category) =>
-  items.filter(
-    item =>
-      !item?.category ||
-      item.category.toLowerCase().includes(category.toLowerCase()),
   );
 
 const Training = () => {
@@ -200,9 +52,10 @@ const Training = () => {
   const [activeCategory, setActiveCategory] = useState('Unstitched');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [customerData, setCustomerData] = useState(trainingCustomerData);
-  const [productData, setProductData] = useState(trainingProductData);
-  const [displayData, setDisplayData] = useState(trainingDisplayData);
+  const [customerData, setCustomerData] = useState([]);
+  const [productData, setProductData] = useState([]);
+  const [displayData, setDisplayData] = useState([]);
+  const [activeVideo, setActiveVideo] = useState(null);
 
   const fetchTrainingVideos = useCallback(async () => {
     if (!role) {
@@ -215,33 +68,16 @@ const Training = () => {
       const res = await Api.getTrainingVideos(apiRole);
       const resJson = res?.data ?? {};
 
-      console.log(
-        'Training Videos Backend Response:',
-        JSON.stringify(resJson, null, 2),
-      );
-
       if (res?.status == 200) {
+        const mapped = mapTrainingVideos(resJson?.data ?? resJson);
+
         console.log(
           'Training Videos Response:',
           JSON.stringify(resJson, null, 2),
         );
 
-        const mapped = mapTrainingVideos(resJson?.data ?? resJson);
-
-        if (
-          mapped.customer.length ||
-          mapped.product.length ||
-          mapped.display.length
-        ) {
-          setCustomerData(mapped.customer);
-          setProductData(mapped.product);
-          setDisplayData(mapped.display);
-        }
+        setCustomerData(mapped.customer);
       } else {
-        console.log(
-          'Training Videos Error Response:',
-          JSON.stringify(resJson, null, 2),
-        );
         showApiMessageToast(res);
       }
     } catch (error) {
@@ -252,11 +88,115 @@ const Training = () => {
     }
   }, [role]);
 
+  const fetchProductTraining = useCallback(async () => {
+    if (!role) {
+      return;
+    }
+
+    const apiRole = getTrainingApiRole(role);
+    const roleCandidates = getProductTrainingRoleCandidates(role);
+
+    try {
+      let products = [];
+      let hasLoggedResponse = false;
+
+      for (const candidate of roleCandidates) {
+        const res = await Api.getProductTraining(candidate);
+        const resJson = res?.data ?? {};
+
+        if (res?.status == 200) {
+          if (!hasLoggedResponse) {
+            console.log(
+              'Product Training Response:',
+              JSON.stringify(resJson, null, 2),
+            );
+            hasLoggedResponse = true;
+          }
+
+          products = mapProductTraining(resJson, candidate || apiRole);
+
+          if (products.length) {
+            break;
+          }
+        }
+      }
+
+      if (!products.length) {
+        const videoRes = await Api.getTrainingVideos(apiRole);
+        const videoJson = videoRes?.data ?? {};
+        const videoPayload = videoJson?.data ?? videoJson;
+        const fallbackItems = getProductTrainingItemsFromVideos(videoPayload);
+
+        if (fallbackItems.length) {
+          products = mapProductTraining({ data: fallbackItems }, apiRole);
+        }
+      }
+
+      setProductData(products);
+    } catch (error) {
+      console.log(
+        'Product Training API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+    }
+  }, [role]);
+
+  const fetchDisplayTraining = useCallback(async (category = activeCategory) => {
+    const apiCategory = toDisplayApiCategory(category);
+
+    try {
+      const res = await Api.getTrainingDisplay(apiCategory);
+      const resJson = res?.data ?? {};
+
+      if (res?.status == 200) {
+        console.log(
+          'Training Display Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        setDisplayData(mapTrainingDisplay(resJson, category));
+      } else {
+        showApiMessageToast(res);
+      }
+    } catch (error) {
+      console.log(
+        'Training Display API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+    }
+  }, [activeCategory]);
+
   useFocusEffect(
     useCallback(() => {
       fetchTrainingVideos();
-    }, [fetchTrainingVideos]),
+
+      if (activeTab === 'Product') {
+        fetchProductTraining();
+      }
+
+      if (activeTab === 'Display') {
+        fetchDisplayTraining(activeCategory);
+      }
+    }, [
+      activeTab,
+      activeCategory,
+      fetchTrainingVideos,
+      fetchProductTraining,
+      fetchDisplayTraining,
+    ]),
   );
+
+  useEffect(() => {
+    if (activeTab === 'Product') {
+      fetchProductTraining();
+    }
+  }, [activeTab, fetchProductTraining]);
+
+  useEffect(() => {
+    if (activeTab === 'Display') {
+      fetchDisplayTraining(activeCategory);
+    }
+  }, [activeTab, activeCategory, fetchDisplayTraining]);
 
   useEffect(() => {
     if (route.params?.tab) {
@@ -269,12 +209,41 @@ const Training = () => {
     setModalVisible(true);
   };
 
+  const handlePlayVideo = async item => {
+    if (!item?.videoUrl) {
+      Toast.show('Video not available', Toast.LONG);
+      return;
+    }
+
+    if (isExternalVideoLink(item.videoUrl)) {
+      try {
+        await Linking.openURL(item.videoUrl);
+      } catch (error) {
+        Toast.show('Unable to open video', Toast.LONG);
+      }
+      return;
+    }
+
+    setActiveVideo(item);
+  };
+
   const filteredCustomer = filterByStatus(customerData, activeStatus);
   const filteredProduct = filterByStatus(productData, activeStatus);
-  const filteredDisplay = filterByStatus(
-    filterDisplayByCategory(displayData, activeCategory),
-    activeStatus,
-  );
+  const filteredDisplay = filterByStatus(displayData, activeStatus);
+
+  const activeList =
+    activeTab === 'Customer'
+      ? filteredCustomer
+      : activeTab === 'Product'
+        ? filteredProduct
+        : filteredDisplay;
+
+  const emptyMessage =
+    activeTab === 'Product'
+      ? 'No product training available'
+      : activeTab === 'Display'
+        ? 'No display training available'
+        : 'No training videos available';
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -282,7 +251,10 @@ const Training = () => {
 
       <View style={styles.headerArea}>
         <TrainingHeader />
-        <TrainingTabs active={activeTab} onChange={setActiveTab} />
+        <TrainingTabs
+          active={activeTab}
+          onChange={setActiveTab}
+        />
       </View>
 
       <ScrollView
@@ -300,7 +272,11 @@ const Training = () => {
 
         {activeTab === 'Customer' &&
           filteredCustomer.map(item => (
-            <TrainingCustomerCard key={item.id} item={item} />
+            <TrainingCustomerCard
+              key={item.id}
+              item={item}
+              onPlay={handlePlayVideo}
+            />
           ))}
 
         {activeTab === 'Product' &&
@@ -316,12 +292,23 @@ const Training = () => {
           filteredDisplay.map(item => (
             <TrainingDisplayCard key={item.id} item={item} />
           ))}
+
+        {!activeList.length ? (
+          <Text style={styles.emptyText}>{emptyMessage}</Text>
+        ) : null}
       </ScrollView>
 
       <TrainingDetailModal
         visible={modalVisible}
         product={selectedProduct}
         onClose={() => setModalVisible(false)}
+      />
+
+      <TrainingVideoModal
+        visible={Boolean(activeVideo)}
+        title={activeVideo?.title ?? ''}
+        videoUrl={activeVideo?.videoUrl}
+        onClose={() => setActiveVideo(null)}
       />
     </SafeAreaView>
   );
@@ -342,7 +329,11 @@ const styles = StyleSheet.create({
     paddingTop: hp(2),
     paddingBottom: hp(3),
   },
-  loader: {
+  emptyText: {
+    textAlign: 'center',
+    fontFamily: Fonts.poppinsRegular,
+    fontSize: Fontsize.xs2,
+    color: Colors.mediumGrey,
     marginTop: hp(4),
   },
 });

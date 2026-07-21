@@ -9,20 +9,68 @@ import {
 } from 'react-native';
 import Modal from 'react-native-modal';
 import Feather from 'react-native-vector-icons/Feather';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { hp, wp } from '../Assets/Responsive';
 import { Images } from '../Assets';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
-import { trainingWaveform } from '../Constants/DummyData';
+import TrainingAudioPlayer from './TrainingAudioPlayer';
+import TrainingThumbnail from './TrainingThumbnail';
+
+const ModalProductVisual = ({ product, colorName }) => {
+  const imageUrl = product?.imageUrl ?? product?.detail?.imageUrl ?? '';
+  const imageUrls = product?.imageUrls ?? product?.detail?.imageUrls ?? [];
+  const hasRemoteImage = Boolean(
+    imageUrl || imageUrls.length || product?.image?.uri || product?.detail?.image?.uri,
+  );
+  const backdropColor = hasRemoteImage
+    ? Colors.inputGrey
+    : colorName
+      ? product?.swatch ?? '#E6DCC6'
+      : '#E6DCC6';
+
+  return (
+    <View style={[styles.modalSwatch, { backgroundColor: backdropColor }]}>
+      <TrainingThumbnail
+        thumbnail={product?.detail?.image ?? product?.image}
+        image={product?.detail?.image ?? product?.image}
+        imageUrl={imageUrl}
+        imageUrls={imageUrls}
+        style={styles.modalImageFill}
+        resizeMode="cover"
+      />
+
+      {colorName ? (
+        <View style={styles.colorBadge}>
+          <MaterialCommunityIcons
+            name="map-marker"
+            size={wp(3.2)}
+            color={Colors.white}
+          />
+          <Text style={styles.colorBadgeText} numberOfLines={1}>
+            {colorName}
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+};
 
 const TrainingDetailModal = ({ visible, product, onClose }) => {
   if (!product) {
     return null;
   }
+
   const detail = product.detail || {};
+  const hasPrice = Boolean(product?.price);
+  const hasSpecs = Boolean(detail?.shirt || detail?.bottom);
+  const hasHighlights = (detail?.highlights ?? []).length > 0;
+  const hasDescription = Boolean(detail?.description);
+  const hasAudio = Boolean(detail?.audioUrl ?? product?.audioUrl);
+  const audioUrl = detail?.audioUrl ?? product?.audioUrl;
+  const colorName = detail?.color || '';
+  const modalTags = detail?.detailTags ?? [];
 
   return (
     <Modal
@@ -56,121 +104,139 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
           contentContainerStyle={styles.modalScroll}
         >
           <View style={styles.modalTopRow}>
-            <View
-              style={[styles.modalSwatch, { backgroundColor: product.swatch }]}
-            >
-              <View style={styles.colorBadge}>
-                <MaterialCommunityIcons
-                  name="palette"
-                  size={wp(3.2)}
-                  color={Colors.white}
-                />
-                <Text style={styles.colorBadgeText}>{detail.color}</Text>
-              </View>
-            </View>
+            <ModalProductVisual product={product} colorName={colorName} />
 
             <View style={styles.modalProductInfo}>
               <Text style={styles.modalProductTitle}>{product.title}</Text>
-              <Text style={styles.modalPrice}>{product.price}</Text>
+              {hasPrice ? (
+                <Text style={styles.modalPrice}>{product.price}</Text>
+              ) : null}
               <View style={styles.codeBadge}>
                 <Text style={styles.codeBadgeText}># {product.code}</Text>
               </View>
-              <View style={styles.modalTagWrap}>
-                {(detail.detailTags || []).map((tag, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.modalTag,
-                      tag.solid ? styles.modalTagSolid : styles.modalTagOutline,
-                    ]}
-                  >
-                    <Text
+              {modalTags.length ? (
+                <View style={styles.modalTagWrap}>
+                  {modalTags.map((tag, i) => (
+                    <View
+                      key={`${tag.label}-${i}`}
                       style={[
-                        styles.modalTagText,
-                        tag.solid && styles.modalTagTextSolid,
+                        styles.modalTag,
+                        tag.solid ? styles.modalTagSolid : styles.modalTagOutline,
                       ]}
                     >
-                      {tag.label}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.modalTagText,
+                          tag.solid && styles.modalTagTextSolid,
+                        ]}
+                      >
+                        {tag.label}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          </View>
+
+          {hasSpecs ? (
+            <View style={styles.specRow}>
+              {detail.shirt ? (
+                <View style={styles.specBox}>
+                  <View style={styles.specLabelRow}>
+                    <MaterialCommunityIcons
+                      name="tshirt-crew-outline"
+                      size={wp(3.8)}
+                      color={Colors.branchGreen}
+                    />
+                    <Text style={styles.specLabel}>SHIRT</Text>
                   </View>
-                ))}
-              </View>
-            </View>
-          </View>
+                  <Text style={styles.specValue}>
+                    {String(detail.shirt).replace(/ · /g, ' - ')}
+                  </Text>
+                  {detail.fabric ? (
+                    <Text style={styles.specFabric}>Fabric: {detail.fabric}</Text>
+                  ) : null}
+                </View>
+              ) : null}
 
-          <View style={styles.specRow}>
-            <View style={styles.specBox}>
-              <View style={styles.specLabelRow}>
-                <MaterialCommunityIcons
-                  name="tshirt-crew-outline"
-                  size={wp(3.8)}
-                  color={Colors.branchGreen}
+              {detail.bottom ? (
+                <View style={styles.specBox}>
+                  <View style={styles.specLabelRow}>
+                    <MaterialCommunityIcons
+                      name="content-cut"
+                      size={wp(3.8)}
+                      color={Colors.branchGreen}
+                    />
+                    <Text style={styles.specLabel}>BOTTOM</Text>
+                  </View>
+                  <Text style={styles.specValue}>
+                    {String(detail.bottom).replace(/ · /g, ' - ')}
+                  </Text>
+                  {detail.fabric ? (
+                    <Text style={styles.specFabric}>Fabric: {detail.fabric}</Text>
+                  ) : null}
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+
+          {hasHighlights ? (
+            <>
+              <View style={styles.sectionHeaderRow}>
+                <Image
+                  source={Images.SvgMargin}
+                  style={styles.sectionHeaderIcon}
+                  resizeMode="contain"
                 />
-                <Text style={styles.specLabel}>SHIRT</Text>
+                <Text style={styles.sectionHeaderText}>Key Highlights</Text>
               </View>
-              <Text style={styles.specValue}>{detail.shirt}</Text>
-              <Text style={styles.specFabric}>Fabric: {detail.fabric}</Text>
-            </View>
-
-            <View style={styles.specBox}>
-              <View style={styles.specLabelRow}>
-                <MaterialCommunityIcons
-                  name="content-cut"
-                  size={wp(3.8)}
-                  color={Colors.branchGreen}
-                />
-                <Text style={styles.specLabel}>BOTTOM</Text>
-              </View>
-              <Text style={styles.specValue}>{detail.bottom}</Text>
-              <Text style={styles.specFabric}>Fabric: {detail.fabric}</Text>
-            </View>
-          </View>
-
-          <View style={styles.sectionHeaderRow}>
-            <Image
-              source={Images.SvgMargin}
-              style={styles.sectionHeaderIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.sectionHeaderText}>Key Highlights</Text>
-          </View>
-          {(detail.highlights || []).map((point, i) => (
-            <View key={i} style={styles.highlightRow}>
-              <View style={styles.checkCircle}>
-                <Feather name="check" size={wp(3)} color={Colors.white} />
-              </View>
-              <Text style={styles.highlightPoint}>{point}</Text>
-            </View>
-          ))}
-
-          <View style={styles.audioSectionHeader}>
-            <View style={styles.sectionHeaderRow}>
-              <Feather
-                name="headphones"
-                size={wp(4.2)}
-                color={Colors.branchGreen}
-              />
-              <Text style={styles.sectionHeaderText}>Audio Training</Text>
-            </View>
-            <View style={styles.guideBadge}>
-              <Text style={styles.guideBadgeText}>Guide</Text>
-            </View>
-          </View>
-
-          <View style={styles.modalAudioBox}>
-            <View style={styles.micCircle}>
-              <Feather name="mic" size={wp(4)} color={Colors.amber} />
-            </View>
-            <View style={styles.waveformRow}>
-              {trainingWaveform.map((h, i) => (
-                <View key={i} style={[styles.waveBar, { height: hp(h) }]} />
+              {detail.highlights.map((point, i) => (
+                <View key={`${point}-${i}`} style={styles.highlightRow}>
+                  <View style={styles.checkCircle}>
+                    <Feather name="check" size={wp(3)} color={Colors.white} />
+                  </View>
+                  <Text style={styles.highlightPoint}>{point}</Text>
+                </View>
               ))}
-            </View>
-            <Text style={styles.modalAudioTime}>{detail.audio}</Text>
-            <TouchableOpacity style={styles.modalPlayBtn} activeOpacity={0.9}>
-              <Ionicons name="play" size={wp(4.2)} color={Colors.white} />
-            </TouchableOpacity>
-          </View>
+            </>
+          ) : hasDescription ? (
+            <>
+              <View style={styles.sectionHeaderRow}>
+                <Image
+                  source={Images.SvgMargin}
+                  style={styles.sectionHeaderIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.sectionHeaderText}>Description</Text>
+              </View>
+              <Text style={styles.highlightPoint}>{detail.description}</Text>
+            </>
+          ) : null}
+
+          {hasAudio ? (
+            <>
+              <View style={styles.audioSectionHeader}>
+                <View style={styles.audioHeaderLeft}>
+                  <Feather
+                    name="headphones"
+                    size={wp(4.2)}
+                    color={Colors.branchGreen}
+                  />
+                  <Text style={styles.sectionHeaderText}>Audio Training</Text>
+                </View>
+                <View style={styles.guideBadge}>
+                  <Text style={styles.guideBadgeText}>Guide</Text>
+                </View>
+              </View>
+
+              <TrainingAudioPlayer
+                audioUrl={audioUrl}
+                variant="modal"
+                apiDuration={detail.audio || product?.audio || ''}
+              />
+            </>
+          ) : null}
         </ScrollView>
 
         <TouchableOpacity
@@ -253,15 +319,22 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     padding: wp(2),
+    overflow: 'hidden',
+  },
+  modalImageFill: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: wp(3),
   },
   colorBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    paddingHorizontal: wp(2.5),
-    paddingVertical: hp(0.5),
-    borderRadius: wp(4),
-    gap: wp(1),
+    backgroundColor: 'rgba(17,17,17,0.72)',
+    paddingHorizontal: wp(2.8),
+    paddingVertical: hp(0.55),
+    borderRadius: wp(5),
+    gap: wp(1.2),
+    zIndex: 2,
+    marginBottom: hp(0.2),
   },
   colorBadgeText: {
     fontFamily: Fonts.poppinsMedium,
@@ -298,6 +371,7 @@ const styles = StyleSheet.create({
   },
   modalTagWrap: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: wp(2),
   },
   modalTag: {
@@ -310,8 +384,8 @@ const styles = StyleSheet.create({
   },
   modalTagOutline: {
     borderWidth: 1,
-    borderColor: 'transparent',
-    backgroundColor: Colors.branchGreenBg,
+    borderColor: Colors.platinum,
+    backgroundColor: Colors.white,
   },
   modalTagText: {
     fontFamily: Fonts.poppinsMedium,
@@ -385,6 +459,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   highlightPoint: {
+    flex: 1,
     fontFamily: Fonts.poppinsRegular,
     fontSize: Fontsize.xs5,
     color: Colors.dimGray,
@@ -395,6 +470,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: hp(1.5),
     marginBottom: hp(1.5),
+  },
+  audioHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: wp(2),
   },
   guideBadge: {
     borderWidth: 1,
@@ -408,51 +488,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.poppinsMedium,
     fontSize: Fontsize.xm2,
     color: Colors.branchGreen,
-  },
-  modalAudioBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: Colors.softDivider,
-    borderRadius: wp(3),
-    paddingHorizontal: wp(3),
-    paddingVertical: hp(1.4),
-    gap: wp(2.5),
-  },
-  micCircle: {
-    width: wp(9),
-    height: wp(9),
-    borderRadius: wp(4.5),
-    backgroundColor: Colors.cornsilk,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  waveformRow: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: wp(0.8),
-    height: hp(4),
-  },
-  waveBar: {
-    width: wp(0.9),
-    borderRadius: wp(0.5),
-    backgroundColor: Colors.amber,
-  },
-  modalAudioTime: {
-    fontFamily: Fonts.poppinsMedium,
-    fontSize: Fontsize.xs1,
-    color: Colors.grey,
-  },
-  modalPlayBtn: {
-    width: wp(10),
-    height: wp(10),
-    borderRadius: wp(5),
-    backgroundColor: Colors.amber,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingLeft: wp(0.6),
   },
   completeBtn: {
     backgroundColor: Colors.green,

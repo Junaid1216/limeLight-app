@@ -1,99 +1,130 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
+import TrainingThumbnail from './TrainingThumbnail';
 
-const TrainingCustomerCard = ({ item }) => (
+const OverlayPlayIcon = ({ size, color }) => (
+  <Svg width={size} height={size} viewBox="0 0 48 48">
+    <Path d="M16 9 L16 39 L40 24 Z" fill={color} />
+  </Svg>
+);
+
+const PlayIcon = ({ size, color }) => (
+  <Svg width={size} height={size} viewBox="0 0 48 48">
+    <Path d="M18 13 L18 35 L35 24 Z" fill={color} />
+  </Svg>
+);
+
+const TrainingCustomerCard = ({ item, onPlay }) => {
+  const handlePlay = () => {
+    onPlay?.(item);
+  };
+
+  return (
   <View style={styles.customerCard}>
-    <View style={styles.thumbWrap}>
-      <Image
-        source={item.image}
+    <TouchableOpacity
+      style={styles.thumbWrap}
+      activeOpacity={0.92}
+      onPress={handlePlay}
+    >
+      <TrainingThumbnail
+        thumbnail={item?.thumbnail}
         style={styles.thumbImage}
         resizeMode="cover"
       />
       <View style={styles.playOverlayWrap}>
         <View style={styles.playOverlay}>
-          <Ionicons name="play" size={wp(5)} color={Colors.charcoal} />
+          <View style={styles.playIconWrap}>
+            <OverlayPlayIcon size={wp(9)} color={Colors.black} />
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
 
-    <Text style={styles.customerTitle}>{item.title}</Text>
-    <Text style={styles.customerDesc}>{item.description}</Text>
+    <View style={styles.cardBody}>
+      <Text style={styles.customerTitle}>{item.title}</Text>
+      <Text style={styles.customerDesc}>{item.description}</Text>
 
-    <View style={styles.customerFooter}>
-      <Text style={styles.dateText}>{item.date}</Text>
-      <TouchableOpacity style={styles.startBtn} activeOpacity={0.9}>
-        <Ionicons name="play" size={wp(3.4)} color={Colors.white} />
-        <Text style={styles.startBtnText}>Start</Text>
-      </TouchableOpacity>
+      <View style={styles.customerFooter}>
+        <Text style={styles.dateText}>{item.date}</Text>
+        <TouchableOpacity style={styles.startBtn} activeOpacity={0.88} onPress={handlePlay}>
+          <PlayIcon size={wp(5.5)} color={Colors.white} />
+          <Text style={styles.startBtnText}>Start</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   customerCard: {
     backgroundColor: Colors.white,
     borderRadius: wp(4),
     borderWidth: 1,
-    borderColor: Colors.softDivider,
+    borderColor: Colors.platinum,
     padding: wp(3),
     marginBottom: hp(2),
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
   },
   thumbWrap: {
     width: '100%',
-    height: hp(20),
+    height: hp(19.5),
     borderRadius: wp(3),
     overflow: 'hidden',
     backgroundColor: Colors.lightGrey,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: hp(1.6),
+    position: 'relative',
   },
   thumbImage: {
-    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
   },
+  thumbPlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: Colors.inputGrey,
+  },
   playOverlayWrap: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },
   playOverlay: {
-    width: wp(13),
-    height: wp(13),
-    borderRadius: wp(6.5),
+    width: wp(15),
+    height: wp(15),
+    borderRadius: wp(7.5),
     backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingLeft: wp(0.5),
-    shadowColor: Colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+  },
+  playIconWrap: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardBody: {
+    paddingTop: hp(1.4),
+    paddingBottom: hp(0.4),
   },
   customerTitle: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: Fontsize.sm1,
+    fontSize: Fontsize.sm,
     color: Colors.black,
-    marginBottom: hp(0.8),
+    lineHeight: hp(2.6),
+    marginBottom: hp(0.7),
   },
   customerDesc: {
     fontFamily: Fonts.poppinsRegular,
     fontSize: Fontsize.xs2,
     color: Colors.grey,
-    lineHeight: hp(2.4),
-    marginBottom: hp(1.6),
+    lineHeight: hp(2.35),
+    marginBottom: hp(1.4),
   },
   customerFooter: {
     flexDirection: 'row',
@@ -108,16 +139,19 @@ const styles = StyleSheet.create({
   startBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.green,
-    paddingHorizontal: wp(4.5),
-    paddingVertical: hp(1),
-    borderRadius: wp(6),
-    gap: wp(1.5),
+    minWidth: wp(24),
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(0.95),
+    borderRadius: wp(8),
+    gap: wp(1.2),
   },
   startBtnText: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: Fontsize.xs2,
     color: Colors.white,
+    includeFontPadding: false,
   },
 });
 

@@ -30,12 +30,14 @@ const AnnouncementDetail = props => {
               </Text>
             </View>
 
-            <View style={styles.dateRow}>
-              <Icon name="calendar" size={wp(3.5)} color={Colors.mediumGrey} />
-              <Text style={styles.dateText} numberOfLines={1}>
-                {item?.date}
-              </Text>
-            </View>
+            {item?.date ? (
+              <View style={styles.dateRow}>
+                <Icon name="calendar" size={wp(3.5)} color={Colors.mediumGrey} />
+                <Text style={styles.dateText} numberOfLines={1}>
+                  {item.date}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
           <Text style={styles.title} numberOfLines={1}>

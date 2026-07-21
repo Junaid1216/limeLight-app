@@ -24,6 +24,17 @@ export const mapApiTypeToRole = type => {
   return null;
 };
 
+export const getProductTrainingRoleCandidates = role => {
+  switch (role) {
+    case ROLES.MANAGER:
+      return ['branch_manager', 'manager', ''];
+    case ROLES.ASM:
+      return ['asm', ''];
+    default:
+      return ['sales_staff', 'staff', ''];
+  }
+};
+
 export const getTrainingApiRole = role => {
   switch (role) {
     case ROLES.MANAGER:
@@ -132,7 +143,11 @@ export const mapProfileData = (apiData = {}, role) => {
     name: apiData.name ?? fallback.name,
     branchLabel: fallback.branchLabel,
     branchValue:
-      apiData.branch_name ?? apiData.branch ?? fallback.branchValue,
+      role === ROLES.ASM
+        ? (apiData.region_name ??
+          apiData.region ??
+          fallback.branchValue)
+        : (apiData.branch_name ?? apiData.branch ?? fallback.branchValue),
     roleTag: roleLabel,
     roleValue: roleLabel,
     designation:

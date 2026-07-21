@@ -7,6 +7,8 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
+const MIN_ACHIEVED_FILL_PERCENT = 8;
+
 const StatBox = props => (
   <View
     style={[
@@ -29,8 +31,18 @@ const StatBox = props => (
 
 const CommissionCard = ({ data = commissionData, isLoading }) => {
   const { target, sale, commission, achieved, remaining } = data;
-  const fill = achieved / 100;
-  const empty = remaining / 100;
+  const achievedPercent = Math.min(
+    100,
+    Math.max(0, Number(achieved) || 0),
+  );
+  const remainingPercent = Math.min(
+    100,
+    Math.max(0, Number(remaining) ?? 100 - achievedPercent),
+  );
+  const fillPercent =
+    achievedPercent === 0
+      ? MIN_ACHIEVED_FILL_PERCENT
+      : achievedPercent;
 
   return (
     <View style={styles.card}>
@@ -69,34 +81,33 @@ const CommissionCard = ({ data = commissionData, isLoading }) => {
           </View>
 
           <View style={styles.combinedBar}>
-            <View style={styles.barRow}>
+            <View style={styles.barTrack}>
               <View
                 style={[
-                  styles.achievedSegment,
-                  { flex: fill, backgroundColor: Colors.emerald },
+                  styles.achievedFill,
+                  { width: `${fillPercent}%` },
                 ]}
+              />
+            </View>
+            <View style={styles.barLabels} pointerEvents="none">
+              <Text
+                style={[styles.barText, styles.barTextLeft]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
               >
-                <Text
-                  style={[styles.barText, styles.barTextLeft]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.75}
-                >
-                  {achieved}
-                  {Strings.percentAchieved}
-                </Text>
-              </View>
-              <View style={[styles.remainingSegment, { flex: empty }]}>
-                <Text
-                  style={[styles.barText, styles.barTextRight]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.75}
-                >
-                  {remaining}
-                  {Strings.percentRemaining}
-                </Text>
-              </View>
+                {achievedPercent}
+                {Strings.percentAchieved}
+              </Text>
+              <Text
+                style={[styles.barText, styles.barTextRight]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
+              >
+                {remainingPercent}
+                {Strings.percentRemaining}
+              </Text>
             </View>
           </View>
         </>
@@ -160,29 +171,24 @@ const styles = StyleSheet.create({
     borderRadius: hp(1.55),
     backgroundColor: Colors.darkNavy,
     overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'center',
   },
-  barRow: {
+  barTrack: {
+    ...StyleSheet.absoluteFillObject,
     flexDirection: 'row',
-    width: wp(78),
-    height: hp(3.1),
   },
-  achievedSegment: {
-    minWidth: 0,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    paddingLeft: wp(3),
-    paddingRight: wp(2),
-    paddingVertical: hp(0.4),
+  achievedFill: {
+    height: '100%',
+    backgroundColor: Colors.emerald,
     borderRadius: hp(1.55),
-    overflow: 'hidden',
   },
-  remainingSegment: {
-    minWidth: 0,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingLeft: wp(2),
-    paddingRight: wp(3),
-    paddingVertical: hp(0.4),
+  barLabels: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: wp(3),
   },
   barText: {
     fontFamily: Fonts.poppinsMedium,

@@ -14,7 +14,7 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
-import { isValidLogin } from '../../Constants/Regex';
+import { emailRegex } from '../../Constants/Regex';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
 import { useNavigation } from '@react-navigation/native';
@@ -35,9 +35,9 @@ const ForgotPassword = () => {
     } else if (!role) {
       setError({ emailError: 'Please select your role first' });
     } else if (!form.email.trim()) {
-      setError({ emailError: 'Please enter email or employee ID' });
-    } else if (!isValidLogin(form.email.trim())) {
-      setError({ emailError: 'Please enter a valid email or employee ID' });
+      setError({ emailError: Strings.pleaseEnterEmail });
+    } else if (!emailRegex.test(form.email.trim())) {
+      setError({ emailError: Strings.pleaseEnterValidEmail });
     } else {
       setError({ emailError: '' });
       setIsLoading(true);
@@ -96,8 +96,8 @@ const ForgotPassword = () => {
         <Text style={styles.description} numberOfLines={2}>{Strings.forgotPasswordDesc}</Text>
 
         <Customtextinput
-          label={Strings.emailLabel}
-          placeholder={Strings.emailPlaceholder}
+          label={Strings.forgotPasswordEmailLabel}
+          placeholder={Strings.forgotPasswordEmailPlaceholder}
           icon={Images.Email}
           iconBg={Colors.lightBlue}
           value={form.email}
@@ -105,7 +105,7 @@ const ForgotPassword = () => {
             setForm({ ...form, email: text });
             setError({ ...error, emailError: '' });
           }}
-          keyboardType="default"
+          keyboardType="email-address"
           error={error.emailError}
         />
 

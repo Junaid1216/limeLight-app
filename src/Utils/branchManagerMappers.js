@@ -86,9 +86,101 @@ const getStatusColor = status => {
   return Colors.black;
 };
 
+const getWeekTargetUnits = (weeklyTargets, key, index) =>
+  Number(
+    weeklyTargets?.[key] ??
+      weeklyTargets?.[WEEK_LABELS[index]] ??
+      weeklyTargets?.[index] ??
+      (Array.isArray(weeklyTargets) ? weeklyTargets[index] : 0) ??
+      0,
+  );
+
+const getWeekPerformanceData = (weeklyPerformance, key, index) => {
+  if (weeklyPerformance == null) {
+    return null;
+  }
+
+  if (Array.isArray(weeklyPerformance)) {
+    return weeklyPerformance[index] ?? null;
+  }
+
+  return (
+    weeklyPerformance?.[key] ??
+    weeklyPerformance?.[WEEK_LABELS[index]] ??
+    weeklyPerformance?.[index] ??
+    null
+  );
+};
+
+const getWeekAchievedUnits = weekData => {
+  if (weekData == null || weekData === '') {
+    return 0;
+  }
+
+  if (typeof weekData === 'number' || typeof weekData === 'string') {
+    const numeric = Number(weekData);
+    return Number.isFinite(numeric) ? numeric : 0;
+  }
+
+  return Number(
+    weekData?.achieved ??
+      weekData?.units ??
+      weekData?.sale ??
+      weekData?.achievement ??
+      0,
+  );
+};
+
+const buildWeeklyPerformanceItem = (index, units, targetUnits, weekData) => {
+  const percent = Number(
+    weekData?.percentage ??
+      weekData?.achievement_percentage ??
+      weekData?.percent ??
+      (targetUnits ? Math.round((units / targetUnits) * 100) : 0),
+  );
+  const progress = Math.min(1, Math.max(0, percent / 100));
+  const status = weekData?.status ?? (units > 0 ? Strings.active : 'Next');
+
+  return {
+    week: WEEK_SHORT_LABELS[index],
+    progress,
+    percent,
+    units,
+    status,
+    statusColor: getStatusColor(status),
+  };
+};
+
+const distributeAchievedAcrossWeeks = (totalAchieved, weeklyTargets) => {
+  const achievedTotal = Number(totalAchieved) || 0;
+  const targetUnitsList = WEEK_KEYS.map((key, index) =>
+    getWeekTargetUnits(weeklyTargets, key, index),
+  );
+  const targetSum = targetUnitsList.reduce((sum, value) => sum + value, 0);
+  let remaining = achievedTotal;
+
+  return WEEK_KEYS.map((key, index) => {
+    const targetUnits = targetUnitsList[index];
+    let units = 0;
+
+    if (achievedTotal <= 0) {
+      units = 0;
+    } else if (index === WEEK_KEYS.length - 1) {
+      units = remaining;
+    } else if (targetSum > 0) {
+      units = Math.round((achievedTotal * targetUnits) / targetSum);
+      remaining -= units;
+    } else if (index === 0) {
+      units = achievedTotal;
+    }
+
+    return buildWeeklyPerformanceItem(index, units, targetUnits);
+  });
+};
+
 const mapWeeklyTargets = (weeklyTargets, totalTarget) =>
   WEEK_KEYS.map((key, index) => {
-    const units = Number(weeklyTargets?.[key] ?? 0);
+    const units = getWeekTargetUnits(weeklyTargets, key, index);
     const badgePercent = totalTarget
       ? Math.round((units / totalTarget) * 100)
       : 0;
@@ -101,50 +193,21 @@ const mapWeeklyTargets = (weeklyTargets, totalTarget) =>
   });
 
 const mapWeeklyPerformance = (weeklyPerformance, weeklyTargets, totalAchieved = 0) => {
-  const hasWeeklyPerformance =
-    weeklyPerformance && Object.keys(weeklyPerformance).length > 0;
+  const weeklyItems = WEEK_KEYS.map((key, index) => {
+    const weekData = getWeekPerformanceData(weeklyPerformance, key, index);
+    const targetUnits = getWeekTargetUnits(weeklyTargets, key, index);
+    const units = getWeekAchievedUnits(weekData);
 
-  if (!hasWeeklyPerformance && Number(totalAchieved) > 0) {
-    return WEEK_KEYS.map((key, index) => {
-      const targetUnits = Number(weeklyTargets?.[key] ?? 0);
-      const units = index === 0 ? Number(totalAchieved) : 0;
-      const percent = targetUnits
-        ? Math.round((units / targetUnits) * 100)
-        : 0;
+    return buildWeeklyPerformanceItem(index, units, targetUnits, weekData);
+  });
 
-      return {
-        week: WEEK_SHORT_LABELS[index],
-        progress: Math.min(1, Math.max(0, percent / 100)),
-        percent,
-        units,
-        status: units > 0 ? Strings.active : 'Next',
-        statusColor: getStatusColor(units > 0 ? Strings.active : 'Next'),
-      };
-    });
+  const hasMeaningfulWeeklyPerformance = weeklyItems.some(item => item.units > 0);
+
+  if (!hasMeaningfulWeeklyPerformance && Number(totalAchieved) > 0) {
+    return distributeAchievedAcrossWeeks(totalAchieved, weeklyTargets);
   }
 
-  return WEEK_KEYS.map((key, index) => {
-    const weekData = weeklyPerformance?.[key] ?? weeklyPerformance?.[index];
-    const targetUnits = Number(weeklyTargets?.[key] ?? 0);
-    const units = Number(weekData?.achieved ?? weekData?.units ?? 0);
-    const percent = Number(
-      weekData?.percentage ??
-        weekData?.achievement_percentage ??
-        weekData?.percent ??
-        (targetUnits ? Math.round((units / targetUnits) * 100) : 0),
-    );
-    const progress = Math.min(1, Math.max(0, percent / 100));
-    const status = weekData?.status ?? (units > 0 ? Strings.active : 'Next');
-
-    return {
-      week: WEEK_SHORT_LABELS[index],
-      progress,
-      percent,
-      units,
-      status,
-      statusColor: getStatusColor(status),
-    };
-  });
+  return weeklyItems;
 };
 
 export const mapBranchManagerCommission = items =>
@@ -305,7 +368,11 @@ export const mapBranchManagerCategoryPerformance = items => {
     const style = categoryStyleMap[categoryKey] ?? categoryStyleMap.garments;
     const weeklyTargets = item?.weekly_targets ?? item?.weeklyTargets ?? {};
     const weeklyPerformance =
-      item?.weekly_performance ?? item?.weeklyPerformance ?? {};
+      item?.weekly_performance ??
+      item?.weeklyPerformance ??
+      item?.weekly_achieved ??
+      item?.weeklyAchieved ??
+      {};
     const target = Number(item?.target ?? 0);
     const achieved = Number(item?.achieved ?? 0);
 

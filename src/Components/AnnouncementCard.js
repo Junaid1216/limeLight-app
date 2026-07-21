@@ -23,16 +23,18 @@ const AnnouncementCard = ({ item, onPress }) => {
           </Text>
         </View>
 
-        <View style={styles.dateRow}>
-          <Image
-            source={Images.Calender}
-            style={styles.calendarIcon}
-            resizeMode="contain"
-          />
-          <Text style={styles.dateText} numberOfLines={1}>
-            {item?.date}
-          </Text>
-        </View>
+        {item?.date ? (
+          <View style={styles.dateRow}>
+            <Image
+              source={Images.Calender}
+              style={styles.calendarIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.dateText} numberOfLines={1}>
+              {item.date}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <Text style={styles.title} numberOfLines={1}>

@@ -22,7 +22,9 @@ export const Strings = {
   forgotPasswordHeader: 'Forgot Password',
   cannotLogin: 'Cannot log in?',
   forgotPasswordDesc:
-    'Enter your email or staff code and we will send a verification code',
+    'Enter your email and we will send a verification code',
+  forgotPasswordEmailLabel: 'Email',
+  forgotPasswordEmailPlaceholder: 'Enter email',
   sendVerificationCode: 'Send Verification Code',
   createPasswordHeader: 'Create Password',
   setNewPassword: 'Set New Password',

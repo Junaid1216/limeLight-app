@@ -1,5 +1,6 @@
-import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Video from 'react-native-video';
 import * as Progress from 'react-native-progress';
 import Feather from 'react-native-vector-icons/Feather';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -7,53 +8,149 @@ import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
+import { getVideoSource } from '../Utils/trainingMappers';
+import TrainingThumbnail from './TrainingThumbnail';
 
-const DisplayAudioPlayer = ({ progress, duration }) => (
-  <View style={styles.displayAudioBox}>
-    <View style={styles.displayAudioRow}>
-      <TouchableOpacity style={styles.displayPlayBtn} activeOpacity={0.9}>
-        <Ionicons name="play" size={wp(4)} color={Colors.white} />
-      </TouchableOpacity>
-      <Text style={styles.displayAudioLabel}>Audio Guide</Text>
-      <Text style={styles.displayAudioTime}>{duration}</Text>
-    </View>
-    <Progress.Bar
-      progress={progress}
-      width={null}
-      height={hp(0.7)}
-      color={Colors.amber}
-      unfilledColor={Colors.platinum}
-      borderWidth={0}
-      borderRadius={wp(2)}
-      style={styles.displayProgress}
-    />
-  </View>
-);
+const formatTime = seconds => {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return '0:00';
+  }
 
-const TrainingDisplayCard = ({ item }) => (
-  <View style={styles.displayCard}>
-    <View style={styles.displayImageWrap}>
-      <Image
-        source={item.image}
-        style={styles.displayImage}
-        resizeMode="cover"
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+};
+
+const DisplayAudioPlayer = ({ audioUrl, apiDuration }) => {
+  const playerRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [duration, setDuration] = useState(0);
+  const [position, setPosition] = useState(0);
+  const source = getVideoSource(audioUrl);
+
+  useEffect(() => {
+    setIsPlaying(false);
+    setDuration(0);
+    setPosition(0);
+  }, [audioUrl]);
+
+  if (!audioUrl) {
+    return null;
+  }
+
+  const progress = duration > 0 ? position / duration : 0;
+  const timeLabel =
+    duration > 0
+      ? `${formatTime(position)} / ${formatTime(duration)}`
+      : apiDuration || '0:00';
+
+  return (
+    <View style={styles.displayAudioBox}>
+      {source ? (
+        <Video
+          ref={playerRef}
+          source={source}
+          paused={!isPlaying}
+          playInBackground={false}
+          playWhenInactive={false}
+          ignoreSilentSwitch="ignore"
+          progressUpdateInterval={250}
+          onLoad={data => setDuration(data?.duration ?? 0)}
+          onProgress={data => setPosition(data?.currentTime ?? 0)}
+          onEnd={() => {
+            setIsPlaying(false);
+            setPosition(0);
+            playerRef.current?.seek(0);
+          }}
+          onError={() => setIsPlaying(false)}
+          style={styles.hiddenPlayer}
+        />
+      ) : null}
+
+      <View style={styles.displayAudioRow}>
+        <TouchableOpacity
+          style={styles.displayPlayBtn}
+          activeOpacity={0.9}
+          onPress={() => {
+            if (source) {
+              setIsPlaying(current => !current);
+            }
+          }}
+        >
+          <Ionicons
+            name={isPlaying ? 'pause' : 'play'}
+            size={wp(4)}
+            color={Colors.white}
+          />
+        </TouchableOpacity>
+        <Text style={styles.displayAudioLabel}>Audio Guide</Text>
+        <Text style={styles.displayAudioTime}>{timeLabel}</Text>
+      </View>
+      <Progress.Bar
+        progress={progress}
+        width={null}
+        height={hp(0.7)}
+        color={Colors.amber}
+        unfilledColor={Colors.platinum}
+        borderWidth={0}
+        borderRadius={wp(2)}
+        style={styles.displayProgress}
       />
-      <View style={styles.locationPill}>
-        <Feather name="map-pin" size={wp(3)} color={Colors.white} />
-        <Text style={styles.locationText}>{item.location}</Text>
+    </View>
+  );
+};
+
+const TrainingDisplayCard = ({ item }) => {
+  const hasLocation = Boolean(item?.location);
+  const hasCategory = Boolean(item?.category);
+  const hasDescription = Boolean(item?.description);
+  const hasAudio = Boolean(item?.audioUrl);
+
+  return (
+    <View style={styles.displayCard}>
+      <View style={styles.displayImageWrap}>
+        <TrainingThumbnail
+          thumbnail={item?.thumbnail}
+          image={item?.image}
+          imageUrl={item?.imageUrl}
+          imageUrls={item?.imageUrls}
+          style={styles.displayImage}
+          resizeMode="cover"
+        />
+        {hasLocation ? (
+          <View style={styles.locationPill}>
+            <Feather name="map-pin" size={wp(3)} color={Colors.white} />
+            <Text style={styles.locationText}>{item.location}</Text>
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.displayBody}>
+        {hasCategory ? (
+          <Text style={styles.displayCategory}>{item.category}</Text>
+        ) : null}
+        <Text style={styles.displayTitle}>{item.title}</Text>
+        {hasDescription ? (
+          <Text style={styles.displayDesc}>{item.description}</Text>
+        ) : null}
+        {hasAudio ? (
+          <DisplayAudioPlayer
+            audioUrl={item.audioUrl}
+            apiDuration={item.duration}
+          />
+        ) : null}
       </View>
     </View>
-
-    <View style={styles.displayBody}>
-      <Text style={styles.displayCategory}>{item.category}</Text>
-      <Text style={styles.displayTitle}>{item.title}</Text>
-      <Text style={styles.displayDesc}>{item.description}</Text>
-      <DisplayAudioPlayer progress={item.progress} duration={item.duration} />
-    </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
+  hiddenPlayer: {
+    width: 0,
+    height: 0,
+    position: 'absolute',
+  },
   displayCard: {
     backgroundColor: Colors.white,
     borderRadius: wp(4),
