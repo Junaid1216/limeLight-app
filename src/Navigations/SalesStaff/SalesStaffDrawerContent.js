@@ -14,21 +14,33 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
-import { getRoleDisplayLabel } from '../../Constants/roleConfig';
+import {
+  getEmployeeNameLabel,
+  getRoleDisplayLabel,
+} from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
 import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 import Toast from 'react-native-simple-toast';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const DRAWER_BOTTOM_ROUTE = 'BottomNavigation';
 
 const SalesStaffDrawerContent = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+
   const dispatch = useDispatch();
+
   const { role, setRole } = useRole();
 
+  const userData = useSelector(state => state?.AUTH?.userData);
+
+  const employeeName =
+    userData?.name ||
+    userData?.user?.name ||
+    userData?.data?.name ||
+    getEmployeeNameLabel(role);
   const goToTabScreen = (screenName, params) => {
     navigation.navigate(DRAWER_BOTTOM_ROUTE, { screen: screenName, params });
     navigation.closeDrawer();
@@ -56,25 +68,23 @@ const SalesStaffDrawerContent = ({ navigation }) => {
       const res = await Api.logout();
       const resJson = res?.data;
 
-      console.log(
-        'Logout Backend Response:',
-        JSON.stringify(resJson, null, 2),
-      );
+      console.log('Logout Backend Response:', JSON.stringify(resJson, null, 2));
 
       if (res?.status == 200) {
         console.log('Logout Response:', JSON.stringify(resJson, null, 2));
         Toast.show(resJson?.message, Toast.LONG);
       } else {
-        console.log(
-          'Logout Error Response:',
-          JSON.stringify(resJson, null, 2),
-        );
+        console.log('Logout Error Response:', JSON.stringify(resJson, null, 2));
         Toast.show(resJson?.message, Toast.LONG);
       }
     } catch (error) {
       console.log(
         'Logout API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
       Toast.show(error?.response?.data?.message, Toast.LONG);
     }
@@ -82,10 +92,13 @@ const SalesStaffDrawerContent = ({ navigation }) => {
     setAuthToken(null);
     dispatch(REMOVE_USER_DATA());
     setRole(null);
-    navigation.getParent()?.getParent()?.reset({
-      index: 0,
-      routes: [{ name: 'Role' }],
-    });
+    navigation
+      .getParent()
+      ?.getParent()
+      ?.reset({
+        index: 0,
+        routes: [{ name: 'Role' }],
+      });
   };
 
   return (
@@ -107,7 +120,7 @@ const SalesStaffDrawerContent = ({ navigation }) => {
         </View>
         <View style={styles.profileInfo}>
           <Text style={styles.userName} numberOfLines={1}>
-            {Strings.homeUserName}
+            {employeeName}
           </Text>
           <Text style={styles.userRole} numberOfLines={1}>
             {getRoleDisplayLabel(role)}
@@ -178,7 +191,10 @@ const SalesStaffDrawerContent = ({ navigation }) => {
 
 const MenuItem = ({ label, onPress, iconName, imageSource, danger }) => (
   <Pressable
-    style={({ pressed }) => [styles.menuItem, pressed && styles.menuItemPressed]}
+    style={({ pressed }) => [
+      styles.menuItem,
+      pressed && styles.menuItemPressed,
+    ]}
     onPress={onPress}
   >
     {iconName ? (
@@ -188,7 +204,11 @@ const MenuItem = ({ label, onPress, iconName, imageSource, danger }) => (
         color={danger ? Colors.brightRed : Colors.slateGrey}
       />
     ) : (
-      <Image source={imageSource} style={styles.menuIcon} resizeMode="contain" />
+      <Image
+        source={imageSource}
+        style={styles.menuIcon}
+        resizeMode="contain"
+      />
     )}
     <Text
       style={[styles.menuLabel, danger && styles.menuLabelDanger]}

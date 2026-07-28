@@ -13,6 +13,7 @@ const UNITS_FONT_SIZE = wp(2.6);
 const WeeklyPerformanceItem = ({ item }) => {
   const progress = Math.min(1, Math.max(0, item?.progress ?? 0));
   const percent = item?.percent ?? Math.round(progress * 100);
+  const fillColor = progress > 0 ? Colors.branchGreen : 'transparent';
 
   return (
     <View style={styles.column}>
@@ -24,7 +25,7 @@ const WeeklyPerformanceItem = ({ item }) => {
         <Progress.Bar
           progress={progress}
           width={null}
-          color={Colors.branchGreen}
+          color={fillColor}
           unfilledColor={Colors.darkSlate}
           borderWidth={0}
           height={BAR_HEIGHT}

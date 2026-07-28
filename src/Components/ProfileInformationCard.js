@@ -1,11 +1,18 @@
 import React from 'react';
+
 import { StyleSheet, View } from 'react-native';
+
 import { Images } from '../Assets';
-import ProfileInfoRow from './ProfileInfoRow';
-import ProfileSectionHeader from './ProfileSectionHeader';
+
 import { hp, wp } from '../Assets/Responsive';
+
 import { Colors } from '../Constants/Colors';
+
 import { Strings } from '../Constants/Strings';
+
+import ProfileInfoRow from './ProfileInfoRow';
+
+import ProfileSectionHeader from './ProfileSectionHeader';
 
 const ProfileInformationCard = props => {
   return (
@@ -13,7 +20,7 @@ const ProfileInformationCard = props => {
       <ProfileSectionHeader
         title={Strings.profileInformation}
         numberoflines={1}
-        style={styles.ProfileInformationStyle}
+        style={styles.profileInformationStyle}
       />
 
       <View style={styles.card}>
@@ -21,23 +28,30 @@ const ProfileInformationCard = props => {
           iconSource={Images.Person}
           label={Strings.fullName}
           value={props?.name}
-          editable={false}
+          editable
+          onChangeText={props?.onChangeName}
         />
+
         <View style={styles.divider} />
+
         <ProfileInfoRow
           iconSource={Images.BranchIcon}
           label={props?.branchLabel}
           value={props?.branchValue}
           editable={false}
         />
+
         <View style={styles.divider} />
+
         <ProfileInfoRow
           iconSource={Images.Staff}
           label={Strings.roleLabel}
           value={props?.roleValue}
           editable={false}
         />
+
         <View style={styles.divider} />
+
         <ProfileInfoRow
           iconSource={Images.Designation}
           label={Strings.designation}
@@ -53,6 +67,7 @@ const styles = StyleSheet.create({
   section: {
     width: wp(90),
   },
+
   card: {
     backgroundColor: Colors.white,
     borderRadius: wp(4),
@@ -63,11 +78,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 0.9,
   },
+
   divider: {
     height: 1,
     backgroundColor: Colors.lightPeriwinkle,
   },
-  ProfileInformationStyle: {
+
+  profileInformationStyle: {
     maxWidth: wp(50),
   },
 });

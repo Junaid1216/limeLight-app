@@ -45,15 +45,17 @@ const ProductTag = ({ tag }) => (
   </View>
 );
 
-const ProductImage = ({ image, imageUrl, imageUrls, swatch }) => (
-  <TrainingThumbnail
-    thumbnail={image}
-    image={image}
-    imageUrl={imageUrl}
-    imageUrls={imageUrls}
-    style={styles.productSwatch}
-    resizeMode="cover"
-  />
+const ProductImage = ({ image, imageUrl, imageUrls }) => (
+  <View style={styles.productSwatch}>
+    <TrainingThumbnail
+      thumbnail={image}
+      image={image}
+      imageUrl={imageUrl}
+      imageUrls={imageUrls}
+      style={styles.productImageFill}
+      resizeMode="cover"
+    />
+  </View>
 );
 
 const ProductCardAudio = ({ audioUrl, apiDuration, children }) => {
@@ -125,7 +127,6 @@ const TrainingProductCard = ({ item, onViewDetail }) => {
           image={item?.image}
           imageUrl={item?.imageUrl}
           imageUrls={item?.imageUrls}
-          swatch={item?.swatch}
         />
 
         <View style={styles.productInfo}>
@@ -253,6 +254,12 @@ const styles = StyleSheet.create({
     height: wp(22),
     borderRadius: wp(3),
     marginRight: wp(3.5),
+    overflow: 'hidden',
+    backgroundColor: Colors.inputGrey,
+  },
+  productImageFill: {
+    width: '100%',
+    height: '100%',
   },
   productInfo: {
     flex: 1,

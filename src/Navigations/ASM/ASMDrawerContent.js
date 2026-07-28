@@ -7,52 +7,73 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
+import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
-import { getRoleDisplayLabel } from '../../Constants/roleConfig';
+import {
+  getEmployeeNameLabel,
+  getRoleDisplayLabel,
+} from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
 import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
 import { navigateToStaffDetail } from '../../Navigations/navigationHelpers';
 import { getLastSelectedStaffMember } from '../../Utils/staffHelpers';
 import Api, { setAuthToken } from '../../Services/Api_services';
-import Toast from 'react-native-simple-toast';
-import { useDispatch } from 'react-redux';
 
 const DRAWER_BOTTOM_ROUTE = 'BottomNavigation';
 
 const ASMDrawerContent = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+
   const dispatch = useDispatch();
+
   const { role, setRole } = useRole();
 
+  const userData = useSelector(state => state?.AUTH?.userData);
+
+  const asmName =
+    userData?.name ||
+    userData?.user?.name ||
+    userData?.data?.name ||
+    getEmployeeNameLabel(role);
+
   const goToTabScreen = (screenName, params) => {
-    navigation.navigate(DRAWER_BOTTOM_ROUTE, { screen: screenName, params });
+    navigation.navigate(DRAWER_BOTTOM_ROUTE, {
+      screen: screenName,
+      params,
+    });
+
     navigation.closeDrawer();
   };
 
   const goToDrawerScreen = screenName => {
     navigation.navigate(screenName);
+
     navigation.closeDrawer();
   };
 
   const goToAnnouncement = () => {
     navigation.closeDrawer();
+
     navigation.getParent()?.navigate('Announcement');
   };
 
   const goToProfile = () => {
     navigation.closeDrawer();
+
     navigation.getParent()?.navigate('Profile');
   };
 
   const goToAppScreen = screenName => {
     navigation.closeDrawer();
+
     navigation.getParent()?.navigate(screenName);
   };
 
@@ -63,7 +84,9 @@ const ASMDrawerContent = ({ navigation }) => {
 
     if (!member) {
       Toast.show(Strings.staffDetailSelectStaff, Toast.LONG);
+
       navigation.getParent()?.navigate('BranchStaffComparison');
+
       return;
     }
 
@@ -77,40 +100,54 @@ const ASMDrawerContent = ({ navigation }) => {
       const res = await Api.logout();
       const resJson = res?.data;
 
-      console.log(
-        'Logout Backend Response:',
-        JSON.stringify(resJson, null, 2),
-      );
+      console.log('Logout Backend Response:', JSON.stringify(resJson, null, 2));
 
       if (res?.status == 200) {
         console.log('Logout Response:', JSON.stringify(resJson, null, 2));
+
         Toast.show(resJson?.message, Toast.LONG);
       } else {
-        console.log(
-          'Logout Error Response:',
-          JSON.stringify(resJson, null, 2),
-        );
+        console.log('Logout Error Response:', JSON.stringify(resJson, null, 2));
+
         Toast.show(resJson?.message, Toast.LONG);
       }
     } catch (error) {
       console.log(
         'Logout API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
+
       Toast.show(error?.response?.data?.message, Toast.LONG);
     }
 
     setAuthToken(null);
+
     dispatch(REMOVE_USER_DATA());
+
     setRole(null);
-    navigation.getParent()?.getParent()?.reset({
-      index: 0,
-      routes: [{ name: 'Role' }],
-    });
+
+    navigation
+      .getParent()
+      ?.getParent()
+      ?.reset({
+        index: 0,
+        routes: [{ name: 'Role' }],
+      });
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + hp(2) }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top + hp(2),
+        },
+      ]}
+    >
       <Pressable
         style={({ pressed }) => [
           styles.profileSection,
@@ -126,10 +163,12 @@ const ASMDrawerContent = ({ navigation }) => {
             tintColor={Colors.white}
           />
         </View>
+
         <View style={styles.profileInfo}>
           <Text style={styles.userName} numberOfLines={1}>
-            {Strings.homeUserName}
+            {asmName}
           </Text>
+
           <Text style={styles.userRole} numberOfLines={1}>
             {getRoleDisplayLabel(role)}
           </Text>
@@ -148,64 +187,92 @@ const ASMDrawerContent = ({ navigation }) => {
           label={Strings.regionComparison}
           onPress={() => goToDrawerScreen('RegionComparison')}
         />
+
         <MenuItem
           iconName="trending-up"
           label={Strings.salesStaffPerformance}
           onPress={() => goToAppScreen('BranchStaffComparison')}
         />
+
         <MenuItem
           iconName="user"
           label={Strings.staffDetailsHeader}
           onPress={goToStaffDetailScreen}
         />
+
         <MenuItem
           iconName="crosshair"
           label={Strings.branchTargets}
           onPress={() => goToAppScreen('BranchTargets')}
         />
+
         <MenuItem
           iconName="headphones"
           label={Strings.customerServiceTraining}
           onPress={() =>
-            goToTabScreen('Training', { tab: 'Customer', ts: Date.now() })
+            goToTabScreen('Training', {
+              tab: 'Customer',
+              ts: Date.now(),
+            })
           }
         />
+
         <MenuItem
           iconName="package"
           label={Strings.productTraining}
           onPress={() =>
-            goToTabScreen('Training', { tab: 'Product', ts: Date.now() })
+            goToTabScreen('Training', {
+              tab: 'Product',
+              ts: Date.now(),
+            })
           }
         />
+
         <MenuItem
           iconName="grid"
           label={Strings.displayTraining}
           onPress={() =>
-            goToTabScreen('Training', { tab: 'Display', ts: Date.now() })
+            goToTabScreen('Training', {
+              tab: 'Display',
+              ts: Date.now(),
+            })
           }
         />
+
         <MenuItem
           imageSource={Images.MegaAssignment}
           label={Strings.announcements}
           onPress={goToAnnouncement}
         />
+
         <MenuItem
           iconName="message-square"
           label={Strings.feedback}
           onPress={() => goToTabScreen('FeedBack')}
         />
+
         <MenuItem
           imageSource={Images.Note}
           label={Strings.surveys}
-          onPress={() => goToTabScreen('Survey', { screen: 'SurveyMain' })}
+          onPress={() =>
+            goToTabScreen('Survey', {
+              screen: 'SurveyMain',
+            })
+          }
         />
+
         <MenuItem
           iconName="file-text"
           label={Strings.SurveyReport}
-          onPress={() => goToTabScreen('Survey', { screen: 'SurveyReport' })}
+          onPress={() =>
+            goToTabScreen('Survey', {
+              screen: 'SurveyReport',
+            })
+          }
         />
 
         <View style={styles.logoutDivider} />
+
         <MenuItem
           iconName="log-out"
           label={Strings.logout}
@@ -238,6 +305,7 @@ const MenuItem = ({ label, onPress, iconName, imageSource, danger }) => (
         resizeMode="contain"
       />
     )}
+
     <Text
       style={[styles.menuLabel, danger && styles.menuLabelDanger]}
       numberOfLines={1}
@@ -253,17 +321,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: wp(5),
   },
+
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: hp(1.5),
     marginTop: hp(-0.3),
   },
+
   profileDivider: {
     height: hp(0.15),
     backgroundColor: Colors.lightGrey,
     marginBottom: hp(1.5),
   },
+
   avatar: {
     width: wp(13),
     height: hp(6.1),
@@ -273,33 +344,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+
   avatarImage: {
     width: wp(5),
     height: hp(2.8),
     tintColor: Colors.white,
   },
+
   profileInfo: {
     marginLeft: wp(3),
     flex: 1,
   },
+
   userName: {
     fontSize: Fontsize.m,
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.black,
     marginTop: hp(0.6),
   },
+
   userRole: {
     fontSize: Fontsize.sm,
     fontFamily: Fonts.poppinsRegular,
     color: Colors.grey,
   },
+
   menuScroll: {
     flex: 1,
   },
+
   menuContent: {
     paddingBottom: hp(3),
     marginTop: hp(-0.5),
   },
+
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -307,14 +385,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(1),
     borderRadius: wp(2),
   },
+
   menuItemPressed: {
     opacity: 0.7,
   },
+
   menuIcon: {
     width: wp(5),
     height: wp(5),
     tintColor: Colors.slateGrey,
   },
+
   menuLabel: {
     flex: 1,
     marginLeft: wp(3),
@@ -322,9 +403,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.poppinsMedium,
     color: Colors.black,
   },
+
   menuLabelDanger: {
     color: Colors.brightRed,
   },
+
   logoutDivider: {
     height: hp(0.15),
     backgroundColor: Colors.lightGrey,

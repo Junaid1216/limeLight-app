@@ -18,30 +18,28 @@ import { Fontsize } from '../Constants/Fontsize';
 import TrainingAudioPlayer from './TrainingAudioPlayer';
 import TrainingThumbnail from './TrainingThumbnail';
 
-const ModalProductVisual = ({ product, colorName }) => {
-  const imageUrl = product?.imageUrl ?? product?.detail?.imageUrl ?? '';
-  const imageUrls = product?.imageUrls ?? product?.detail?.imageUrls ?? [];
-  const hasRemoteImage = Boolean(
-    imageUrl || imageUrls.length || product?.image?.uri || product?.detail?.image?.uri,
-  );
-  const backdropColor = hasRemoteImage
-    ? Colors.inputGrey
-    : colorName
-      ? product?.swatch ?? '#E6DCC6'
-      : '#E6DCC6';
+const ModalProductVisual = ({ product }) => {
+  const image = product?.image ?? product?.detail?.image ?? null;
+  const imageUrl = product?.imageUrl || product?.detail?.imageUrl || '';
+  const imageUrls = product?.imageUrls?.length
+    ? product.imageUrls
+    : product?.detail?.imageUrls ?? [];
+  const colorName = product?.detail?.color || product?.color || '';
+  const hasImage = Boolean(imageUrl || imageUrls.length || image?.uri || typeof image === 'number');
 
   return (
-    <View style={[styles.modalSwatch, { backgroundColor: backdropColor }]}>
+    <View style={styles.modalSwatch}>
       <TrainingThumbnail
-        thumbnail={product?.detail?.image ?? product?.image}
-        image={product?.detail?.image ?? product?.image}
+        key={`modal-thumb-${product?.id ?? imageUrl}`}
+        thumbnail={image}
+        image={image}
         imageUrl={imageUrl}
         imageUrls={imageUrls}
         style={styles.modalImageFill}
         resizeMode="cover"
       />
 
-      {colorName ? (
+      {colorName && !hasImage ? (
         <View style={styles.colorBadge}>
           <MaterialCommunityIcons
             name="map-marker"
@@ -57,7 +55,7 @@ const ModalProductVisual = ({ product, colorName }) => {
   );
 };
 
-const TrainingDetailModal = ({ visible, product, onClose }) => {
+const TrainingDetailModal = ({ visible, product, onClose, onMarkCompleted }) => {
   if (!product) {
     return null;
   }
@@ -69,8 +67,15 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
   const hasDescription = Boolean(detail?.description);
   const hasAudio = Boolean(detail?.audioUrl ?? product?.audioUrl);
   const audioUrl = detail?.audioUrl ?? product?.audioUrl;
-  const colorName = detail?.color || '';
   const modalTags = detail?.detailTags ?? [];
+
+  const handleMarkCompleted = () => {
+    if (onMarkCompleted) {
+      onMarkCompleted(product);
+      return;
+    }
+    onClose?.();
+  };
 
   return (
     <Modal
@@ -104,7 +109,7 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
           contentContainerStyle={styles.modalScroll}
         >
           <View style={styles.modalTopRow}>
-            <ModalProductVisual product={product} colorName={colorName} />
+            <ModalProductVisual product={product} />
 
             <View style={styles.modalProductInfo}>
               <Text style={styles.modalProductTitle}>{product.title}</Text>
@@ -242,7 +247,7 @@ const TrainingDetailModal = ({ visible, product, onClose }) => {
         <TouchableOpacity
           style={styles.completeBtn}
           activeOpacity={0.9}
-          onPress={onClose}
+          onPress={handleMarkCompleted}
         >
           <Text style={styles.completeBtnText}>Mark as Completed</Text>
         </TouchableOpacity>
@@ -316,16 +321,18 @@ const styles = StyleSheet.create({
     height: wp(34),
     borderRadius: wp(3),
     marginRight: wp(4),
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    padding: wp(2),
+    backgroundColor: Colors.inputGrey,
     overflow: 'hidden',
+    position: 'relative',
   },
   modalImageFill: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: wp(3),
+    width: '100%',
+    height: '100%',
   },
   colorBadge: {
+    position: 'absolute',
+    left: wp(2),
+    bottom: hp(0.8),
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(17,17,17,0.72)',
@@ -334,7 +341,6 @@ const styles = StyleSheet.create({
     borderRadius: wp(5),
     gap: wp(1.2),
     zIndex: 2,
-    marginBottom: hp(0.2),
   },
   colorBadgeText: {
     fontFamily: Fonts.poppinsMedium,

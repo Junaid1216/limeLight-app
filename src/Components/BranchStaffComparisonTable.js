@@ -11,9 +11,14 @@ import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { hp, wp } from '../Assets/Responsive';
+import { getEmployeeNameLabel } from '../Constants/roleConfig';
 import { Strings } from '../Constants/Strings';
+import { useRole } from '../Context/RoleContext';
 
-const ListHeader = () => (
+const ListHeader = () => {
+  const { role } = useRole();
+
+  return (
   <>
     <View style={styles.topRow}>
       <Text style={styles.sectionTitle} numberOfLines={1}>
@@ -47,7 +52,7 @@ const ListHeader = () => (
         }
         name={
           <Text style={styles.headerText} numberOfLines={1}>
-            {Strings.name}
+            {getEmployeeNameLabel(role)}
           </Text>
         }
         target={
@@ -63,7 +68,8 @@ const ListHeader = () => (
       />
     </View>
   </>
-);
+  );
+};
 
 const BranchStaffComparisonTable = ({ staff, onStaffPress }) => (
   <View style={styles.table}>

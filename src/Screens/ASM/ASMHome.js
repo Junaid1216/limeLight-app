@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StatusBar, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import ASMAchievementCard from '../../Components/ASMAchievementCard';
 import ASMConversionTable from '../../Components/ASMConversionTable';
 import ASMRangeToggle from '../../Components/ASMRangeToggle';
@@ -19,33 +20,41 @@ import {
 } from '../../Utils/asmMappers';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 
-const getRangeType = range =>
-  range === Strings.weekly ? 'weekly' : 'monthly';
+const getRangeType = range => (range === Strings.weekly ? 'weekly' : 'monthly');
 
 const ASMHome = () => {
+  const userData = useSelector(state => state?.AUTH?.userData);
+
+  const asmName =
+    userData?.name || userData?.user?.name || userData?.data?.name || '';
+
   const [selectedRange, setSelectedRange] = useState(Strings.weekly);
   const [conversionData, setConversionData] = useState([]);
   const [garmentsData, setGarmentsData] = useState([]);
   const [unstitchedData, setUnstitchedData] = useState([]);
   const [accessoriesData, setAccessoriesData] = useState([]);
+
   const [garmentsYoursRow, setGarmentsYoursRow] = useState({
     rank: 0,
     name: '',
     achieved: 0,
     remaining: 0,
   });
+
   const [unstitchedYoursRow, setUnstitchedYoursRow] = useState({
     rank: 0,
     name: '',
     achieved: 0,
     remaining: 0,
   });
+
   const [accessoriesYoursRow, setAccessoriesYoursRow] = useState({
     rank: 0,
     name: '',
     achieved: 0,
     remaining: 0,
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [isConversionLoading, setIsConversionLoading] = useState(false);
 
@@ -70,18 +79,24 @@ const ASMHome = () => {
         );
 
         const appResponse = mapAsmBranchConversion(resJson?.data);
+
         setConversionData(appResponse);
       } else {
         console.log(
           'ASM Branch Conversion Error Response:',
           JSON.stringify(resJson, null, 2),
         );
+
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'ASM Branch Conversion API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
     } finally {
       setIsConversionLoading(false);
@@ -107,6 +122,7 @@ const ASMHome = () => {
         );
 
         const appResponse = mapAsmBranchComparison(resJson?.data);
+
         setGarmentsData(appResponse.garmentsData);
         setUnstitchedData(appResponse.unstitchedData);
         setAccessoriesData(appResponse.accessoriesData);
@@ -118,12 +134,17 @@ const ASMHome = () => {
           'ASM Branch Comparison Error Response:',
           JSON.stringify(resJson, null, 2),
         );
+
         showApiMessageToast(res);
       }
     } catch (error) {
       console.log(
         'ASM Branch Comparison API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
     } finally {
       setIsLoading(false);
@@ -138,13 +159,14 @@ const ASMHome = () => {
 
   useEffect(() => {
     fetchAsmBranchConversion();
-  }, [selectedRange, fetchAsmBranchConversion]);
+  }, [fetchAsmBranchConversion]);
 
   return (
     <View style={MyStyling.container2}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.darkNavy} />
+
       <View style={styles.headerArea}>
-        <HomeHeaderComponent />
+        <HomeHeaderComponent userName={asmName} />
       </View>
 
       <ASMConversionTable
@@ -172,22 +194,25 @@ const ASMHome = () => {
             <Text style={styles.sectionHeading} numberOfLines={1}>
               {Strings.branchComparison}
             </Text>
+
             {isLoading ? (
               <ScreenLoader />
             ) : (
-            <View style={styles.achievementGroup}>
+              <View style={styles.achievementGroup}>
                 <ASMAchievementCard
                   title={Strings.asmGarments}
                   data={garmentsData}
                   accentColor="#20C997"
                   yoursRow={garmentsYoursRow}
                 />
+
                 <ASMAchievementCard
                   title={Strings.asmUnstitched}
                   data={unstitchedData}
                   accentColor={Colors.brightBlue}
                   yoursRow={unstitchedYoursRow}
                 />
+
                 <ASMAchievementCard
                   title={Strings.asmAccessories}
                   data={accessoriesData}
@@ -208,12 +233,14 @@ const styles = StyleSheet.create({
   headerArea: {
     backgroundColor: Colors.darkNavy,
   },
+
   content: {
     paddingHorizontal: wp(4),
     paddingTop: hp(2.5),
     paddingBottom: hp(3),
     backgroundColor: Colors.white,
   },
+
   screenTitle: {
     fontFamily: Fonts.poppinsBold,
     fontSize: Fontsize.mm,
@@ -221,12 +248,14 @@ const styles = StyleSheet.create({
     marginBottom: hp(2.2),
     textAlign: 'center',
   },
+
   sectionHeading: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: Fontsize.sm,
     color: Colors.black,
     marginBottom: hp(1.2),
   },
+
   achievementGroup: {
     borderWidth: 0.97,
     borderColor: '#A89C9C',

@@ -9,6 +9,7 @@ import { Strings } from '../Constants/Strings';
 
 const StaffDetailCategoryCard = ({ item }) => {
   const progressValue = Math.min(1, (item?.achieved ?? 0) / (item?.target || 1));
+  const fillColor = progressValue > 0 ? item?.progressColor : 'transparent';
 
   return (
     <View
@@ -52,7 +53,7 @@ const StaffDetailCategoryCard = ({ item }) => {
       <Progress.Bar
         progress={progressValue}
         width={null}
-        color={item?.progressColor}
+        color={fillColor}
         unfilledColor={Colors.dividerBlue}
         borderWidth={0}
         height={hp(0.9)}

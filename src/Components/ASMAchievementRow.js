@@ -8,6 +8,7 @@ import { Fontsize } from '../Constants/Fontsize';
 
 const ASMAchievementRow = ({ item }) => {
   const progress = Math.min(1, Math.max(0, (item?.achieved ?? 0) / 100));
+  const fillColor = progress > 0 ? '#20C997' : 'transparent';
 
   return (
     <View style={styles.row}>
@@ -27,7 +28,7 @@ const ASMAchievementRow = ({ item }) => {
             progress={progress}
             width={styles.BAR_WIDTH.width}
             height={styles.BAR_HEIGHT.height}
-            color="#20C997"
+            color={fillColor}
             unfilledColor={Colors.orange}
             borderWidth={0}
             borderRadius={styles.BAR_HEIGHT.borderRadius}

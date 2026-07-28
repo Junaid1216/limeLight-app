@@ -154,7 +154,8 @@ const StaffComparison = props => {
                 ? fromDate || today
                 : toDate || fromDate || today
             }
-            minimumDate={datePickerKey === 'to' ? fromDate || today : today}
+            minimumDate={datePickerKey === 'to' ? fromDate || today : undefined}
+            maximumDate={datePickerKey === 'from' ? today : undefined}
             display="default"
             onChange={handleDateChange}
           />

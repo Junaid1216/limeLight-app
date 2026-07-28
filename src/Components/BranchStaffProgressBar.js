@@ -7,6 +7,7 @@ import { Fonts } from '../Constants/Fonts';
 
 const BranchStaffProgressBar = ({ achieved, remaining }) => {
   const progress = Math.min(1, Math.max(0, achieved / 100));
+  const fillColor = progress > 0 ? Colors.green : 'transparent';
 
   return (
     <View style={styles.row}>
@@ -14,7 +15,7 @@ const BranchStaffProgressBar = ({ achieved, remaining }) => {
         progress={progress}
         width={styles.BAR_WIDTH.width}
         height={styles.BAR_HEIGHT.height}
-        color={Colors.green}
+        color={fillColor}
         unfilledColor={Colors.amber}
         borderWidth={0}
         borderRadius={styles.BAR_HEIGHT.borderRadius}

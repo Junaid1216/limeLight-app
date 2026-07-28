@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 import BranchCommissionCard from '../../Components/BranchCommissionCard';
 import HomeHeaderComponent from '../../Components/HomeHeaderComponent';
 import ManagerCategoryCard from '../../Components/ManagerCategoryCard';
@@ -10,6 +11,12 @@ import ScreenLoader from '../../Components/ScreenLoader';
 import StaffConversionChartCard from '../../Components/StaffConversionChartCard';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
+import {
+  categoryBreakdownData,
+  managerAccessoriesPerformance,
+  managerGarmentsPerformance,
+  managerUnstitchedPerformance,
+} from '../../Constants/DummyData';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
@@ -23,14 +30,18 @@ import {
   mapBranchManagerDashboard,
 } from '../../Utils/branchManagerMappers';
 
+const DEFAULT_CATEGORY_PERFORMANCE = [
+  managerGarmentsPerformance,
+  managerUnstitchedPerformance,
+  managerAccessoriesPerformance,
+];
+
 const isNotFoundError = error => {
   const status = error?.response?.status;
   const data = error?.response?.data;
-
   if (status === 404) {
     return true;
   }
-
   if (typeof data === 'string' && data.includes('Not Found')) {
     return true;
   }
@@ -66,28 +77,48 @@ const formatApiDate = date => {
   }
 
   const value = new Date(date);
+
   const year = value.getFullYear();
+
   const month = String(value.getMonth() + 1).padStart(2, '0');
+
   const day = String(value.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
 };
 
 const BranchManager = () => {
+  const userData = useSelector(state => state?.AUTH?.userData);
+
+  const managerName =
+    userData?.name || userData?.user?.name || userData?.data?.name || '';
+
   const [performanceSummary, setPerformanceSummary] = useState(null);
-  const [commissionData, setCommissionData] = useState([]);
-  const [categoryPerformance, setCategoryPerformance] = useState([]);
+
+  const [commissionData, setCommissionData] = useState(categoryBreakdownData);
+
+  const [categoryPerformance, setCategoryPerformance] = useState(
+    DEFAULT_CATEGORY_PERFORMANCE,
+  );
+
   const [fromDate, setFromDate] = useState(null);
+
   const [toDate, setToDate] = useState(null);
+
   const [datePickerKey, setDatePickerKey] = useState(null);
+
   const [showPicker, setShowPicker] = useState(false);
+
   const [conversionData, setConversionData] = useState(null);
+
   const [isLoading, setIsLoading] = useState(false);
+
   const [isConversionLoading, setIsConversionLoading] = useState(false);
 
   const hasConversionDateRange = Boolean(fromDate && toDate);
 
   const today = new Date();
+
   today.setHours(0, 0, 0, 0);
 
   const formatDate = date => date?.toLocaleDateString('en-GB');
@@ -95,11 +126,13 @@ const BranchManager = () => {
   const handleDateChange = (event, selectedDate) => {
     if (event.type === 'dismissed') {
       setShowPicker(false);
+
       return;
     }
 
     if (datePickerKey === 'from') {
       const nextDate = selectedDate > today ? today : selectedDate;
+
       setFromDate(nextDate);
 
       if (toDate && nextDate > toDate) {
@@ -116,12 +149,14 @@ const BranchManager = () => {
 
   const openPicker = key => {
     setDatePickerKey(key);
+
     setShowPicker(true);
   };
 
   const fetchBranchManagerDashboard = useCallback(async () => {
     try {
       const res = await Api.getBranchManagerDashboard();
+
       const resJson = res?.data;
 
       console.log(
@@ -136,12 +171,14 @@ const BranchManager = () => {
         );
 
         const appResponse = mapBranchManagerDashboard(resJson?.data);
+
         setPerformanceSummary(appResponse);
       } else {
         console.log(
           'Branch Manager Dashboard Error Response:',
           JSON.stringify(resJson, null, 2),
         );
+
         showApiMessageToast(res);
       }
     } catch (error) {
@@ -153,7 +190,11 @@ const BranchManager = () => {
       } else {
         console.log(
           'Branch Manager Dashboard API Error:',
-          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+          JSON.stringify(
+            error?.response?.data ?? error?.message ?? error,
+            null,
+            2,
+          ),
         );
       }
     }
@@ -162,6 +203,7 @@ const BranchManager = () => {
   const fetchBranchManagerCommission = useCallback(async () => {
     try {
       const res = await Api.getBranchManagerCommission();
+
       const resJson = res?.data;
 
       console.log(
@@ -176,13 +218,19 @@ const BranchManager = () => {
         );
 
         const appResponse = mapBranchManagerCommission(resJson?.data);
-        setCommissionData(appResponse);
+
+        setCommissionData(
+          appResponse?.length ? appResponse : categoryBreakdownData,
+        );
       } else {
         console.log(
           'Branch Manager Commission Error Response:',
           JSON.stringify(resJson, null, 2),
         );
+
         showApiMessageToast(res);
+
+        setCommissionData(categoryBreakdownData);
       }
     } catch (error) {
       if (isNotFoundError(error)) {
@@ -193,15 +241,22 @@ const BranchManager = () => {
       } else {
         console.log(
           'Branch Manager Commission API Error:',
-          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+          JSON.stringify(
+            error?.response?.data ?? error?.message ?? error,
+            null,
+            2,
+          ),
         );
       }
+
+      setCommissionData(categoryBreakdownData);
     }
   }, []);
 
   const fetchBranchManagerCategoryPerformance = useCallback(async () => {
     try {
       const res = await Api.getBranchManagerCategoryPerformance();
+
       const resJson = res?.data;
 
       console.log(
@@ -216,13 +271,19 @@ const BranchManager = () => {
         );
 
         const appResponse = mapBranchManagerCategoryPerformance(resJson?.data);
-        setCategoryPerformance(appResponse);
+
+        setCategoryPerformance(
+          appResponse?.length ? appResponse : DEFAULT_CATEGORY_PERFORMANCE,
+        );
       } else {
         console.log(
           'Branch Manager Category Performance Error Response:',
           JSON.stringify(resJson, null, 2),
         );
+
         showApiMessageToast(res);
+
+        setCategoryPerformance(DEFAULT_CATEGORY_PERFORMANCE);
       }
     } catch (error) {
       if (isNotFoundError(error)) {
@@ -233,25 +294,34 @@ const BranchManager = () => {
       } else {
         console.log(
           'Branch Manager Category Performance API Error:',
-          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+          JSON.stringify(
+            error?.response?.data ?? error?.message ?? error,
+            null,
+            2,
+          ),
         );
       }
+
+      setCategoryPerformance(DEFAULT_CATEGORY_PERFORMANCE);
     }
   }, []);
 
   const fetchConversionRate = useCallback(async () => {
     if (!fromDate || !toDate) {
       setConversionData(null);
+
       return;
     }
 
     const from = formatApiDate(fromDate);
+
     const to = formatApiDate(toDate);
 
     setIsConversionLoading(true);
 
     try {
       const res = await Api.getConversionRate(from, to);
+
       const resJson = res?.data;
 
       console.log(
@@ -275,14 +345,21 @@ const BranchManager = () => {
           'Conversion Rate Error Response:',
           JSON.stringify(resJson, null, 2),
         );
+
         showApiMessageToast(res);
+
         setConversionData([]);
       }
     } catch (error) {
       console.log(
         'Conversion Rate API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
+
       setConversionData([]);
     } finally {
       setIsConversionLoading(false);
@@ -328,8 +405,9 @@ const BranchManager = () => {
   return (
     <View style={MyStyling.container2}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.darkNavy} />
+
       <View style={styles.headerArea}>
-        <HomeHeaderComponent />
+        <HomeHeaderComponent userName={managerName} />
       </View>
 
       <ScrollView
@@ -345,28 +423,30 @@ const BranchManager = () => {
           <ScreenLoader />
         ) : (
           <>
-        <ManagerLiveStatusCard data={performanceSummary} />
+            <ManagerLiveStatusCard data={performanceSummary} />
 
-        <Text style={styles.sectionTitle} numberOfLines={1}>
-          {Strings.categoryPerformance}
-        </Text>
+            <Text style={styles.sectionTitle} numberOfLines={1}>
+              {Strings.categoryPerformance}
+            </Text>
 
-        {categoryPerformance.map(item => (
-          <ManagerCategoryCard key={item.id} item={item} />
-        ))}
+            {categoryPerformance.map(item => (
+              <ManagerCategoryCard key={item.id} item={item} />
+            ))}
 
-        <BranchCommissionCard items={commissionData} />
+            <BranchCommissionCard items={commissionData} />
 
-        <StaffConversionChartCard
-          labels={Strings}
-          fromDate={fromDate}
-          toDate={toDate}
-          formatDate={formatDate}
-          onPressFrom={() => openPicker('from')}
-          onPressTo={() => openPicker('to')}
-          transactionSummary={hasConversionDateRange ? conversionData : null}
-          isLoading={isConversionLoading}
-        />
+            <StaffConversionChartCard
+              labels={Strings}
+              fromDate={fromDate}
+              toDate={toDate}
+              formatDate={formatDate}
+              onPressFrom={() => openPicker('from')}
+              onPressTo={() => openPicker('to')}
+              transactionSummary={
+                hasConversionDateRange ? conversionData : null
+              }
+              isLoading={isConversionLoading}
+            />
           </>
         )}
 
@@ -393,12 +473,14 @@ const styles = StyleSheet.create({
   headerArea: {
     backgroundColor: Colors.darkNavy,
   },
+
   content: {
     paddingHorizontal: wp(4),
     paddingTop: hp(2.3),
     paddingBottom: hp(3),
     backgroundColor: Colors.white,
   },
+
   screenTitle: {
     fontFamily: Fonts.poppinsBold,
     fontSize: Fontsize.mm,
@@ -406,6 +488,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: hp(2.1),
   },
+
   sectionTitle: {
     fontFamily: Fonts.poppinsBold,
     fontSize: Fontsize.m,

@@ -1,13 +1,23 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import * as Progress from 'react-native-progress';
 import { Images } from '../Assets';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
-import { managerPerformanceSummary } from '../Constants/DummyData';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
+
+const EMPTY_SUMMARY = {
+  branchMonthlyTarget: 0,
+  achieved: 0,
+  remaining: 0,
+  commission: 0,
+  achievedPercent: 0,
+  remainingPercent: 0,
+};
+
+const clampPercent = value =>
+  Math.min(100, Math.max(0, Math.round(Number(value) || 0)));
 
 const StatItem = ({ label, value, alignRight = false }) => (
   <View style={[styles.statItem, alignRight && styles.statItemRight]}>
@@ -27,8 +37,15 @@ const StatItem = ({ label, value, alignRight = false }) => (
 );
 
 const ManagerLiveStatusCard = ({ data }) => {
-  const summary = data ?? managerPerformanceSummary;
-  const progress = Math.min(1, Math.max(0, summary.achievedPercent / 100));
+  const summary = data ?? EMPTY_SUMMARY;
+
+  const achievedPercent = clampPercent(summary.achievedPercent);
+  const remainingPercent = clampPercent(
+    summary.remainingPercent != null && summary.remainingPercent !== ''
+      ? summary.remainingPercent
+      : 100 - achievedPercent,
+  );
+  const progress = achievedPercent / 100;
 
   return (
     <View style={styles.card}>
@@ -48,7 +65,10 @@ const ManagerLiveStatusCard = ({ data }) => {
 
       <View style={styles.statsGrid}>
         <View style={styles.statsRow}>
-          <StatItem label={Strings.branchMonthlyTarget} value={summary.branchMonthlyTarget} />
+          <StatItem
+            label={Strings.branchMonthlyTarget}
+            value={summary.branchMonthlyTarget}
+          />
           <StatItem
             label={Strings.achievedLabel}
             value={summary.achieved}
@@ -57,42 +77,41 @@ const ManagerLiveStatusCard = ({ data }) => {
         </View>
         <View style={styles.statsRow}>
           <StatItem label={Strings.remainingLabel} value={summary.remaining} />
-          <StatItem label={Strings.commission} value={summary.commission} alignRight />
+          <StatItem
+            label={Strings.commission}
+            value={summary.commission}
+            alignRight
+          />
         </View>
       </View>
 
       <Text style={styles.progressLabel} numberOfLines={1}>
         {Strings.achievedLabel}
       </Text>
-      <View style={styles.progressWrap}>
-        <Progress.Bar
-          progress={progress}
-          width={null}
-          color={Colors.emerald}
-          unfilledColor={Colors.darkSlate}
-          borderWidth={0}
-          height={hp(3.1)}
-          borderRadius={hp(1.55)}
-          animated={false}
-          style={styles.progressBar}
-        />
-        <View style={styles.barLabelRow} pointerEvents="none">
+
+      <View style={styles.combinedBar}>
+        <View style={styles.barTrack}>
+          {progress > 0 ? (
+            <View style={[styles.achievedFill, { width: `${achievedPercent}%` }]} />
+          ) : null}
+        </View>
+        <View style={styles.barLabels} pointerEvents="none">
           <Text
-            style={styles.barText}
+            style={[styles.barText, styles.barTextLeft]}
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.75}
           >
-            {summary.achievedPercent}
+            {achievedPercent}
             {Strings.percentAchieved}
           </Text>
           <Text
-            style={styles.barText}
+            style={[styles.barText, styles.barTextRight]}
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.75}
           >
-            {summary.remainingPercent}
+            {remainingPercent}
             {Strings.percentRemaining}
           </Text>
         </View>
@@ -155,7 +174,6 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: Fonts.poppinsBold,
-    // fontSize: 13.33,
     fontSize: wp(3.1),
     color: Colors.white,
     marginBottom: hp(0.3),
@@ -171,28 +189,40 @@ const styles = StyleSheet.create({
     color: Colors.vividAmber,
     marginBottom: hp(0.8),
   },
-  progressWrap: {
+  combinedBar: {
     height: hp(3.1),
+    borderRadius: hp(1.55),
+    backgroundColor: Colors.darkSlate,
+    overflow: 'hidden',
     position: 'relative',
+    justifyContent: 'center',
   },
-  progressBar: {
-    alignSelf: 'stretch',
-  },
-  barLabelRow: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+  barTrack: {
+    ...StyleSheet.absoluteFillObject,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+  },
+  achievedFill: {
+    height: '100%',
+    backgroundColor: Colors.emerald,
+    borderRadius: hp(1.55),
+  },
+  barLabels: {
+    ...StyleSheet.absoluteFillObject,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: wp(3),
   },
   barText: {
-    fontFamily: Fonts.poppinsMedium,
+    fontFamily: Fonts.poppinsBold,
     fontSize: Fontsize.xm2,
     color: Colors.white,
+  },
+  barTextLeft: {
+    textAlign: 'left',
+  },
+  barTextRight: {
+    textAlign: 'right',
   },
 });
 

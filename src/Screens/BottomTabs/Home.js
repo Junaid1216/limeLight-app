@@ -193,7 +193,11 @@ const StaffHomeContent = () => {
     } catch (error) {
       console.log(
         'Dashboard API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
     }
   }, [ensureAuthToken]);
@@ -235,7 +239,11 @@ const StaffHomeContent = () => {
     } catch (error) {
       console.log(
         'Slip Bound Incentive API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
       );
     }
   }, [authToken, ensureAuthToken]);
@@ -280,16 +288,24 @@ const StaffHomeContent = () => {
   );
 };
 
-const Home = () => (
-  <View style={MyStyling.container2}>
-    <View style={styles.headerArea}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.darkNavy} />
-      <HomeHeaderComponent />
-    </View>
-    <StaffHomeContent />
-  </View>
-);
+const Home = () => {
+  const userData = useSelector(state => state?.AUTH?.userData);
 
+  const userName =
+    userData?.name || userData?.user?.name || userData?.data?.name || '';
+
+  return (
+    <View style={MyStyling.container2}>
+      <View style={styles.headerArea}>
+        <StatusBar barStyle="light-content" backgroundColor={Colors.darkNavy} />
+
+        <HomeHeaderComponent userName={userName} />
+      </View>
+
+      <StaffHomeContent />
+    </View>
+  );
+};
 const styles = StyleSheet.create({
   headerArea: {
     backgroundColor: Colors.darkNavy,

@@ -11,6 +11,8 @@ import { Strings } from '../Constants/Strings';
 
 const ManagerCategoryCard = ({ item }) => {
   const progressValue = (item?.achievementPercent ?? 0) / 100;
+  const fillColor =
+    progressValue > 0 ? item?.progressColor : 'transparent';
 
   return (
     <View style={styles.card}>
@@ -79,7 +81,7 @@ const ManagerCategoryCard = ({ item }) => {
       <Progress.Bar
         progress={progressValue}
         width={null}
-        color={item?.progressColor}
+        color={fillColor}
         unfilledColor={Colors.dividerBlue}
         borderWidth={0}
         height={hp(0.9)}

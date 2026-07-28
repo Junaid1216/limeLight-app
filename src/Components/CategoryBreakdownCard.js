@@ -92,19 +92,23 @@ const CategoryBreakdownCard = ({
         );
 
         const appResponse = mapCategoryBreakdown(resJson?.data);
-        setBreakdownData(appResponse);
+        setBreakdownData(
+          appResponse?.length ? appResponse : categoryBreakdownData,
+        );
       } else {
         console.log(
           'Category Breakdown Error Response:',
           JSON.stringify(resJson, null, 2),
         );
         showApiMessageToast(res);
+        setBreakdownData(categoryBreakdownData);
       }
     } catch (error) {
       console.log(
         'Category Breakdown API Error:',
         JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
+      setBreakdownData(categoryBreakdownData);
     }
   }, []);
 

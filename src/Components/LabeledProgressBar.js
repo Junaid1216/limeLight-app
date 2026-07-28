@@ -23,7 +23,8 @@ const LabeledProgressBar = props => {
   const percent = Math.round(props.achieved ?? fill * 100);
   const usableWidth = Math.max(progressWidth - THUMB_SIZE, 0);
   const thumbLeft = usableWidth * fill;
-  const fillWidth = thumbLeft + THUMB_RADIUS;
+  // Keep the 0% circle visible; only draw green fill when progress > 0
+  const fillWidth = fill > 0 ? thumbLeft + THUMB_RADIUS : 0;
 
   return (
     <View style={styles.wrapper}>
@@ -37,15 +38,17 @@ const LabeledProgressBar = props => {
           onLayout={event =>
             setProgressWidth(event.nativeEvent.layout.width)
           }>
-          <View
-            style={[
-              styles.fill,
-              {
-                width: fillWidth,
-                backgroundColor: props.color,
-              },
-            ]}
-          />
+          {fillWidth > 0 ? (
+            <View
+              style={[
+                styles.fill,
+                {
+                  width: fillWidth,
+                  backgroundColor: props.color,
+                },
+              ]}
+            />
+          ) : null}
 
           <View style={[styles.thumbWrap, { left: thumbLeft }]}>
             <View style={[styles.thumb, { borderColor: props.color }]}>
@@ -100,7 +103,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderTopLeftRadius: hp(2),
     borderBottomLeftRadius: hp(2),
-    minWidth: THUMB_RADIUS,
   },
   thumbWrap: {
     position: 'absolute',

@@ -31,10 +31,10 @@ const TrainingThumbnail = ({
 
   const remoteSources = useMemo(() => {
     const urls = [
-      ...(Array.isArray(imageUrls) ? imageUrls : []),
-      imageUrl,
       image?.uri,
       thumbnail?.uri,
+      imageUrl,
+      ...(Array.isArray(imageUrls) ? imageUrls : []),
     ]
       .map(value => toMediaUrl(value) || value)
       .filter(Boolean);

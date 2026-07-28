@@ -68,6 +68,17 @@ export const getHomeBranchLabel = role => {
   }
 };
 
+export const getEmployeeNameLabel = role => {
+  switch (role) {
+    case ROLES.MANAGER:
+      return Strings.branchManagerName;
+    case ROLES.ASM:
+      return Strings.asmName;
+    default:
+      return Strings.salerName;
+  }
+};
+
 export const getProfileInfo = role => {
   switch (role) {
     case ROLES.MANAGER:

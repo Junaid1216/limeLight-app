@@ -323,14 +323,21 @@ export const mapDashboardTargetToCategoryRaw = items =>
     };
   });
 
-export const mapBranchManagerDashboard = data => ({
-  branchMonthlyTarget: data?.branch_monthly_target ?? 0,
-  achieved: data?.achieved ?? 0,
-  remaining: data?.remaining ?? 0,
-  commission: data?.commission ?? 0,
-  achievedPercent: data?.achieved_percentage ?? 0,
-  remainingPercent: data?.remaining_percentage ?? 0,
-});
+export const mapBranchManagerDashboard = data => {
+  const achievedPercent = Number(data?.achieved_percentage ?? 0);
+  const remainingPercent = Number(
+    data?.remaining_percentage ?? Math.max(0, 100 - achievedPercent),
+  );
+
+  return {
+    branchMonthlyTarget: data?.branch_monthly_target ?? 0,
+    achieved: data?.achieved ?? 0,
+    remaining: data?.remaining ?? 0,
+    commission: data?.commission ?? 0,
+    achievedPercent,
+    remainingPercent,
+  };
+};
 
 export const mapBranchManagerPerformanceSummary = items => {
   const list = items ?? [];

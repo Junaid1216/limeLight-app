@@ -48,7 +48,9 @@ const Training = () => {
   const route = useRoute();
   const { role } = useRole();
   const [activeTab, setActiveTab] = useState(route.params?.tab || 'Customer');
-  const [activeStatus, setActiveStatus] = useState('New');
+  const [activeStatus, setActiveStatus] = useState(
+    route.params?.status || 'New',
+  );
   const [activeCategory, setActiveCategory] = useState('Unstitched');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -202,11 +204,29 @@ const Training = () => {
     if (route.params?.tab) {
       setActiveTab(route.params.tab);
     }
-  }, [route.params?.tab, route.params?.ts]);
+    if (route.params?.status) {
+      setActiveStatus(route.params.status);
+    }
+  }, [route.params?.tab, route.params?.status, route.params?.ts]);
 
   const openDetail = product => {
     setSelectedProduct(product);
     setModalVisible(true);
+  };
+
+  const handleMarkCompleted = product => {
+    if (product?.id) {
+      setProductData(prev =>
+        prev.map(item =>
+          item.id === product.id ? { ...item, status: 'Completed' } : item,
+        ),
+      );
+    }
+
+    setModalVisible(false);
+    setSelectedProduct(null);
+    setActiveTab('Product');
+    setActiveStatus('Completed');
   };
 
   const handlePlayVideo = async item => {
@@ -302,6 +322,7 @@ const Training = () => {
         visible={modalVisible}
         product={selectedProduct}
         onClose={() => setModalVisible(false)}
+        onMarkCompleted={handleMarkCompleted}
       />
 
       <TrainingVideoModal

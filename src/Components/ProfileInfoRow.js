@@ -11,8 +11,10 @@ const ProfileInfoRow = props => {
     return null;
   }
 
+  const isEditable = props?.editable === true;
+
   return (
-    <View style={styles.row}>
+    <View style={styles.row} pointerEvents={isEditable ? 'auto' : 'none'}>
       <View style={styles.left}>
         <View style={styles.iconBox}>
           {props?.iconSource ? (
@@ -34,16 +36,22 @@ const ProfileInfoRow = props => {
           <Text style={styles.label} numberOfLines={1}>
             {props?.label}
           </Text>
-          <TextInput
-            style={[
-              styles.valueInput,
-              props?.editable === false && styles.valueInputDisabled,
-            ]}
-            value={props?.value}
-            onChangeText={props?.onChangeText}
-            editable={props?.editable !== false}
-            numberOfLines={1}
-          />
+          {isEditable ? (
+            <TextInput
+              style={styles.valueInput}
+              value={props?.value}
+              onChangeText={props?.onChangeText}
+              editable
+              numberOfLines={1}
+            />
+          ) : (
+            <Text
+              style={[styles.valueInput, styles.valueInputDisabled]}
+              numberOfLines={1}
+            >
+              {props?.value ?? ''}
+            </Text>
+          )}
         </View>
       </View>
     </View>

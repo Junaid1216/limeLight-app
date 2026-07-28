@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
 import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
@@ -114,6 +115,26 @@ const SurveyProgress = () => {
   );
 
   const answeredCount = questions.filter(item => answers[item.id]).length;
+  const allAnswered =
+    questions.length > 0 && answeredCount === questions.length;
+
+  const handleSubmitSurvey = () => {
+    if (!allAnswered) {
+      Toast.show(
+        'Please select an option for every question before submitting the survey',
+        Toast.LONG,
+      );
+      return;
+    }
+
+    navigation.navigate('BottomNavigation', {
+      screen: 'BottomNavigation',
+      params: {
+        screen: 'Survey',
+        params: { screen: 'SurveyReport' },
+      },
+    });
+  };
 
   return (
     <View style={MyStyling.container2}>
@@ -152,15 +173,7 @@ const SurveyProgress = () => {
         <Btn
           title={Strings.submitSurvey}
           icon={Images.SubmitArrow}
-          onPress={() =>
-            navigation.navigate('BottomNavigation', {
-              screen: 'BottomNavigation',
-              params: {
-                screen: 'Survey',
-                params: { screen: 'SurveyReport' },
-              },
-            })
-          }
+          onPress={handleSubmitSurvey}
           style={styles.submitBtn}
         />
       </View>

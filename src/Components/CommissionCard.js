@@ -7,8 +7,6 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
-const MIN_ACHIEVED_FILL_PERCENT = 8;
-
 const StatBox = props => (
   <View
     style={[
@@ -39,10 +37,6 @@ const CommissionCard = ({ data = commissionData, isLoading }) => {
     100,
     Math.max(0, Number(remaining) ?? 100 - achievedPercent),
   );
-  const fillPercent =
-    achievedPercent === 0
-      ? MIN_ACHIEVED_FILL_PERCENT
-      : achievedPercent;
 
   return (
     <View style={styles.card}>
@@ -82,12 +76,14 @@ const CommissionCard = ({ data = commissionData, isLoading }) => {
 
           <View style={styles.combinedBar}>
             <View style={styles.barTrack}>
-              <View
-                style={[
-                  styles.achievedFill,
-                  { width: `${fillPercent}%` },
-                ]}
-              />
+              {achievedPercent > 0 ? (
+                <View
+                  style={[
+                    styles.achievedFill,
+                    { width: `${achievedPercent}%` },
+                  ]}
+                />
+              ) : null}
             </View>
             <View style={styles.barLabels} pointerEvents="none">
               <Text

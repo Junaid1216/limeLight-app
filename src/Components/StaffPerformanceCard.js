@@ -3,6 +3,8 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
+import { getEmployeeNameLabel } from '../Constants/roleConfig';
+import { useRole } from '../Context/RoleContext';
 
 const ACHIEVED_COLOR_MAP = {
   1: Colors.successTeal,
@@ -58,6 +60,8 @@ const StaffPerformanceCard = ({
   yourData,
   labels,
 }) => {
+  const { role } = useRole();
+  const nameHeader = getEmployeeNameLabel(role);
   const meName = yourData?.name
     ? `${yourData.name} (You)`
     : labels?.saleemYou;
@@ -95,7 +99,7 @@ const StaffPerformanceCard = ({
           {labels?.rank}
         </Text>
         <Text style={[styles.tableHeaderText, styles.nameCol]} numberOfLines={1}>
-          {labels?.name}
+          {nameHeader}
         </Text>
         <Text style={[styles.tableHeaderText, styles.targetCol]} numberOfLines={1}>
           {labels?.target}
