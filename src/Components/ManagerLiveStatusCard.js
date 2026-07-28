@@ -13,11 +13,16 @@ const EMPTY_SUMMARY = {
   remaining: 0,
   commission: 0,
   achievedPercent: 0,
-  remainingPercent: 0,
+  remainingPercent: 100,
 };
 
-const clampPercent = value =>
-  Math.min(100, Math.max(0, Math.round(Number(value) || 0)));
+const clampPercent = value => {
+  const parsedValue = parseFloat(value);
+  if (!Number.isFinite(parsedValue)) {
+    return 0;
+  }
+  return Math.min(100, Math.max(0, Math.round(parsedValue)));
+};
 
 const StatItem = ({ label, value, alignRight = false }) => (
   <View style={[styles.statItem, alignRight && styles.statItemRight]}>
@@ -31,7 +36,7 @@ const StatItem = ({ label, value, alignRight = false }) => (
       style={[styles.statValue, alignRight && styles.statTextRight]}
       numberOfLines={1}
     >
-      {value}
+      {value ?? 0}
     </Text>
   </View>
 );
@@ -39,13 +44,27 @@ const StatItem = ({ label, value, alignRight = false }) => (
 const ManagerLiveStatusCard = ({ data }) => {
   const summary = data ?? EMPTY_SUMMARY;
 
-  const achievedPercent = clampPercent(summary.achievedPercent);
+  const achievedPercent = clampPercent(
+    summary?.achievedPercent ??
+      summary?.achievedPercentage ??
+      summary?.achieved_percentage ??
+      summary?.percentageAchieved ??
+      summary?.percentage_achieved ??
+      0,
+  );
+
+  const remainingValue =
+    summary?.remainingPercent ??
+    summary?.remainingPercentage ??
+    summary?.remaining_percentage ??
+    summary?.percentageRemaining ??
+    summary?.percentage_remaining;
+
   const remainingPercent = clampPercent(
-    summary.remainingPercent != null && summary.remainingPercent !== ''
-      ? summary.remainingPercent
+    remainingValue != null && remainingValue !== ''
+      ? remainingValue
       : 100 - achievedPercent,
   );
-  const progress = achievedPercent / 100;
 
   return (
     <View style={styles.card}>
@@ -67,52 +86,53 @@ const ManagerLiveStatusCard = ({ data }) => {
         <View style={styles.statsRow}>
           <StatItem
             label={Strings.branchMonthlyTarget}
-            value={summary.branchMonthlyTarget}
+            value={summary?.branchMonthlyTarget}
           />
           <StatItem
             label={Strings.achievedLabel}
-            value={summary.achieved}
+            value={summary?.achieved}
             alignRight
           />
         </View>
         <View style={styles.statsRow}>
-          <StatItem label={Strings.remainingLabel} value={summary.remaining} />
+          <StatItem label={Strings.remainingLabel} value={summary?.remaining} />
           <StatItem
             label={Strings.commission}
-            value={summary.commission}
+            value={summary?.commission}
             alignRight
           />
         </View>
       </View>
 
-      <Text style={styles.progressLabel} numberOfLines={1}>
-        {Strings.achievedLabel}
-      </Text>
-
       <View style={styles.combinedBar}>
-        <View style={styles.barTrack}>
-          {progress > 0 ? (
-            <View style={[styles.achievedFill, { width: `${achievedPercent}%` }]} />
-          ) : null}
-        </View>
-        <View style={styles.barLabels} pointerEvents="none">
+        {achievedPercent > 0 ? (
+          <View
+            style={[
+              styles.achievedFill,
+              {
+                width: `${achievedPercent}%`,
+              },
+            ]}
+          >
+            <Text
+              style={styles.achievedBarText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              {`${achievedPercent}% Achieved`}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.remainingTextContainer} pointerEvents="none">
           <Text
-            style={[styles.barText, styles.barTextLeft]}
+            style={styles.remainingBarText}
             numberOfLines={1}
             adjustsFontSizeToFit
-            minimumFontScale={0.75}
+            minimumFontScale={0.7}
           >
-            {achievedPercent}
-            {Strings.percentAchieved}
-          </Text>
-          <Text
-            style={[styles.barText, styles.barTextRight]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.75}
-          >
-            {remainingPercent}
-            {Strings.percentRemaining}
+            {`${remainingPercent}% Remaining`}
           </Text>
         </View>
       </View>
@@ -183,45 +203,45 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.mm,
     color: Colors.white,
   },
-  progressLabel: {
-    fontFamily: Fonts.poppinsMedium,
-    fontSize: Fontsize.xs1,
-    color: Colors.vividAmber,
-    marginBottom: hp(0.8),
-  },
   combinedBar: {
+    width: '100%',
     height: hp(3.1),
     borderRadius: hp(1.55),
     backgroundColor: Colors.darkSlate,
     overflow: 'hidden',
     position: 'relative',
-    justifyContent: 'center',
-  },
-  barTrack: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
   },
   achievedFill: {
     height: '100%',
     backgroundColor: Colors.emerald,
     borderRadius: hp(1.55),
-  },
-  barLabels: {
-    ...StyleSheet.absoluteFillObject,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: wp(3),
+    justifyContent: 'center',
+    overflow: 'hidden',
+    zIndex: 2,
   },
-  barText: {
+  achievedBarText: {
+    width: '100%',
+    paddingHorizontal: wp(1),
     fontFamily: Fonts.poppinsBold,
     fontSize: Fontsize.xm2,
     color: Colors.white,
+    textAlign: 'center',
   },
-  barTextLeft: {
-    textAlign: 'left',
+  remainingTextContainer: {
+    position: 'absolute',
+    right: wp(2),
+    top: 0,
+    bottom: 0,
+    maxWidth: '55%',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    zIndex: 3,
   },
-  barTextRight: {
+  remainingBarText: {
+    fontFamily: Fonts.poppinsBold,
+    fontSize: Fontsize.xm2,
+    color: Colors.white,
     textAlign: 'right',
   },
 });
