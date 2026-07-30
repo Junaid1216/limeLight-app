@@ -9,7 +9,7 @@ import { Strings } from '../Constants/Strings';
 const CARD_BORDER = '#3B82F6';
 const CARD_BG = '#F5FAFF';
 const VISIBLE_ROWS = 6;
-const ROW_HEIGHT = hp(5.5);
+const ROW_HEIGHT = hp(6.5);
 
 const EMPTY_YOURS_ROW = { rank: 0, name: '', achieved: 0, remaining: 0 };
 
@@ -135,26 +135,28 @@ const styles = StyleSheet.create({
     width: wp(11),
   },
   nameCol: {
-    width: wp(14),
+    flex: 1,
+    flexShrink: 1,
+    minWidth: wp(12),
     marginLeft: wp(0.5),
   },
   rightHeader: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    width: wp(28),
+    flexShrink: 0,
+    marginLeft: wp(0.5),
   },
   achievementCol: {
-    marginRight: wp(2),
+    marginBottom: hp(0.15),
   },
   legend: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: wp(1.5),
+    marginRight: wp(1.5),
   },
   legendDot: {
     width: 7,

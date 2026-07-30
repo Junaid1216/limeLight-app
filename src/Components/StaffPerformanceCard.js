@@ -36,7 +36,7 @@ const RankItem = ({ item, index, totalItems, achievedSuffix }) => {
       </View>
 
       <View style={styles.rankNameWrap}>
-        <Text style={styles.rankName} numberOfLines={1}>
+        <Text style={styles.rankName} numberOfLines={2}>
           {item?.name}
         </Text>
         <Text style={[styles.achievedText, { color: achievedColor }]} numberOfLines={1}>
@@ -75,7 +75,7 @@ const StaffPerformanceCard = ({
           </Text>
         </View>
         <View style={styles.meInfoWrap}>
-          <Text style={styles.meName} numberOfLines={1}>
+          <Text style={styles.meName} numberOfLines={2}>
             {meName}
           </Text>
           <Text style={styles.meAchievement} numberOfLines={1}>
@@ -162,13 +162,14 @@ const styles = StyleSheet.create({
   },
   meInfoWrap: {
     flex: 1,
-    marginLeft: wp(6),
+    flexShrink: 1,
+    minWidth: 0,
+    marginLeft: wp(2),
   },
   meName: {
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: wp(3.65),
     color: Colors.graphite,
-    marginLeft: wp(2),
     marginBottom: hp(0.05),
   },
   meAchievement: {
@@ -179,17 +180,18 @@ const styles = StyleSheet.create({
     color: Colors.green,
   },
   meTarget: {
-    width: wp(10),
+    width: wp(8),
     textAlign: 'left',
-    paddingLeft: 0,
-    marginRight: wp(9.5),
+    marginRight: wp(2),
+    flexShrink: 0,
     fontFamily: Fonts.poppinsRegular,
     fontSize: wp(3.9),
     color: Colors.black,
   },
   meCommission: {
-    width: wp(18),
+    width: wp(16),
     textAlign: 'right',
+    flexShrink: 0,
     fontFamily: Fonts.poppinsBold,
     fontSize: wp(3.9),
     color: Colors.graphite,
@@ -215,15 +217,19 @@ const styles = StyleSheet.create({
   },
   nameCol: {
     flex: 1,
-    marginLeft: wp(9.5),
+    flexShrink: 1,
+    minWidth: 0,
+    marginLeft: wp(2),
   },
   targetCol: {
-    width: wp(10),
-    marginRight: wp(10),
+    width: wp(8),
+    marginRight: wp(2),
+    flexShrink: 0,
   },
   commissionCol: {
-    width: wp(20),
+    width: wp(16),
     textAlign: 'right',
+    flexShrink: 0,
   },
   rankListContent: {
     rowGap: 0,
@@ -254,7 +260,9 @@ const styles = StyleSheet.create({
   },
   rankNameWrap: {
     flex: 1,
-    marginLeft: wp(11.5),
+    flexShrink: 1,
+    minWidth: 0,
+    marginLeft: wp(2),
   },
   rankName: {
     fontFamily: Fonts.poppinsSemiBold,
@@ -269,21 +277,21 @@ const styles = StyleSheet.create({
     fontSize: wp(2.7),
   },
   rankTarget: {
-    width: wp(10),
+    width: wp(8),
     textAlign: 'left',
-    paddingLeft: 0,
-    marginRight: wp(5.9),
+    marginRight: wp(2),
+    flexShrink: 0,
     fontFamily: Fonts.poppinsRegular,
     fontSize: wp(3.6),
     color: Colors.black,
   },
   rankCommission: {
-    width: wp(20),
+    width: wp(16),
     textAlign: 'right',
+    flexShrink: 0,
     fontFamily: Fonts.poppinsBold,
     fontSize: wp(3.9),
     color: Colors.graphite,
-    marginRight: wp(1.7),
   },
 });
 

@@ -28,7 +28,14 @@ const ProfileInformationCard = props => {
           iconSource={Images.Person}
           label={Strings.fullName}
           value={props?.name}
-          editable
+          editable={props?.isEditingName}
+          isEditing={props?.isEditingName}
+          autoFocus={props?.isEditingName}
+          isSaving={props?.isSavingName}
+          showEditAction
+          onPressEdit={props?.onPressEditName}
+          onPressSave={props?.onPressSaveName}
+          onPressCancel={props?.onPressCancelName}
           onChangeText={props?.onChangeName}
         />
 

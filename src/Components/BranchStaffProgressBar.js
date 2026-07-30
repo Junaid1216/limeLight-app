@@ -6,11 +6,13 @@ import { Colors } from '../Constants/Colors';
 import { Fonts } from '../Constants/Fonts';
 
 const BranchStaffProgressBar = ({ achieved, remaining }) => {
-  const progress = Math.min(1, Math.max(0, achieved / 100));
+  const achievedValue = Number(achieved ?? 0);
+  const remainingValue = Number(remaining ?? 0);
+  const progress = Math.min(1, Math.max(0, achievedValue / 100));
   const fillColor = progress > 0 ? Colors.green : 'transparent';
 
   return (
-    <View style={styles.row}>
+    <View style={styles.column}>
       <Progress.Bar
         progress={progress}
         width={styles.BAR_WIDTH.width}
@@ -24,10 +26,10 @@ const BranchStaffProgressBar = ({ achieved, remaining }) => {
 
       <View style={styles.percentRow}>
         <Text style={styles.greenText} numberOfLines={1}>
-          {achieved}%
+          {achievedValue}%
         </Text>
         <Text style={styles.orangeText} numberOfLines={1}>
-          {remaining}%
+          {remainingValue}%
         </Text>
       </View>
     </View>
@@ -35,33 +37,34 @@ const BranchStaffProgressBar = ({ achieved, remaining }) => {
 };
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  column: {
+    alignSelf: 'stretch',
   },
   BAR_WIDTH: {
-    width: wp(17),
+    width: wp(22),
   },
   BAR_HEIGHT: {
-    height: wp(1),
-    borderRadius: wp(0.5),
+    height: wp(2),
+    borderRadius: wp(1),
   },
   percentRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexShrink: 0,
-    marginLeft: wp(1.8),
+    justifyContent: 'space-between',
+    width: wp(22),
+    marginTop: wp(0.8),
   },
   greenText: {
-    fontSize: wp(2.4),
+    fontSize: wp(2.2),
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.green,
-    marginRight: wp(1.4),
+    flexShrink: 0,
   },
   orangeText: {
-    fontSize: wp(2.4),
+    fontSize: wp(2.2),
     fontFamily: Fonts.poppinsSemiBold,
     color: Colors.amber,
+    flexShrink: 0,
   },
 });
 

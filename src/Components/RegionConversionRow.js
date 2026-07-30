@@ -17,7 +17,7 @@ const RegionConversionRow = props => (
     </View>
 
     <View style={styles.nameColumn}>
-      <Text style={styles.regionName} numberOfLines={1}>
+      <Text style={styles.regionName} numberOfLines={2}>
         {props?.name}
       </Text>
     </View>
@@ -85,9 +85,10 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   nameColumn: {
-    width: wp(20),
-    marginLeft: wp(3),
-    flexShrink: 0,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    marginLeft: wp(2),
   },
   regionName: {
     fontFamily: Fonts.poppinsBold,
@@ -98,8 +99,8 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   trafficCell: {
-    width: wp(34),
-    marginLeft: wp(0.5),
+    width: wp(30),
+    marginLeft: wp(1),
     paddingHorizontal: wp(0.5),
     paddingVertical: hp(0.8),
     flexShrink: 0,
@@ -116,18 +117,20 @@ const styles = StyleSheet.create({
     marginLeft: wp(2),
   },
   percentageBox: {
-    width: wp(13),
+    width: wp(14),
+    minWidth: wp(14),
     flexShrink: 0,
     alignItems: 'flex-end',
     justifyContent: 'center',
-    marginLeft: 'auto',
+    marginLeft: wp(1),
     marginTop: hp(2.2),
   },
   percentageText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: Fontsize.sm,
+    fontSize: Fontsize.xs1,
     color: Colors.black,
     includeFontPadding: false,
+    textAlign: 'right',
   },
 });
 

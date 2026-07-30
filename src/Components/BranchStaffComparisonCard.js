@@ -95,9 +95,8 @@ const styles = StyleSheet.create({
     // marginBottom: hp(0.2),
   },
   tableWrap: {
-    // marginHorizontal: -wp(4),
-    width: wp(85.8),
     alignSelf: 'stretch',
+    width: '100%',
   },
   pressed: {
     opacity: 0.9,

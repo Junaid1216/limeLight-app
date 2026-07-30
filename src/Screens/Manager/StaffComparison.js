@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
@@ -15,6 +15,21 @@ import Api from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 import { mapSalesStaffComparison } from '../../Utils/salesStaffMappers';
 
+const getRangeType = tab => (tab === Strings.weekly ? 'weekly' : 'monthly');
+
+const formatApiDate = date => {
+  if (!date) {
+    return '';
+  }
+
+  const value = new Date(date);
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 const StaffComparison = props => {
   const params = props?.route?.params;
   const title = params?.title ?? props?.title ?? Strings.staffComparisonHeader;
@@ -29,7 +44,11 @@ const StaffComparison = props => {
   const [yourData, setYourData] = useState(null);
   const [rankData, setRankData] = useState([]);
   const [topPerformer, setTopPerformer] = useState(null);
+  const [conversionData, setConversionData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConversionLoading, setIsConversionLoading] = useState(false);
+
+  const hasConversionDateRange = Boolean(fromDate && toDate);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -40,46 +59,66 @@ const StaffComparison = props => {
     setIsLoading(true);
 
     try {
-      const res = await Api.getSalesStaffComparison();
+      const type = getRangeType(selectedTab);
+      const res = await Api.getSalesStaffComparison(type);
       const resJson = res?.data;
 
-      console.log(
-        'Sales Staff Comparison Backend Response:',
-        JSON.stringify(resJson, null, 2),
-      );
-
       if (res?.status == 200) {
-        console.log(
-          'Sales Staff Comparison Response:',
-          JSON.stringify(resJson, null, 2),
-        );
-
         const mapped = mapSalesStaffComparison(resJson?.data ?? resJson);
         setYourData(mapped.yourData);
         setRankData(mapped.rankData);
         setTopPerformer(mapped.topPerformer);
       } else {
-        console.log(
-          'Sales Staff Comparison Error Response:',
-          JSON.stringify(resJson, null, 2),
-        );
         showApiMessageToast(res);
       }
     } catch (error) {
-      console.log(
-        'Sales Staff Comparison API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
-      );
+      // Error toast handled by axios interceptor
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedTab]);
+
+  const fetchConversionRate = useCallback(async () => {
+    if (!fromDate || !toDate) {
+      setConversionData(null);
+      return;
+    }
+
+    const from = formatApiDate(fromDate);
+    const to = formatApiDate(toDate);
+
+    setIsConversionLoading(true);
+
+    try {
+      const res = await Api.getConversionRate(from, to);
+      const resJson = res?.data;
+
+      if (res?.status == 200) {
+        const list = Array.isArray(resJson)
+          ? resJson
+          : resJson?.chart ?? resJson?.data ?? [];
+
+        setConversionData(list);
+      } else {
+        showApiMessageToast(res);
+        setConversionData([]);
+      }
+    } catch (error) {
+      setConversionData([]);
+    } finally {
+      setIsConversionLoading(false);
+    }
+  }, [fromDate, toDate]);
 
   useFocusEffect(
     useCallback(() => {
       fetchSalesStaffComparison();
     }, [fetchSalesStaffComparison]),
   );
+
+  useEffect(() => {
+    fetchConversionRate();
+  }, [fetchConversionRate]);
 
   const handleDateChange = (event, selectedDate) => {
     if (event.type === 'dismissed') {
@@ -144,6 +183,10 @@ const StaffComparison = props => {
           formatDate={formatDate}
           onPressFrom={() => openPicker('from')}
           onPressTo={() => openPicker('to')}
+          transactionSummary={
+            hasConversionDateRange ? conversionData : null
+          }
+          isLoading={isConversionLoading}
         />
 
         {showPicker && (

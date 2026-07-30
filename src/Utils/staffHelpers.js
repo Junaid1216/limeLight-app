@@ -127,6 +127,68 @@ export const getStaffNameFromRawApiItem = item => {
   return '';
 };
 
+export const parseCommissionAmount = value => {
+  if (value == null || value === '') {
+    return 0;
+  }
+
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+
+  const normalized = String(value)
+    .trim()
+    .replace(/^Rs\.?\s*/i, '')
+    .replace(/,/g, '');
+
+  if (normalized === '') {
+    return 0;
+  }
+
+  const parsed = Number(normalized);
+
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+export const getCommissionFromRawApiItem = item => {
+  if (!item) {
+    return 0;
+  }
+
+  const nested =
+    item?.sale_staff ??
+    item?.sales_staff ??
+    item?.staff ??
+    item?.employee ??
+    item?.user ??
+    {};
+
+  const candidates = [
+    item?.commission,
+    item?.commission_amount,
+    item?.total_commission,
+    item?.commission_received,
+    nested?.commission,
+    nested?.commission_amount,
+    nested?.total_commission,
+    nested?.commission_received,
+  ];
+
+  for (const value of candidates) {
+    if (value != null && value !== '') {
+      return value;
+    }
+  }
+
+  return 0;
+};
+
+export const formatStaffCommissionDisplay = value => {
+  const amount = parseCommissionAmount(value);
+
+  return `Rs ${amount}`;
+};
+
 export const setLastSelectedStaff = member => {
   const staffId = getValidStaffId(member);
 

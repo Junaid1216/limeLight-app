@@ -24,6 +24,7 @@ import TrainingProductCard from '../../Components/TrainingProductCard';
 import TrainingStatusChips from '../../Components/TrainingStatusChips';
 import TrainingTabs from '../../Components/TrainingTabs';
 import TrainingVideoModal from '../../Components/TrainingVideoModal';
+import ScreenLoader from '../../Components/ScreenLoader';
 import { useRole } from '../../Context/RoleContext';
 import Api from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
@@ -58,6 +59,7 @@ const Training = () => {
   const [productData, setProductData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
   const [activeVideo, setActiveVideo] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchTrainingVideos = useCallback(async () => {
     if (!role) {
@@ -168,37 +170,40 @@ const Training = () => {
     }
   }, [activeCategory]);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchTrainingVideos();
+  const loadTrainingData = useCallback(async () => {
+    if (!role) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await fetchTrainingVideos();
 
       if (activeTab === 'Product') {
-        fetchProductTraining();
+        await fetchProductTraining();
       }
 
       if (activeTab === 'Display') {
-        fetchDisplayTraining(activeCategory);
+        await fetchDisplayTraining(activeCategory);
       }
-    }, [
-      activeTab,
-      activeCategory,
-      fetchTrainingVideos,
-      fetchProductTraining,
-      fetchDisplayTraining,
-    ]),
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    role,
+    activeTab,
+    activeCategory,
+    fetchTrainingVideos,
+    fetchProductTraining,
+    fetchDisplayTraining,
+  ]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTrainingData();
+    }, [loadTrainingData]),
   );
-
-  useEffect(() => {
-    if (activeTab === 'Product') {
-      fetchProductTraining();
-    }
-  }, [activeTab, fetchProductTraining]);
-
-  useEffect(() => {
-    if (activeTab === 'Display') {
-      fetchDisplayTraining(activeCategory);
-    }
-  }, [activeTab, activeCategory, fetchDisplayTraining]);
 
   useEffect(() => {
     if (route.params?.tab) {
@@ -281,41 +286,47 @@ const Training = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {activeTab === 'Display' && (
-          <TrainingDisplayCategories
-            active={activeCategory}
-            onChange={setActiveCategory}
-          />
+        {isLoading ? (
+          <ScreenLoader />
+        ) : (
+          <>
+            {activeTab === 'Display' && (
+              <TrainingDisplayCategories
+                active={activeCategory}
+                onChange={setActiveCategory}
+              />
+            )}
+
+            <TrainingStatusChips active={activeStatus} onChange={setActiveStatus} />
+
+            {activeTab === 'Customer' &&
+              filteredCustomer.map(item => (
+                <TrainingCustomerCard
+                  key={item.id}
+                  item={item}
+                  onPlay={handlePlayVideo}
+                />
+              ))}
+
+            {activeTab === 'Product' &&
+              filteredProduct.map(item => (
+                <TrainingProductCard
+                  key={item.id}
+                  item={item}
+                  onViewDetail={openDetail}
+                />
+              ))}
+
+            {activeTab === 'Display' &&
+              filteredDisplay.map(item => (
+                <TrainingDisplayCard key={item.id} item={item} />
+              ))}
+
+            {!activeList.length ? (
+              <Text style={styles.emptyText}>{emptyMessage}</Text>
+            ) : null}
+          </>
         )}
-
-        <TrainingStatusChips active={activeStatus} onChange={setActiveStatus} />
-
-        {activeTab === 'Customer' &&
-          filteredCustomer.map(item => (
-            <TrainingCustomerCard
-              key={item.id}
-              item={item}
-              onPlay={handlePlayVideo}
-            />
-          ))}
-
-        {activeTab === 'Product' &&
-          filteredProduct.map(item => (
-            <TrainingProductCard
-              key={item.id}
-              item={item}
-              onViewDetail={openDetail}
-            />
-          ))}
-
-        {activeTab === 'Display' &&
-          filteredDisplay.map(item => (
-            <TrainingDisplayCard key={item.id} item={item} />
-          ))}
-
-        {!activeList.length ? (
-          <Text style={styles.emptyText}>{emptyMessage}</Text>
-        ) : null}
       </ScrollView>
 
       <TrainingDetailModal

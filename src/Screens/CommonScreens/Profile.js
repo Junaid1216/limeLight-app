@@ -29,30 +29,33 @@ import { MyStyling } from '../../Constants/Styling';
 import { useRole } from '../../Context/RoleContext';
 import { USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { getAuthToken } from '../../Services/Api_services';
-import Config from '../../Services/Config';
+import {
+  getAvatarDisplayUri,
+  getProfileImagePath,
+  getUserAvatarUri,
+} from '../../Utils/profileImageHelpers';
 
-const getProfileImagePath = data =>
-  data?.profile_image ?? data?.image ?? data?.avatar ?? null;
+const appendProfileImage = (formData, serverImagePath, avatarUri) => {
+  const isLocalImage =
+    avatarUri &&
+    (avatarUri.startsWith('file:') || avatarUri.startsWith('content:'));
 
-const getAvatarDisplayUri = profileImage => {
-  if (!profileImage) {
-    return null;
+  if (isLocalImage) {
+    formData.append('image', {
+      uri: avatarUri,
+      type: 'image/jpeg',
+      name: 'profile.jpg',
+    });
+    return;
   }
 
-  if (typeof profileImage === 'string') {
-    if (
-      profileImage.startsWith('file:') ||
-      profileImage.startsWith('content:') ||
-      profileImage.startsWith('http')
-    ) {
-      return profileImage;
-    }
-
-    return Config.domain + profileImage;
+  if (serverImagePath) {
+    formData.append('image', serverImagePath);
   }
-
-  return profileImage.uri ?? null;
 };
+
+const isLocalAvatarUri = uri =>
+  Boolean(uri && (uri.startsWith('file:') || uri.startsWith('content:')));
 
 const requestGalleryPermission = async () => {
   if (Platform.OS !== 'android') {
@@ -80,31 +83,48 @@ const Profile = () => {
   const { role } = useRole();
   const userData = useSelector(state => state?.AUTH?.userData);
 
+  console.log('userdata@@@',JSON.stringify(userData,null,2));
+  
   const [profile, setProfile] = useState(
     () => userData || getProfileInfo(role),
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
   const [savedName, setSavedName] = useState(
     () => userData?.name || getProfileInfo(role).name,
+  );
+  const [serverImagePath, setServerImagePath] = useState(
+    () => getProfileImagePath(userData) ?? null,
   );
 
   const applyProfileData = useCallback(
     data => {
       const profileData = mapProfileData(data, role);
-      const serverImage = getProfileImagePath(data);
+      const nextServerImage = getProfileImagePath(data);
 
       setProfile({
         ...profileData,
-        avatarUri: getAvatarDisplayUri(serverImage),
+        avatarUri: getAvatarDisplayUri(nextServerImage),
       });
       setSavedName(profileData.name);
+      setServerImagePath(nextServerImage);
     },
     [role],
   );
 
   const handleChangeName = text => {
     setProfile(prev => ({ ...prev, name: text }));
+  };
+
+  const handleEditName = () => {
+    setIsEditingName(true);
+  };
+
+  const handleCancelName = () => {
+    setProfile(prev => ({ ...prev, name: savedName }));
+    setIsEditingName(false);
   };
 
   const handleUpdateProfile = async () => {
@@ -117,6 +137,7 @@ const Profile = () => {
 
     if (nextName === savedName) {
       Toast.show('No changes to update', Toast.LONG);
+      setIsEditingName(false);
       return;
     }
 
@@ -125,27 +146,25 @@ const Profile = () => {
       return;
     }
 
-    setIsUpdating(true);
+    if (!role) {
+      Toast.show('Unable to determine user role', Toast.LONG);
+      return;
+    }
+
+    setIsSavingName(true);
 
     const formData = new FormData();
     formData.append('name', nextName);
+    formData.append('role', role);
+    appendProfileImage(formData, serverImagePath, profile?.avatarUri);
 
     try {
       const res = await Api.updateProfile(formData);
       const resJson = res?.data;
 
-      console.log(
-        'Update Profile Backend Response:',
-        JSON.stringify(resJson, null, 2),
-      );
-
       if (res?.status == 200) {
-        console.log(
-          'Update Profile Response:',
-          JSON.stringify(resJson, null, 2),
-        );
-
         const data = resJson?.data;
+
         if (data) {
           applyProfileData(data);
           const profileData = mapProfileData(data, role);
@@ -154,6 +173,7 @@ const Profile = () => {
               ...normalizeAuthUser(userData),
               ...profileData,
               avatarUri: getProfileImagePath(data),
+              name: profileData.name,
             }),
           );
         } else {
@@ -168,29 +188,107 @@ const Profile = () => {
           );
         }
 
+        setIsEditingName(false);
         Toast.show(resJson?.message || 'Profile updated', Toast.LONG);
       } else {
-        console.log(
-          'Update Profile Error Response:',
-          JSON.stringify(resJson, null, 2),
-        );
         Toast.show(resJson?.message || 'Unable to update profile', Toast.LONG);
       }
     } catch (error) {
-      console.log(
-        'Update Profile API Error:',
-        JSON.stringify(
-          error?.response?.data ?? error?.message ?? error,
-          null,
-          2,
-        ),
-      );
       Toast.show(
         error?.response?.data?.message || 'Unable to update profile',
         Toast.LONG,
       );
+      console.log('update profile error',JSON.stringify(error,null,2));
+      
     } finally {
-      setIsUpdating(false);
+      setIsSavingName(false);
+    }
+  };
+
+  const hasPendingImageChange = isLocalAvatarUri(profile?.avatarUri);
+
+  const handleUpdateProfileImage = async () => {
+    const nextName = String(savedName ?? profile?.name ?? '').trim();
+
+    if (!nextName) {
+      Toast.show('Please enter full name', Toast.LONG);
+      return;
+    }
+
+    if (!hasPendingImageChange) {
+      return;
+    }
+
+    if (!getAuthToken()) {
+      Toast.show('Please login again', Toast.LONG);
+      return;
+    }
+
+    if (!role) {
+      Toast.show('Unable to determine user role', Toast.LONG);
+      return;
+    }
+
+    setIsUpdatingProfile(true);
+
+    const formData = new FormData();
+    formData.append('name', nextName);
+    formData.append('role', role);
+    appendProfileImage(formData, serverImagePath, profile?.avatarUri);
+
+    console.log('Formdata',JSON.stringify(formData,null,2));
+    
+
+    console.log('formdata',JSON.stringify(formData,null,2));
+    
+
+    try {
+      const res = await Api.updateProfile(formData);
+      const resJson = res?.data;
+
+      if (res?.status == 200) {
+        const data = resJson?.data;
+
+        console.log('profile update respoinse',JSON.stringify(data,null,2));
+        
+
+        if (data) {
+          applyProfileData(data);
+          const profileData = mapProfileData(data, role);
+          dispatch(
+            USER_DATA({
+              ...normalizeAuthUser(userData),
+              ...profileData,
+              avatarUri: getProfileImagePath(data),
+              name: profileData.name,
+            }),
+          );
+        } else {
+          dispatch(
+            USER_DATA({
+              ...normalizeAuthUser(userData),
+              ...profile,
+              name: nextName,
+              avatarUri: profile?.avatarUri,
+            }),
+          );
+        }
+
+        Toast.show(resJson?.message || 'Profile updated', Toast.LONG);
+      } else {
+        Toast.show(resJson?.message || 'Unable to update profile', Toast.LONG);
+      console.log('profile update error### ');
+
+      }
+    } catch (error) {
+      Toast.show(
+        error?.response?.data?.message || 'Unable to update profile',
+        Toast.LONG,
+      );
+      console.log('profile update error ',JSON.stringify(error?.response?.data?.message,null,2));
+      
+    } finally {
+      setIsUpdatingProfile(false);
     }
   };
 
@@ -208,17 +306,8 @@ const Profile = () => {
           }
 
           const resJson = res?.data;
-          console.log(
-            'Get Profile Backend Response:',
-            JSON.stringify(resJson, null, 2),
-          );
 
           if (res?.status == 200) {
-            console.log(
-              'Get Profile Response:',
-              JSON.stringify(resJson, null, 2),
-            );
-
             const data = resJson?.data || {};
             applyProfileData(data);
 
@@ -231,10 +320,6 @@ const Profile = () => {
               }),
             );
           } else {
-            console.log(
-              'Get Profile Error Response:',
-              JSON.stringify(resJson, null, 2),
-            );
             Toast.show(res?.data?.message, Toast.LONG);
             setProfile(getProfileInfo(role));
           }
@@ -242,14 +327,6 @@ const Profile = () => {
           if (!isActive) {
             return;
           }
-          console.log(
-            'Get Profile API Error:',
-            JSON.stringify(
-              error?.response?.data ?? error?.message ?? error,
-              null,
-              2,
-            ),
-          );
           Toast.show(error?.response?.data?.message, Toast.LONG);
           setProfile(prev => prev || getProfileInfo(role));
         } finally {
@@ -307,6 +384,10 @@ const Profile = () => {
     );
   };
 
+  const profileAvatarUri = isLocalAvatarUri(profile?.avatarUri)
+    ? profile.avatarUri
+    : getUserAvatarUri(userData) || profile?.avatarUri;
+
   return (
     <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
@@ -328,7 +409,7 @@ const Profile = () => {
           <ProfileSummaryCard
             name={profile.name}
             roleTag={profile.roleTag}
-            avatarUri={profile.avatarUri}
+            avatarUri={profileAvatarUri}
             onAvatarPress={handlePickImage}
           />
           <ProfileInformationCard
@@ -337,14 +418,21 @@ const Profile = () => {
             branchValue={profile.branchValue}
             roleValue={profile.roleValue}
             designation={profile.designation}
+            isEditingName={isEditingName}
+            isSavingName={isSavingName}
             onChangeName={handleChangeName}
+            onPressEditName={handleEditName}
+            onPressSaveName={handleUpdateProfile}
+            onPressCancelName={handleCancelName}
           />
-          <Btn
-            title={Strings.updateProfile}
-            onPress={handleUpdateProfile}
-            loading={isUpdating}
-            style={styles.updateBtn}
-          />
+          {hasPendingImageChange ? (
+            <Btn
+              title={Strings.updateProfile}
+              onPress={handleUpdateProfileImage}
+              loading={isUpdatingProfile}
+              style={styles.updateBtn}
+            />
+          ) : null}
           <ProfileChangePasswordCard />
         </ScrollView>
       )}

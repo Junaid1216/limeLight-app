@@ -45,9 +45,13 @@ const logApi404Fix = (label, endpoint) => {
 
 const EMPTY_TEAM_ROW = { rank: 0, name: '', achieved: 0, remaining: 0 };
 
+const getRangeType = range => (range === Strings.weekly ? 'weekly' : 'monthly');
+
 const Comparison = props => {
   const params = props?.route?.params;
-  const [selectedRange, setSelectedRange] = useState(params?.selectedRange ?? '');
+  const [selectedRange, setSelectedRange] = useState(
+    params?.selectedRange ?? Strings.weekly,
+  );
   const [staffData, setStaffData] = useState([]);
   const [garmentsData, setGarmentsData] = useState([]);
   const [unstitchedData, setUnstitchedData] = useState([]);
@@ -63,7 +67,8 @@ const Comparison = props => {
 
   const fetchStaffComparison = useCallback(async () => {
     try {
-      const res = await Api.getBranchManagerStaffComparison();
+      const type = getRangeType(selectedRange);
+      const res = await Api.getBranchManagerStaffComparison(type);
       const resJson = res?.data;
 
       console.log(
@@ -80,7 +85,6 @@ const Comparison = props => {
         const rawData = resJson?.data ?? [];
         const appResponse = mapBranchManagerStaffComparison(rawData);
         setStaffData(appResponse);
-        setExpandedId(appResponse[0]?.id ?? null);
       } else {
         console.log(
           'Branch Manager Staff Comparison Error Response:',
@@ -101,11 +105,12 @@ const Comparison = props => {
         JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
-  }, []);
+  }, [selectedRange]);
 
   const fetchBranchComparison = useCallback(async () => {
     try {
-      const res = await Api.getBranchManagerBranchComparison();
+      const type = getRangeType(selectedRange);
+      const res = await Api.getBranchManagerBranchComparison(type);
       const resJson = res?.data;
 
       console.log(
@@ -146,7 +151,7 @@ const Comparison = props => {
         JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
-  }, []);
+  }, [selectedRange]);
 
   const fetchComparisonData = useCallback(async () => {
     setIsLoading(true);

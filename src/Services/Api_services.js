@@ -120,7 +120,7 @@ const Api = {
   resetPassword: data => requests.post('resetpassword', data),
   changePassword: data => requests.post('changepassword', data),
   getProfile: () => requests.get('getprofile'),
-  updateProfile: data => requests.post('updateprofile', data),
+  updateProfile: data => requests.post('update-profile', data),
   staffFeedback: data => requests.post('staff-feedback', data),
   asmFeedback: data => requests.post('asm-feedback', data),
   getSurveyQuestions: role => requests.get(`survey-questions/${role}`),
@@ -151,10 +151,10 @@ const Api = {
   getBranchManagerCommission: () => requests.get('branch-manager-commission'),
   getBranchManagerCategoryPerformance: () =>
     requests.get('branch-manager-category-performance'),
-  getBranchManagerStaffComparison: () =>
-    requests.get('branch-manager-staff-comparison'),
-  getBranchManagerBranchComparison: () =>
-    requests.get('branch-manager-branch-comparison'),
+  getBranchManagerStaffComparison: type =>
+    requests.get(`branch-manager-staff-comparison?type=${type}`),
+  getBranchManagerBranchComparison: type =>
+    requests.get(`branch-manager-branch-comparison?type=${type}`),
   getMonthlyTargets: () => requests.get('monthly-targets'),
   assignBranchManagerTargets: data =>
     requests.post('branch-manager/assign-targets', data),
@@ -164,8 +164,11 @@ const Api = {
   getAsmRegionComparison: () => requests.get('asm-regions-comparison'),
   getAsmRegionConversion: type =>
     requests.get(`asm-region-comparison?type=${type}`),
-  getAsmStaffComparison: () => requests.get('asm-staff-comparison'),
-  getSalesStaffComparison: () => requests.get('sales-staff-comparison'),
+  getAsmStaffComparison: type =>
+    requests.get(`asm-staff-comparison?type=${type}`),
+  getNotifications: () => requests.get('notifications'),
+  getSalesStaffComparison: type =>
+    requests.get(`sales-staff-comparison?type=${type}`),
   getAsmBranchTargets: () => requests.get('asm-branch-targets'),
   getStaffDetails: (id, role) =>
     requests.get(getStaffDetailsEndpoint(id, role)),

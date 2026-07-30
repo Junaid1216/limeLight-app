@@ -1,5 +1,10 @@
 import { formatApiAppResponse } from '../Services/Api_services';
-import { getStaffIdFromRawApiItem } from './staffHelpers';
+import {
+  formatStaffCommissionDisplay,
+  getCommissionFromRawApiItem,
+  getStaffIdFromRawApiItem,
+  getStaffNameFromRawApiItem,
+} from './staffHelpers';
 
 export { formatApiAppResponse };
 
@@ -31,7 +36,12 @@ const mapAsmBranchRow = (branch, suffix = '') => ({
   name: suffix
     ? `${branch?.branch_name ?? branch?.branch ?? ''} (${suffix})`
     : branch?.branch_name ?? branch?.branch ?? '',
-  achieved: branch?.achievement_percentage ?? branch?.achievement ?? 0,
+  achieved:
+    branch?.achievement_percentage ??
+    branch?.achieved_percentage ??
+    branch?.achievement ??
+    branch?.achieved ??
+    0,
   remaining: branch?.remaining_percentage ?? branch?.remaining ?? 0,
 });
 
@@ -40,7 +50,12 @@ const mapAsmRegionRow = (region, suffix = '') => ({
   name: suffix
     ? `${region?.region ?? ''} (${suffix})`
     : region?.region ?? '',
-  achieved: region?.achievement_percentage ?? region?.achievement ?? 0,
+  achieved:
+    region?.achievement_percentage ??
+    region?.achieved_percentage ??
+    region?.achievement ??
+    region?.achieved ??
+    0,
   remaining: region?.remaining_percentage ?? region?.remaining ?? 0,
 });
 
@@ -106,25 +121,42 @@ export const mapAsmRegionComparison = data => {
 };
 
 export const mapAsmStaffComparison = data =>
-  (data ?? []).map(branch => ({
-    id: branch?.branch_id ?? branch?.branch_name,
-    name: branch?.branch_name ?? '',
-    staff: (branch?.staff ?? []).map((member, index) => {
-      const staffId = getStaffIdFromRawApiItem(member);
+  (data ?? []).map((branch, branchIndex) => {
+    const staffList =
+      branch?.staff ??
+      branch?.staff_members ??
+      branch?.sales_staff ??
+      [];
 
-      return {
-        id: staffId != null ? String(staffId) : `staff-row-${index}`,
-        staff_id: staffId,
-        sale_staff_id: staffId,
-        rank: member?.rank ?? index + 1,
-        name: member?.name ?? '',
-        achieved: Number(member?.achieved ?? 0),
-        remaining: Number(member?.remaining ?? 0),
-        commission:
-          member?.commission != null ? `Rs ${member.commission}` : 'Rs 0',
-      };
-    }),
-  }));
+    return {
+      id: branch?.branch_id ?? branch?.branch_name ?? `branch-${branchIndex}`,
+      name: branch?.branch_name ?? branch?.branch ?? '',
+      staff: staffList.map((member, index) => {
+        const staffId = getStaffIdFromRawApiItem(member);
+
+        return {
+          id: staffId != null ? String(staffId) : `staff-row-${index}`,
+          staff_id: staffId,
+          sale_staff_id: staffId,
+          rank: member?.rank ?? index + 1,
+          name: getStaffNameFromRawApiItem(member) || member?.name || '',
+          achieved: Number(
+            member?.achieved_percentage ??
+              member?.achievement_percentage ??
+              member?.achieved ??
+              0,
+          ),
+          remaining: Number(
+            member?.remaining_percentage ?? member?.remaining ?? 0,
+          ),
+          target: Number(member?.target ?? 0),
+          commission: formatStaffCommissionDisplay(
+            getCommissionFromRawApiItem(member),
+          ),
+        };
+      }),
+    };
+  });
 
 const mapConversionRow = (item, options = {}) => ({
   rank: item?.rank ?? 0,

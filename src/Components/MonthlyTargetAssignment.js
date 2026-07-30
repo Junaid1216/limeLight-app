@@ -12,20 +12,23 @@ const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
     onUpdateField?.(id, field, cleaned);
   };
 
-  const renderRow = item => (
+  const renderRow = item => {
+    const isAssigned = item?.assigned === true;
+
+    return (
     <View style={styles.row} key={item.id}>
       <View style={styles.nameContainer}>
         <View style={[styles.avatar, { backgroundColor: item.color }]}>
           <Text style={styles.avatarText}>{item.initials}</Text>
         </View>
 
-        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">
+        <Text style={styles.name} numberOfLines={2}>
           {item.name}
         </Text>
       </View>
 
       <TextInput
-        style={styles.inputBox}
+        style={[styles.inputBox, isAssigned && styles.inputDisabled]}
         value={item.garments}
         onChangeText={text => updateField(item.id, 'garments', text)}
         keyboardType="number-pad"
@@ -33,10 +36,11 @@ const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
         maxLength={4}
         placeholder="0"
         placeholderTextColor="#9CA3AF"
+        editable={!isAssigned}
       />
 
       <TextInput
-        style={styles.inputBox}
+        style={[styles.inputBox, isAssigned && styles.inputDisabled]}
         value={item.unstitched}
         onChangeText={text => updateField(item.id, 'unstitched', text)}
         keyboardType="number-pad"
@@ -44,10 +48,11 @@ const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
         maxLength={4}
         placeholder="0"
         placeholderTextColor="#9CA3AF"
+        editable={!isAssigned}
       />
 
       <TextInput
-        style={styles.inputBox}
+        style={[styles.inputBox, isAssigned && styles.inputDisabled]}
         value={item.accessories}
         onChangeText={text => updateField(item.id, 'accessories', text)}
         keyboardType="number-pad"
@@ -55,9 +60,11 @@ const MonthlyTargetAssignment = ({ rows = [], onUpdateField }) => {
         maxLength={4}
         placeholder="0"
         placeholderTextColor="#9CA3AF"
+        editable={!isAssigned}
       />
     </View>
   );
+  };
 
   return (
     <View style={styles.boxContainer}>
@@ -191,6 +198,11 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.xs4,
     fontFamily: Fonts.poppinsMedium,
     color: '#111827',
+  },
+
+  inputDisabled: {
+    backgroundColor: '#F3F4F6',
+    color: '#9CA3AF',
   },
 
   inputBox: {

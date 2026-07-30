@@ -7,7 +7,9 @@ import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 
 const ASMAchievementRow = ({ item }) => {
-  const progress = Math.min(1, Math.max(0, (item?.achieved ?? 0) / 100));
+  const achieved = Number(item?.achieved ?? 0);
+  const remaining = Number(item?.remaining ?? 0);
+  const progress = Math.min(1, Math.max(0, achieved / 100));
   const fillColor = progress > 0 ? '#20C997' : 'transparent';
 
   return (
@@ -18,7 +20,7 @@ const ASMAchievementRow = ({ item }) => {
         </Text>
       </View>
 
-      <Text style={styles.name} numberOfLines={1}>
+      <Text style={styles.name} numberOfLines={2}>
         {item?.name}
       </Text>
 
@@ -36,13 +38,14 @@ const ASMAchievementRow = ({ item }) => {
           />
         </View>
 
-        <Text style={styles.achievedText} numberOfLines={1}>
-          {item?.achieved}%
-        </Text>
-        <View style={styles.percentSpacer} />
-        <Text style={styles.remainingText} numberOfLines={1}>
-          {item?.remaining}%
-        </Text>
+        <View style={styles.percentRow}>
+          <Text style={styles.achievedText} numberOfLines={1}>
+            {achieved}%
+          </Text>
+          <Text style={styles.remainingText} numberOfLines={1}>
+            {remaining}%
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -51,8 +54,8 @@ const ASMAchievementRow = ({ item }) => {
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: hp(0.45),
+    alignItems: 'flex-start',
+    paddingVertical: hp(0.55),
     paddingHorizontal: wp(2),
     backgroundColor: '#F5FAFF',
   },
@@ -63,6 +66,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#20C997',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: hp(0.2),
+    flexShrink: 0,
   },
   rankText: {
     fontFamily: Fonts.poppinsBold,
@@ -70,20 +75,23 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   name: {
-    width: wp(18),
-    marginLeft: wp(2),
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    marginLeft: wp(1.5),
+    marginRight: wp(1),
     fontFamily: Fonts.poppinsBold,
     fontSize: wp(2.4),
     color: Colors.charcoalText,
+    lineHeight: wp(2.4) * 1.2,
   },
   achievementCol: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: wp(28),
+    flexShrink: 0,
     marginLeft: wp(0.5),
   },
   BAR_WIDTH: {
-    width: wp(26),
+    width: wp(28),
   },
   BAR_HEIGHT: {
     height: wp(2.8),
@@ -91,25 +99,25 @@ const styles = StyleSheet.create({
   },
   barBox: {
     overflow: 'hidden',
-    marginRight: wp(1),
   },
-  percentSpacer: {
-    flex: 1,
+  percentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: wp(28),
+    marginTop: wp(0.8),
   },
   achievedText: {
-    width: wp(7),
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: Fontsize.xs0,
     color: '#20C997',
-    textAlign: 'left',
-    marginLeft: wp(1.8),
+    flexShrink: 0,
   },
   remainingText: {
-    width: wp(7),
     fontFamily: Fonts.poppinsSemiBold,
     fontSize: Fontsize.xs0,
     color: Colors.orange,
-    textAlign: 'right',
+    flexShrink: 0,
   },
 });
 

@@ -18,6 +18,8 @@ import {
 } from '../../Utils/apiHelpers';
 import { navigateToStaffDetail } from '../../Navigations/navigationHelpers';
 
+const getRangeType = tab => (tab === Strings.weekly ? 'weekly' : 'monthly');
+
 const BranchStaffComparison = props => {
   const params = props?.route?.params;
 
@@ -32,7 +34,8 @@ const BranchStaffComparison = props => {
     setIsLoading(true);
 
     try {
-      const res = await Api.getAsmStaffComparison();
+      const type = getRangeType(selectedTab);
+      const res = await Api.getAsmStaffComparison(type);
       const resJson = res?.data;
 
       console.log(
@@ -64,7 +67,7 @@ const BranchStaffComparison = props => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedTab]);
 
   useFocusEffect(
     useCallback(() => {

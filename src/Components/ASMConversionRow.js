@@ -16,7 +16,7 @@ const ASMConversionRow = ({ item }) => (
 
     <View style={styles.rowBody}>
       <View style={styles.nameColumnBody}>
-        <Text style={styles.branchName} numberOfLines={1}>
+        <Text style={styles.branchName} numberOfLines={2}>
           {item?.name}
         </Text>
       </View>
@@ -92,13 +92,16 @@ const styles = StyleSheet.create({
   },
   nameColumnBody: {
     flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
   },
   trafficCell: {
-    width: wp(34),
-    marginLeft: wp(2),
+    width: wp(30),
+    marginLeft: wp(1),
     borderRadius: wp(1.5),
-    paddingHorizontal: wp(2),
+    paddingHorizontal: wp(1),
     paddingVertical: hp(0.8),
+    flexShrink: 0,
   },
   branchName: {
     fontFamily: Fonts.poppinsBold,
@@ -121,16 +124,19 @@ const styles = StyleSheet.create({
     marginBottom: hp(0.8),
   },
   percentageBox: {
-    width: wp(12),
+    width: wp(14),
+    minWidth: wp(14),
+    flexShrink: 0,
     alignItems: 'flex-end',
-    marginLeft: wp(3),
+    marginLeft: wp(1),
     marginTop: hp(2.2),
-    paddingRight: wp(1),
+    paddingRight: wp(0.5),
   },
   percentageText: {
     fontFamily: Fonts.poppinsSemiBold,
-    fontSize: Fontsize.sm,
+    fontSize: Fontsize.xs1,
     color: Colors.black,
+    textAlign: 'right',
   },
 });
 

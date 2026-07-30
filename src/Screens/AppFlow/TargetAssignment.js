@@ -60,7 +60,7 @@ const TargetAssignment = () => {
     try {
       const [monthlyRes, staffRes] = await Promise.all([
         Api.getMonthlyTargets(),
-        Api.getBranchManagerStaffComparison(),
+        Api.getBranchManagerStaffComparison('weekly'),
       ]);
       const monthlyJson = monthlyRes?.data;
       const staffJson = staffRes?.data;

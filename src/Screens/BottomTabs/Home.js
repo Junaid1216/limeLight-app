@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import CategoryBreakdownCard from '../../Components/CategoryBreakdownCard';
 import CommissionCard from '../../Components/CommissionCard';
 import HomeHeaderComponent from '../../Components/HomeHeaderComponent';
+import ScreenLoader from '../../Components/ScreenLoader';
 import SlipBoundIncentiveItem, {
   SlipBoundIncentiveHeader,
 } from '../../Components/SlipBoundIncentive';
@@ -153,6 +154,7 @@ const StaffHomeContent = () => {
   const [targetData, setTargetData] = useState(defaultTargetData);
   const [commission, setCommission] = useState(commissionData);
   const [incentiveData, setIncentiveData] = useState(slipBoundIncentiveData);
+  const [isLoading, setIsLoading] = useState(false);
 
   const ensureAuthToken = useCallback(() => {
     if (authToken && !getAuthToken()) {
@@ -254,10 +256,31 @@ const StaffHomeContent = () => {
         return;
       }
 
-      fetchDashboard();
-      fetchSlipBoundIncentive();
+      let isActive = true;
+
+      const loadHomeData = async () => {
+        setIsLoading(true);
+
+        try {
+          await Promise.all([fetchDashboard(), fetchSlipBoundIncentive()]);
+        } finally {
+          if (isActive) {
+            setIsLoading(false);
+          }
+        }
+      };
+
+      loadHomeData();
+
+      return () => {
+        isActive = false;
+      };
     }, [authToken, fetchDashboard, fetchSlipBoundIncentive]),
   );
+
+  if (isLoading) {
+    return <ScreenLoader style={styles.loader} />;
+  }
 
   return (
     <FlatList
@@ -333,6 +356,9 @@ const styles = StyleSheet.create({
     color: Colors.steelGray,
     marginTop: hp(0.4),
     marginBottom: hp(1.2),
+  },
+  loader: {
+    flex: 1,
   },
 });
 

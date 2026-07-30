@@ -20,6 +20,7 @@ import {
 } from '../../Constants/roleConfig';
 import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
+import UserAvatarImage from '../../Components/UserAvatarImage';
 import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 import Toast from 'react-native-simple-toast';
@@ -111,11 +112,9 @@ const SalesStaffDrawerContent = ({ navigation }) => {
         onPress={goToProfile}
       >
         <View style={styles.avatar}>
-          <Image
-            source={Images.Avatar}
-            style={styles.avatarImage}
-            resizeMode="contain"
-            tintColor={Colors.white}
+          <UserAvatarImage
+            userData={userData}
+            iconStyle={styles.avatarImage}
           />
         </View>
         <View style={styles.profileInfo}>
@@ -238,8 +237,8 @@ const styles = StyleSheet.create({
   },
   avatar: {
     width: wp(13),
-    height: hp(6.1),
-    borderRadius: wp(8),
+    height: wp(13),
+    borderRadius: wp(6.5),
     backgroundColor: Colors.green,
     alignItems: 'center',
     justifyContent: 'center',

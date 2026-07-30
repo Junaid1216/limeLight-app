@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   targetHeader: {
     alignSelf: 'stretch',
-    paddingLeft: wp(6),
+    paddingLeft: wp(2),
     textAlign: 'left',
   },
   commissionHeader: {

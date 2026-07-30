@@ -19,6 +19,7 @@ import { Colors } from '../Constants/Colors';
 import { Fontsize } from '../Constants/Fontsize';
 
 import { Fonts } from '../Constants/Fonts';
+import { getAvatarDisplayUri } from '../Utils/profileImageHelpers';
 
 const ProfileSummaryCard = ({
   name,
@@ -28,6 +29,8 @@ const ProfileSummaryCard = ({
   onChangeName,
   nameEditable = false,
 }) => {
+  const displayUri = getAvatarDisplayUri(avatarUri);
+
   return (
     <View style={styles.card}>
       <Pressable
@@ -38,15 +41,15 @@ const ProfileSummaryCard = ({
         <View style={styles.avatar}>
           <Image
             source={
-              avatarUri
+              displayUri
                 ? {
-                    uri: avatarUri,
+                    uri: displayUri,
                   }
                 : Images.Avatar
             }
-            style={avatarUri ? styles.avatarPhoto : styles.avatarImage}
-            resizeMode={avatarUri ? 'cover' : 'contain'}
-            tintColor={avatarUri ? undefined : Colors.white}
+            style={displayUri ? styles.avatarPhoto : styles.avatarImage}
+            resizeMode={displayUri ? 'cover' : 'contain'}
+            tintColor={displayUri ? undefined : Colors.white}
           />
         </View>
 

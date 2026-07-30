@@ -13,8 +13,7 @@ export const ROW_PAD_H = TABLE_SIDE_INSET + TABLE_PAD;
 
 export const COMPARISON_COLUMNS = {
   rank: wp(8),
-  name: wp(17),
-  commission: wp(19),
+  commission: wp(22),
 };
 
 export const ComparisonColumnsLayout = ({
@@ -26,7 +25,7 @@ export const ComparisonColumnsLayout = ({
 }) => (
   <View style={[styles.columnsRow, style]}>
     <View style={[styles.rankCol, { width: COMPARISON_COLUMNS.rank }]}>{rank}</View>
-    <View style={[styles.nameCol, { width: COMPARISON_COLUMNS.name }]}>{name}</View>
+    <View style={styles.nameCol}>{name}</View>
     <View style={styles.targetCol}>{target}</View>
     <View style={[styles.commissionCol, { width: COMPARISON_COLUMNS.commission }]}>
       {commission}
@@ -48,7 +47,7 @@ const BranchStaffComparisonRow = ({ member, onPress }) => (
         </View>
       }
       name={
-        <Text style={styles.name} numberOfLines={1} ellipsizeMode="clip">
+        <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
           {member?.name}
         </Text>
       }
@@ -59,7 +58,12 @@ const BranchStaffComparisonRow = ({ member, onPress }) => (
         />
       }
       commission={
-        <Text style={styles.commission} numberOfLines={1} ellipsizeMode="clip">
+        <Text
+          style={styles.commission}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+        >
           {member?.commission}
         </Text>
       }
@@ -70,24 +74,31 @@ const BranchStaffComparisonRow = ({ member, onPress }) => (
 const styles = StyleSheet.create({
   columnsRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   rankCol: {
     justifyContent: 'center',
+    paddingTop: hp(0.15),
   },
   nameCol: {
-    paddingLeft: wp(2.5),
-  },
-  targetCol: {
     flex: 1,
     flexShrink: 1,
-    paddingLeft: wp(6),
-    marginRight: wp(2.5),
+    minWidth: 0,
+    paddingLeft: wp(1.5),
+    paddingRight: wp(1),
+  },
+  targetCol: {
+    width: wp(24),
+    flexShrink: 0,
+    paddingLeft: wp(0.5),
   },
   commissionCol: {
+    width: COMPARISON_COLUMNS.commission,
     flexShrink: 0,
     alignItems: 'flex-end',
-    paddingRight: wp(0.3),
+    justifyContent: 'center',
+    paddingTop: hp(0.15),
+    paddingLeft: wp(0.5),
   },
   row: {
     paddingVertical: hp(0.55),
@@ -114,9 +125,9 @@ const styles = StyleSheet.create({
     fontSize: Fontsize.xs0,
     fontFamily: Fonts.poppinsBold,
     color: Colors.graphite,
-    lineHeight: Fontsize.xs0 * 1.15,
+    lineHeight: Fontsize.xs0 * 1.2,
     includeFontPadding: false,
-    flexShrink: 0,
+    flexShrink: 1,
   },
   commission: {
     fontSize: Fontsize.xs1,
@@ -124,6 +135,7 @@ const styles = StyleSheet.create({
     color: Colors.graphite,
     textAlign: 'right',
     flexShrink: 0,
+    maxWidth: COMPARISON_COLUMNS.commission,
   },
 });
 

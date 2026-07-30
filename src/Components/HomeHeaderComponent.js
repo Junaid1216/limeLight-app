@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import DrawerMenuButton from './DrawerMenuButton';
+import UserAvatarImage from './UserAvatarImage';
 
 import { Images } from '../Assets';
 
@@ -27,12 +28,13 @@ import {
   navigateToNotification,
   navigateToProfile,
 } from '../Navigations/navigationHelpers';
+import { useSelector } from 'react-redux';
 
 const NOTIFICATION_COUNT = 5;
 
 const HomeHeaderComponent = ({ userName }) => {
   const navigation = useNavigation();
-
+  const userData = useSelector(state => state?.AUTH?.userData);
   const { role } = useRole();
 
   return (
@@ -71,11 +73,9 @@ const HomeHeaderComponent = ({ userName }) => {
           style={styles.avatar}
           onPress={() => navigateToProfile(navigation)}
         >
-          <Image
-            source={Images.Avatar}
-            style={styles.avatarImage}
-            resizeMode="contain"
-            tintColor={Colors.white}
+          <UserAvatarImage
+            userData={userData}
+            iconStyle={styles.avatarImage}
           />
         </TouchableOpacity>
       </View>
@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
 
   avatar: {
     width: wp(10),
-    height: hp(5.1),
-    borderRadius: wp(8),
+    height: wp(10),
+    borderRadius: wp(5),
     backgroundColor: Colors.green,
     alignItems: 'center',
     justifyContent: 'center',

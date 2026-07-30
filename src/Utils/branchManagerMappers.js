@@ -2,7 +2,14 @@ import { Images } from '../Assets';
 import { Colors } from '../Constants/Colors';
 import { categoryColorMap } from '../Constants/CategoryColors';
 import { Strings } from '../Constants/Strings';
-import { getStaffIdFromRawApiItem, getStaffNameFromRawApiItem, getValidStaffId } from './staffHelpers';
+import {
+  formatStaffCommissionDisplay,
+  getCommissionFromRawApiItem,
+  getStaffIdFromRawApiItem,
+  getStaffNameFromRawApiItem,
+  getValidStaffId,
+  parseCommissionAmount,
+} from './staffHelpers';
 
 const CATEGORY_ORDER = ['garments', 'unstitched', 'accessories'];
 
@@ -61,8 +68,6 @@ const getCategoryDotColor = categoryName => {
   const key = getCategoryKey(categoryName);
   return categoryColorMap[key] || Colors.blueGrey;
 };
-
-const formatCommission = value => `Rs ${value ?? 0}`;
 
 const WEEK_LABELS = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
 const WEEK_SHORT_LABELS = ['W1', 'W2', 'W3', 'W4'];
@@ -216,7 +221,7 @@ export const mapBranchManagerCommission = items =>
     categoryName: item?.category ?? '',
     target: String(item?.target ?? 0),
     achieved: String(item?.achieved ?? 0),
-    commission: formatCommission(item?.commission ?? 0),
+    commission: formatStaffCommissionDisplay(getCommissionFromRawApiItem(item)),
     dotColor: getCategoryDotColor(item?.category),
   }));
 
@@ -225,8 +230,13 @@ const mapBranchAchievementRow = (branch, suffix = '') => ({
   name: suffix
     ? `${branch?.branch ?? branch?.branch_name ?? ''} (${suffix})`
     : branch?.branch ?? branch?.branch_name ?? '',
-  achieved: branch?.achievement ?? branch?.achievement_percentage ?? 0,
-  remaining: branch?.remaining ?? branch?.remaining_percentage ?? 0,
+  achieved:
+    branch?.achievement_percentage ??
+    branch?.achieved_percentage ??
+    branch?.achievement ??
+    branch?.achieved ??
+    0,
+  remaining: branch?.remaining_percentage ?? branch?.remaining ?? 0,
 });
 
 export const mapBranchManagerStaffComparison = items =>
@@ -238,9 +248,16 @@ export const mapBranchManagerStaffComparison = items =>
       staff_id: staffId,
       rank: item?.rank ?? index + 1,
       name: getStaffNameFromRawApiItem(item) || item?.staff_name || '',
-      achieved: item?.achieved_percentage ?? 0,
-      remaining: item?.remaining_percentage ?? 0,
-      commission: formatCommission(item?.commission ?? 0),
+      achieved: Number(
+        item?.achieved_percentage ??
+          item?.achievement_percentage ??
+          item?.achieved ??
+          0,
+      ),
+      remaining: Number(
+        item?.remaining_percentage ?? item?.remaining ?? 0,
+      ),
+      commission: formatStaffCommissionDisplay(getCommissionFromRawApiItem(item)),
       target: item?.target ?? 0,
     };
   });
@@ -274,17 +291,6 @@ export const mapBranchManagerBranchComparison = data => {
     accessoriesYoursRow: accessoriesBlock.yoursRow,
     teamAchievementRow: garmentsBlock.yoursRow,
   };
-};
-
-const parseCommissionAmount = value => {
-  if (value == null || value === '') {
-    return 0;
-  }
-
-  const numeric = String(value).replace(/[^\d.]/g, '');
-  const parsed = Number(numeric);
-
-  return Number.isFinite(parsed) ? parsed : 0;
 };
 
 export const mapBetaDashboardToManagerSummary = dashboard => {
@@ -538,6 +544,7 @@ export const mapBranchManagerStaffForAssignment = (items, nameLookup = new Map()
       garments: item?.garments != null ? String(item.garments) : '',
       unstitched: item?.unstitched != null ? String(item.unstitched) : '',
       accessories: item?.accessories != null ? String(item.accessories) : '',
+      assigned: item?.assigned === true || item?.assigned === 1,
     };
   });
 
@@ -645,10 +652,25 @@ export const mapMonthlyTargets = data => {
 };
 
 export const mapTargetAssignmentScreenData = (monthlyData, staffItems = []) => {
-  const staffSource = Array.isArray(staffItems) ? staffItems : [];
+  const comparisonStaff = Array.isArray(staffItems) ? staffItems : [];
+  const monthlyStaff = getMonthlyTargetsStaffList(monthlyData);
+  const staffSource = mergeMonthlyTargetStaffRows({
+    staff: comparisonStaff,
+    targets: monthlyStaff,
+  });
+
+  const resolvedStaff =
+    staffSource.length > 0
+      ? staffSource
+      : comparisonStaff.length
+        ? comparisonStaff
+        : monthlyStaff;
 
   return {
-    staff: mapBranchManagerStaffForAssignment(staffSource),
+    staff: mapBranchManagerStaffForAssignment(
+      resolvedStaff,
+      buildStaffNameLookup(monthlyData),
+    ),
     categories: mapMonthlyTargetCategories(monthlyData),
   };
 };
