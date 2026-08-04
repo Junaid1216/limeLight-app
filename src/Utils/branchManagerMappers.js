@@ -62,6 +62,8 @@ const mapMonthlyTargetCategoriesFromList = items =>
   (items ?? []).map(item => ({
     title: formatCategoryTitle(item?.category ?? item?.name ?? ''),
     target: Number(item?.monthly_target ?? item?.target ?? item?.monthlyTarget ?? 0),
+    assigned: Number(item?.assigned_target ?? item?.assigned ?? 0),
+    remaining: Number(item?.remaining_target ?? item?.remaining ?? 0),
   }));
 
 const getCategoryDotColor = categoryName => {
@@ -137,12 +139,13 @@ const getWeekAchievedUnits = weekData => {
 };
 
 const buildWeeklyPerformanceItem = (index, units, targetUnits, weekData) => {
-  const percent = Number(
+  const rawPercent = Number(
     weekData?.percentage ??
       weekData?.achievement_percentage ??
       weekData?.percent ??
       (targetUnits ? Math.round((units / targetUnits) * 100) : 0),
   );
+  const percent = Math.min(100, Math.max(0, rawPercent));
   const progress = Math.min(1, Math.max(0, percent / 100));
   const status = weekData?.status ?? (units > 0 ? Strings.active : 'Next');
 
@@ -683,7 +686,9 @@ export const mapMonthlyTargetCategories = data => {
   if (Array.isArray(data?.categories)) {
     return data.categories.map(item => ({
       title: item?.category ?? item?.name ?? '',
-      target: Number(item?.target ?? 0),
+      target: Number(item?.monthly_target ?? item?.target ?? 0),
+      assigned: Number(item?.assigned_target ?? item?.assigned ?? 0),
+      remaining: Number(item?.remaining_target ?? item?.remaining ?? 0),
     }));
   }
 
@@ -691,14 +696,20 @@ export const mapMonthlyTargetCategories = data => {
     {
       title: 'Garments',
       target: Number(data?.garments_target ?? data?.garments ?? 0),
+      assigned: 0,
+      remaining: 0,
     },
     {
       title: 'Unstitched',
       target: Number(data?.unstitched_target ?? data?.unstitched ?? 0),
+      assigned: 0,
+      remaining: 0,
     },
     {
       title: 'Accessories',
       target: Number(data?.accessories_target ?? data?.accessories ?? 0),
+      assigned: 0,
+      remaining: 0,
     },
   ];
 };
@@ -725,13 +736,18 @@ export const mapBranchManagerTargetSummary = (categoryItems, assignedTotals) => 
   const buildRow = key => {
     const category = findCategory(key);
     const target = Number(category?.target ?? 0);
-    const assigned = Number(assignedTotals?.[key] ?? 0);
+    const baseAssigned = Number(category?.assigned ?? 0);
+    const assigned = baseAssigned + Number(assignedTotals?.[key] ?? 0);
+    const remaining =
+      Number(assignedTotals?.[key] ?? 0) === 0 && category?.remaining != null
+        ? Number(category.remaining)
+        : Math.max(0, target - assigned);
 
     return {
       key,
       target,
       assigned,
-      left: Math.max(0, target - assigned),
+      left: remaining,
     };
   };
 
@@ -778,6 +794,38 @@ export const getAssignTargetsValidationError = rows => {
   }
 
   return null;
+};
+
+const getSectionAvailableTarget = category => {
+  const remaining = category?.remaining;
+
+  if (remaining != null) {
+    return Math.max(0, Number(remaining));
+  }
+
+  const target = Number(category?.target ?? 0);
+  const assigned = Number(category?.assigned ?? 0);
+
+  return Math.max(0, target - assigned);
+};
+
+export const getAssignTargetsSectionError = (categoryItems, assignedTotals) => {
+  const findCategory = key =>
+    (categoryItems ?? []).find(item => getCategoryKey(item?.title) === key);
+
+  const hasBlockedSection = CATEGORY_ORDER.some(key => {
+    const entered = Number(assignedTotals?.[key] ?? 0);
+
+    if (entered <= 0) {
+      return false;
+    }
+
+    return getSectionAvailableTarget(findCategory(key)) <= 0;
+  });
+
+  return hasBlockedSection
+    ? 'You can only assign targets for sections with available targets in the Monthly Targets Calculator.'
+    : null;
 };
 
 export const mapBranchManagerAssignTargetsResponse = data => {

@@ -10,6 +10,8 @@ import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
 const ManagerCategoryCard = ({ item }) => {
+  console.log('items@@', JSON.stringify(item, null, 2));
+
   const progressValue = (item?.achievementPercent ?? 0) / 100;
   const fillColor =
     progressValue > 0 ? item?.progressColor : 'transparent';

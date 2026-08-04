@@ -62,6 +62,8 @@ const StaffComparison = props => {
       const type = getRangeType(selectedTab);
       const res = await Api.getSalesStaffComparison(type);
       const resJson = res?.data;
+      console.log('staff comparison@@', JSON.stringify(resJson, null, 2));
+
 
       if (res?.status == 200) {
         const mapped = mapSalesStaffComparison(resJson?.data ?? resJson);

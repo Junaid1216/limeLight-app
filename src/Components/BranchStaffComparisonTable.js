@@ -19,55 +19,55 @@ const ListHeader = () => {
   const { role } = useRole();
 
   return (
-  <>
-    <View style={styles.topRow}>
-      <Text style={styles.sectionTitle} numberOfLines={1}>
-        {Strings.staffComparisonHeader}
-      </Text>
+    <>
+      <View style={styles.topRow}>
+        <Text style={styles.sectionTitle} numberOfLines={1}>
+          {Strings.staffComparisonHeader}
+        </Text>
 
-      <View style={styles.legendWrap}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.achievedDot]} />
-          <Text style={styles.legendText} numberOfLines={1}>
-            {Strings.achievedLabel}
-          </Text>
-        </View>
+        <View style={styles.legendWrap}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, styles.achievedDot]} />
+            <Text style={styles.legendText} numberOfLines={1}>
+              {Strings.achievedLabel}
+            </Text>
+          </View>
 
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.remainingDot]} />
-          <Text style={styles.legendText} numberOfLines={1}>
-            {Strings.remainingLabel}
-          </Text>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendDot, styles.remainingDot]} />
+            <Text style={styles.legendText} numberOfLines={1}>
+              {Strings.remainingLabel}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
 
-    <View style={styles.headerShell}>
-      <ComparisonColumnsLayout
-        style={styles.headerColumns}
-        rank={
-          <Text style={styles.headerText} numberOfLines={1}>
-            {Strings.rank}
-          </Text>
-        }
-        name={
-          <Text style={styles.headerText} numberOfLines={1}>
-            {getEmployeeNameLabel(role)}
-          </Text>
-        }
-        target={
-          <Text style={[styles.headerText, styles.targetHeader]} numberOfLines={1}>
-            {Strings.target}
-          </Text>
-        }
-        commission={
-          <Text style={[styles.headerText, styles.commissionHeader]} numberOfLines={1}>
-            {Strings.commission}
-          </Text>
-        }
-      />
-    </View>
-  </>
+      <View style={styles.headerShell}>
+        <ComparisonColumnsLayout
+          style={styles.headerColumns}
+          rank={
+            <Text style={styles.headerText} numberOfLines={1}>
+              {Strings.rank}
+            </Text>
+          }
+          name={
+            <Text style={styles.headerText} numberOfLines={1}>
+              {getEmployeeNameLabel(role)}
+            </Text>
+          }
+          target={
+            <Text style={[styles.headerText, styles.targetHeader]} numberOfLines={1}>
+              {Strings.target}
+            </Text>
+          }
+          commission={
+            <Text style={[styles.headerText, styles.commissionHeader]} numberOfLines={1}>
+              {Strings.commission}
+            </Text>
+          }
+        />
+      </View>
+    </>
   );
 };
 

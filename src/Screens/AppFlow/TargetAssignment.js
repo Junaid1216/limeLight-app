@@ -23,6 +23,7 @@ import ScreenLoader from '../../Components/ScreenLoader';
 import Api from '../../Services/Api_services';
 import {
   buildBranchManagerAssignTargetsPayload,
+  getAssignTargetsSectionError,
   getAssignTargetsValidationError,
   getCurrentMonthYearLabels,
   isAssignTargetsSuccess,
@@ -166,6 +167,16 @@ const TargetAssignment = () => {
 
     if (validationError) {
       Toast.show(validationError, Toast.LONG);
+      return;
+    }
+
+    const sectionError = getAssignTargetsSectionError(
+      categoryTargets,
+      assignedTotals,
+    );
+
+    if (sectionError) {
+      Toast.show(sectionError, Toast.LONG);
       return;
     }
 

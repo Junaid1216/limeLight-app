@@ -107,7 +107,9 @@ const ASMHome = () => {
     setIsLoading(true);
 
     try {
-      const res = await Api.getAsmBranchComparison();
+      const type = getRangeType(selectedRange);
+
+      const res = await Api.getAsmBranchComparison(type);
       const resJson = res?.data;
 
       console.log(
@@ -149,7 +151,7 @@ const ASMHome = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedRange]);
 
   useFocusEffect(
     useCallback(() => {

@@ -35,11 +35,11 @@ const isNotFoundError = error => {
 const logApi404Fix = (label, endpoint) => {
   console.log(
     `${label} — 404 Fix:\n` +
-      `1. Browser kholo: ${OPTIMIZE_URL}\n` +
-      `2. "Optimization Commands Executed Successfully" message aana chahiye\n` +
-      `3. App reload karo (Metro: r) aur screen dubara kholo\n` +
-      `4. Agar phir bhi 404 aaye to backend se deploy karwao:\n` +
-      `GET https://ranglerzbeta.in/limelight/api/${endpoint}`,
+    `1. Browser kholo: ${OPTIMIZE_URL}\n` +
+    `2. "Optimization Commands Executed Successfully" message aana chahiye\n` +
+    `3. App reload karo (Metro: r) aur screen dubara kholo\n` +
+    `4. Agar phir bhi 404 aaye to backend se deploy karwao:\n` +
+    `GET https://ranglerzbeta.in/limelight/api/${endpoint}`,
   );
 };
 
@@ -185,20 +185,20 @@ const Comparison = props => {
           <ScreenLoader />
         ) : (
           <>
-        <ASMRangeToggle
-          selectedRange={selectedRange}
-          onSelectRange={setSelectedRange}
-        />
+            <ASMRangeToggle
+              selectedRange={selectedRange}
+              onSelectRange={setSelectedRange}
+            />
 
-        <BranchStaffComparisonTable
-          staff={staffData}
-          onStaffPress={goToStaffDetail}
-        />
+            <BranchStaffComparisonTable
+              staff={staffData}
+              onStaffPress={goToStaffDetail}
+            />
 
-        <Text style={styles.sectionHeading} numberOfLines={1}>
-          {Strings.branchComparison}
-        </Text>
-        <View style={styles.achievementGroup}>
+            <Text style={styles.sectionHeading} numberOfLines={1}>
+              {Strings.branchComparison}
+            </Text>
+            <View style={styles.achievementGroup}>
               <ASMAchievementCard
                 title={Strings.asmGarments}
                 data={garmentsData}

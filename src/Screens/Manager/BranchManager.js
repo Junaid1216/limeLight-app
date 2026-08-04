@@ -58,16 +58,16 @@ const logBackend404Message = (label, endpoint) => {
 
   console.log(
     `${label} — 404 Fix:\n` +
-      `1. Browser kholo: https://ranglerzbeta.in/limelight/optimize-project\n` +
-      `2. "Optimization Commands Executed Successfully" message aana chahiye\n` +
-      `3. App reload karo (Metro: r) aur screen dubara kholo\n` +
-      `4. Agar phir bhi 404 aaye to backend ko yeh message send karo:\n\n` +
-      `Hi Backend Team,\n\n` +
-      `Beta server par yeh API 404 de rahi hai:\n` +
-      `GET ${url}\n\n` +
-      `optimize-project bhi run kar liya, phir bhi 404 aa raha hai.\n` +
-      `Please route deploy karo.\n\n` +
-      `Thanks.`,
+    `1. Browser kholo: https://ranglerzbeta.in/limelight/optimize-project\n` +
+    `2. "Optimization Commands Executed Successfully" message aana chahiye\n` +
+    `3. App reload karo (Metro: r) aur screen dubara kholo\n` +
+    `4. Agar phir bhi 404 aaye to backend ko yeh message send karo:\n\n` +
+    `Hi Backend Team,\n\n` +
+    `Beta server par yeh API 404 de rahi hai:\n` +
+    `GET ${url}\n\n` +
+    `optimize-project bhi run kar liya, phir bhi 404 aa raha hai.\n` +
+    `Please route deploy karo.\n\n` +
+    `Thanks.`,
   );
 };
 

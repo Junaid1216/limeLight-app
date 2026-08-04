@@ -2,8 +2,8 @@
 const USE_LOCAL_API = false;
 
 const betaApi = {
-  baseURL: 'https://ranglerzbeta.in/limelight/api/',
-  domain: 'https://ranglerzbeta.in/limelight/',
+  baseURL: 'https://ranglerz.click/limelight/api/',
+  domain: 'https://ranglerz.click/limelight/',
 };
 
 const localApi = {

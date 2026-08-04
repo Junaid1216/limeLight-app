@@ -85,7 +85,9 @@ const RegionComparison = props => {
     setIsLoading(true);
 
     try {
-      const res = await Api.getAsmRegionComparison();
+      const type = getRangeType(selectedRange);
+
+      const res = await Api.getAsmRegionComparison(type);
       const resJson = res?.data;
 
       console.log(
@@ -121,7 +123,7 @@ const RegionComparison = props => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [selectedRange]);
 
   useFocusEffect(
     useCallback(() => {

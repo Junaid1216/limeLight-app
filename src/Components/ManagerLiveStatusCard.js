@@ -42,15 +42,17 @@ const StatItem = ({ label, value, alignRight = false }) => (
 );
 
 const ManagerLiveStatusCard = ({ data }) => {
+  console.log('data@@', JSON.stringify(data, null, 2));
+
   const summary = data ?? EMPTY_SUMMARY;
 
   const achievedPercent = clampPercent(
     summary?.achievedPercent ??
-      summary?.achievedPercentage ??
-      summary?.achieved_percentage ??
-      summary?.percentageAchieved ??
-      summary?.percentage_achieved ??
-      0,
+    summary?.achievedPercentage ??
+    summary?.achieved_percentage ??
+    summary?.percentageAchieved ??
+    summary?.percentage_achieved ??
+    0,
   );
 
   const remainingValue =

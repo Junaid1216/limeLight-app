@@ -151,9 +151,9 @@ const renderIncentiveItem = ({ item }) => (
 
 const StaffHomeContent = () => {
   const authToken = useSelector(state => state.AUTH.userData?.token);
-  const [targetData, setTargetData] = useState(defaultTargetData);
-  const [commission, setCommission] = useState(commissionData);
-  const [incentiveData, setIncentiveData] = useState(slipBoundIncentiveData);
+  const [targetData, setTargetData] = useState([]);
+  const [commission, setCommission] = useState([]);
+  const [incentiveData, setIncentiveData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const ensureAuthToken = useCallback(() => {

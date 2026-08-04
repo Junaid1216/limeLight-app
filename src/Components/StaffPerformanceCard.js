@@ -47,7 +47,7 @@ const RankItem = ({ item, index, totalItems, achievedSuffix }) => {
       <Text style={styles.rankTarget} numberOfLines={1}>
         {item?.target}
       </Text>
-      <Text style={styles.rankCommission} numberOfLines={1}>
+      <Text style={styles.rankCommission} numberOfLines={2}>
         {item?.commission}
       </Text>
     </View>
@@ -85,7 +85,7 @@ const StaffPerformanceCard = ({
         <Text style={styles.meTarget} numberOfLines={1}>
           {yourData?.target ?? topPerformer?.target ?? 0}
         </Text>
-        <Text style={styles.meCommission} numberOfLines={1}>
+        <Text style={styles.meCommission} numberOfLines={2}>
           {yourData?.commission ?? topPerformer?.commission ?? 'Rs. 0'}
         </Text>
       </View>
@@ -95,18 +95,23 @@ const StaffPerformanceCard = ({
       </Text>
 
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableHeaderText, styles.rankCol]} numberOfLines={1}>
-          {labels?.rank}
-        </Text>
-        <Text style={[styles.tableHeaderText, styles.nameCol]} numberOfLines={1}>
-          {nameHeader}
-        </Text>
-        <Text style={[styles.tableHeaderText, styles.targetCol]} numberOfLines={1}>
-          {labels?.target}
-        </Text>
-        <Text style={[styles.tableHeaderText, styles.commissionCol]} numberOfLines={1}>
-          {labels?.commission}
-        </Text>
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={[styles.tableHeaderText, styles.rankCol]} numberOfLines={1}>
+            {labels?.rank}
+          </Text>
+          <Text style={[styles.tableHeaderText, styles.nameCol]} numberOfLines={1}>
+            {nameHeader}
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row' }}>
+
+          <Text style={[styles.tableHeaderText, styles.targetCol]} numberOfLines={1}>
+            {labels?.target}
+          </Text>
+          <Text style={[styles.tableHeaderText, styles.commissionCol]} numberOfLines={1}>
+            {labels?.commission}
+          </Text>
+        </View>
       </View>
 
       <FlatList
@@ -189,7 +194,7 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   meCommission: {
-    width: wp(16),
+    width: wp(22),
     textAlign: 'right',
     flexShrink: 0,
     fontFamily: Fonts.poppinsBold,
@@ -206,6 +211,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: hp(0.3),
+    justifyContent: 'space-between'
+
   },
   tableHeaderText: {
     fontFamily: Fonts.poppinsBold,
@@ -216,18 +223,18 @@ const styles = StyleSheet.create({
     width: wp(11),
   },
   nameCol: {
-    flex: 1,
+    // flex: 1,
     flexShrink: 1,
     minWidth: 0,
-    marginLeft: wp(2),
+    // marginLeft: wp(2),
   },
   targetCol: {
-    width: wp(8),
-    marginRight: wp(2),
-    flexShrink: 0,
+    // width: wp(8),
+    marginRight: wp(10),
+    // flexShrink: 0,
   },
   commissionCol: {
-    width: wp(16),
+    // width: wp(16),
     textAlign: 'right',
     flexShrink: 0,
   },
@@ -277,16 +284,17 @@ const styles = StyleSheet.create({
     fontSize: wp(2.7),
   },
   rankTarget: {
-    width: wp(8),
-    textAlign: 'left',
-    marginRight: wp(2),
+    // flex: 1,
+    width: wp(14),
+    textAlign: 'center',
+    marginRight: wp(3),
     flexShrink: 0,
     fontFamily: Fonts.poppinsRegular,
     fontSize: wp(3.6),
     color: Colors.black,
   },
   rankCommission: {
-    width: wp(16),
+    width: wp(22),
     textAlign: 'right',
     flexShrink: 0,
     fontFamily: Fonts.poppinsBold,

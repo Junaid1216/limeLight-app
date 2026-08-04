@@ -1,0 +1,2 @@
+Agar undefined is not a function ka issue aye:
+then change @react-navigation/native to 7.3.14

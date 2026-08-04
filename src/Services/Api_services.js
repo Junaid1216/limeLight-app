@@ -158,10 +158,12 @@ const Api = {
   getMonthlyTargets: () => requests.get('monthly-targets'),
   assignBranchManagerTargets: data =>
     requests.post('branch-manager/assign-targets', data),
-  getAsmBranchComparison: () => requests.get('asm-branch-comparison'),
+  getAsmBranchComparison: type =>
+    requests.get(`asm-branch-comparison?type=${type}`),
   getAsmBranchConversion: type =>
     requests.get(`asm-branch-conversion?type=${type}`),
-  getAsmRegionComparison: () => requests.get('asm-regions-comparison'),
+  getAsmRegionComparison: type =>
+    requests.get(`asm-regions-comparison?type=${type}`),
   getAsmRegionConversion: type =>
     requests.get(`asm-region-comparison?type=${type}`),
   getAsmStaffComparison: type =>
