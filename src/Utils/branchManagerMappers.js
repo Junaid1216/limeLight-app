@@ -138,16 +138,60 @@ const getWeekAchievedUnits = weekData => {
   );
 };
 
-const buildWeeklyPerformanceItem = (index, units, targetUnits, weekData) => {
+const getWeekOverAchieved = (weeklyOverAchieved, key, index) => {
+  if (weeklyOverAchieved == null) {
+    return 0;
+  }
+
+  if (Array.isArray(weeklyOverAchieved)) {
+    return Number(weeklyOverAchieved[index] ?? 0);
+  }
+
+  return Number(
+    weeklyOverAchieved?.[key] ??
+      weeklyOverAchieved?.[WEEK_LABELS[index]] ??
+      weeklyOverAchieved?.[index] ??
+      0,
+  );
+};
+
+const resolveWeekStatus = (units, targetUnits, carryForward, weekData) => {
+  if (weekData?.status) {
+    return weekData.status;
+  }
+
+  if (carryForward > 0) {
+    return `${carryForward} CF`;
+  }
+
+  if (units >= targetUnits && units > 0) {
+    return Strings.done;
+  }
+
+  if (units > 0) {
+    return 'Active';
+  }
+
+  return Strings.next;
+};
+
+const buildWeeklyPerformanceItem = (
+  index,
+  units,
+  targetUnits,
+  weekData,
+  totalTarget = 0,
+  carryForward = 0,
+) => {
   const rawPercent = Number(
     weekData?.percentage ??
       weekData?.achievement_percentage ??
       weekData?.percent ??
-      (targetUnits ? Math.round((units / targetUnits) * 100) : 0),
+      (totalTarget ? Math.round((units / totalTarget) * 100) : 0),
   );
   const percent = Math.min(100, Math.max(0, rawPercent));
   const progress = Math.min(1, Math.max(0, percent / 100));
-  const status = weekData?.status ?? (units > 0 ? Strings.active : 'Next');
+  const status = resolveWeekStatus(units, targetUnits, carryForward, weekData);
 
   return {
     week: WEEK_SHORT_LABELS[index],
@@ -159,7 +203,7 @@ const buildWeeklyPerformanceItem = (index, units, targetUnits, weekData) => {
   };
 };
 
-const distributeAchievedAcrossWeeks = (totalAchieved, weeklyTargets) => {
+const distributeAchievedAcrossWeeks = (totalAchieved, weeklyTargets, totalTarget = 0) => {
   const achievedTotal = Number(totalAchieved) || 0;
   const targetUnitsList = WEEK_KEYS.map((key, index) =>
     getWeekTargetUnits(weeklyTargets, key, index),
@@ -182,7 +226,14 @@ const distributeAchievedAcrossWeeks = (totalAchieved, weeklyTargets) => {
       units = achievedTotal;
     }
 
-    return buildWeeklyPerformanceItem(index, units, targetUnits);
+    return buildWeeklyPerformanceItem(
+      index,
+      units,
+      targetUnits,
+      null,
+      totalTarget,
+      0,
+    );
   });
 };
 
@@ -200,19 +251,36 @@ const mapWeeklyTargets = (weeklyTargets, totalTarget) =>
     };
   });
 
-const mapWeeklyPerformance = (weeklyPerformance, weeklyTargets, totalAchieved = 0) => {
+const mapWeeklyPerformance = (
+  weeklyPerformance,
+  weeklyTargets,
+  totalAchieved = 0,
+  weeklyOverAchieved = {},
+  totalTarget = 0,
+) => {
   const weeklyItems = WEEK_KEYS.map((key, index) => {
     const weekData = getWeekPerformanceData(weeklyPerformance, key, index);
     const targetUnits = getWeekTargetUnits(weeklyTargets, key, index);
     const units = getWeekAchievedUnits(weekData);
+    const carryForward =
+      index > 0
+        ? getWeekOverAchieved(weeklyOverAchieved, WEEK_KEYS[index - 1], index - 1)
+        : 0;
 
-    return buildWeeklyPerformanceItem(index, units, targetUnits, weekData);
+    return buildWeeklyPerformanceItem(
+      index,
+      units,
+      targetUnits,
+      weekData,
+      totalTarget,
+      carryForward,
+    );
   });
 
   const hasMeaningfulWeeklyPerformance = weeklyItems.some(item => item.units > 0);
 
   if (!hasMeaningfulWeeklyPerformance && Number(totalAchieved) > 0) {
-    return distributeAchievedAcrossWeeks(totalAchieved, weeklyTargets);
+    return distributeAchievedAcrossWeeks(totalAchieved, weeklyTargets, totalTarget);
   }
 
   return weeklyItems;
@@ -389,6 +457,8 @@ export const mapBranchManagerCategoryPerformance = items => {
       item?.weekly_achieved ??
       item?.weeklyAchieved ??
       {};
+    const weeklyOverAchieved =
+      item?.weekly_over_achieved ?? item?.weeklyOverAchieved ?? {};
     const target = Number(item?.target ?? 0);
     const achieved = Number(item?.achieved ?? 0);
 
@@ -407,6 +477,8 @@ export const mapBranchManagerCategoryPerformance = items => {
         weeklyPerformance,
         weeklyTargets,
         achieved,
+        weeklyOverAchieved,
+        target,
       ),
       sortOrder: CATEGORY_ORDER.indexOf(categoryKey),
     };
