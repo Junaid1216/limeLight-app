@@ -20,7 +20,7 @@ import {
 import { navigateToStaffDetail } from '../../Navigations/navigationHelpers';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 
-const OPTIMIZE_URL = 'https://ranglerzbeta.in/limelight/optimize-project';
+const OPTIMIZE_URL = 'https://ranglerz.click/limelight/optimize-project';
 
 const isNotFoundError = error => {
   const status = error?.response?.status;
@@ -68,6 +68,8 @@ const Comparison = props => {
   const fetchStaffComparison = useCallback(async () => {
     try {
       const type = getRangeType(selectedRange);
+      console.log('branch manager staff type', type);
+
       const res = await Api.getBranchManagerStaffComparison(type);
       const resJson = res?.data;
 
