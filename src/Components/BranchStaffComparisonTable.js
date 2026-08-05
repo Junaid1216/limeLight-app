@@ -52,7 +52,8 @@ const ListHeader = () => {
           }
           name={
             <Text style={styles.headerText} numberOfLines={1}>
-              {getEmployeeNameLabel(role)}
+              {/* {getEmployeeNameLabel(role)} */}
+              Name
             </Text>
           }
           target={

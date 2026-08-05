@@ -64,6 +64,9 @@ const ASMHome = () => {
     try {
       const type = getRangeType(selectedRange);
 
+      console.log('type@@', type);
+
+
       const res = await Api.getAsmBranchConversion(type);
       const resJson = res?.data;
 
