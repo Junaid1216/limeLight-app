@@ -26,6 +26,7 @@ import UserAvatarImage from '../../Components/UserAvatarImage';
 import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
 import { navigateToStaffDetail } from '../../Navigations/navigationHelpers';
 import { getLastSelectedStaffMember } from '../../Utils/staffHelpers';
+import { selectHasPendingSurveys } from '../../Redux/Slices/SurveySlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 
 const DRAWER_BOTTOM_ROUTE = 'BottomNavigation';
@@ -38,6 +39,7 @@ const ASMDrawerContent = ({ navigation }) => {
   const { role, setRole } = useRole();
 
   const userData = useSelector(state => state?.AUTH?.userData);
+  const hasPendingSurveys = useSelector(selectHasPendingSurveys);
 
   const asmName =
     userData?.name ||
@@ -250,15 +252,17 @@ const ASMDrawerContent = ({ navigation }) => {
           onPress={() => goToTabScreen('FeedBack')}
         />
 
-        <MenuItem
-          imageSource={Images.Note}
-          label={Strings.surveys}
-          onPress={() =>
-            goToTabScreen('Survey', {
-              screen: 'SurveyMain',
-            })
-          }
-        />
+        {hasPendingSurveys ? (
+          <MenuItem
+            imageSource={Images.Note}
+            label={Strings.surveys}
+            onPress={() =>
+              goToTabScreen('Survey', {
+                screen: 'SurveyMain',
+              })
+            }
+          />
+        ) : null}
 
         <MenuItem
           iconName="file-text"

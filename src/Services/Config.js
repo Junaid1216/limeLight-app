@@ -11,7 +11,7 @@ const localApi = {
   domain: 'http://192.168.18.184/limelight-sales-performance/',
 };
 
-const activeApi = USE_LOCAL_API ? localApi : betaApi;
+const activeApi = USE_LOCAL_API ? betaApi : betaApi;
 
 const Config = {
   baseURL: activeApi.baseURL,

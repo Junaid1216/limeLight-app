@@ -7,7 +7,11 @@ import { Fontsize } from '../Constants/Fontsize';
 import { Images } from '../Assets';
 import { Strings } from '../Constants/Strings';
 
-const ResponseComponent = () => {
+const ResponseComponent = ({
+  totalStaff = 0,
+  completed = 0,
+  pending = 0,
+}) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -18,7 +22,7 @@ const ResponseComponent = () => {
           {Strings.TotalStaff}
         </Text>
         <Text style={[styles.count, styles.staffCount]} numberOfLines={1}>
-          8
+          {totalStaff}
         </Text>
       </View>
 
@@ -30,7 +34,7 @@ const ResponseComponent = () => {
           {Strings.Completed}
         </Text>
         <Text style={[styles.count, styles.completedCount]} numberOfLines={1}>
-          6
+          {completed}
         </Text>
       </View>
 
@@ -42,7 +46,7 @@ const ResponseComponent = () => {
           {Strings.Pending}
         </Text>
         <Text style={[styles.count, styles.pendingCount]} numberOfLines={1}>
-          2
+          {pending}
         </Text>
       </View>
     </View>
@@ -70,17 +74,6 @@ const styles = StyleSheet.create({
     height: wp(34),
     marginLeft: wp(1.2),
   },
-
-  // card: {
-  //   marginHorizontal: 16,
-  //   marginBottom: 16,
-  //   marginTop: -10,
-  //   padding: 16,
-  //   borderRadius: 18,
-  //   backgroundColor: '#FFFFFF',
-  //   borderWidth: 1,
-  //   borderColor: '#E5E7EB',
-  // },
   iconBox: {
     width: wp(8),
     height: wp(8),

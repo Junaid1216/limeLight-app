@@ -123,8 +123,25 @@ const Api = {
   updateProfile: data => requests.post('update-profile', data),
   staffFeedback: data => requests.post('staff-feedback', data),
   asmFeedback: data => requests.post('asm-feedback', data),
-  getSurveyQuestions: role => requests.get(`survey-questions/${role}`),
-  getTrainingVideos: role => requests.get(`training-videos?role=${role}`),
+  getSurveyQuestions: () => requests.get('surveys'),
+  getSurveyDetail: id => requests.get(`surveys/${id}`),
+  submitSurvey: (id, data) => requests.post(`surveys/${id}/submit`, data),
+  getSurveyReport: (surveyId, branchId) => {
+    const query = branchId
+      ? `?branch_id=${encodeURIComponent(branchId)}`
+      : '';
+
+    return requests.get(`surveys/${surveyId}/report${query}`);
+  },
+  getSurveyResponses: (surveyId, branchId, status = 'all') =>
+    requests.get(
+      `surveys/${surveyId}/responses?branch_id=${encodeURIComponent(branchId)}&status=${encodeURIComponent(status)}`,
+    ),
+  getAsmBranches: () => requests.get('asm-branches'),
+  getTrainingVideos: status =>
+    requests.get(`training-videos?status=${encodeURIComponent(status)}`),
+  updateTrainingVideoStatus: (id, data) =>
+    requests.post(`training-videos/${id}/status`, data),
   getProductTraining: role => {
     const query = role ? `?role=${encodeURIComponent(role)}` : '';
 

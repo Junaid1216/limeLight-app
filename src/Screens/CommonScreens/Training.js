@@ -26,10 +26,9 @@ import TrainingTabs from '../../Components/TrainingTabs';
 import TrainingVideoModal from '../../Components/TrainingVideoModal';
 import ScreenLoader from '../../Components/ScreenLoader';
 import { useRole } from '../../Context/RoleContext';
-import Api from '../../Services/Api_services';
+import Api, { isApiSuccess } from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
 import {
-  getProductTrainingItemsFromVideos,
   isExternalVideoLink,
   mapProductTraining,
   mapTrainingDisplay,
@@ -44,6 +43,20 @@ const filterByStatus = (items, status) =>
       item.status === status ||
       item.status?.toLowerCase() === status.toLowerCase(),
   );
+
+const getTrainingVideoStatusParam = status => {
+  const normalized = String(status ?? 'New').trim().toLowerCase();
+
+  if (normalized === 'pending') {
+    return 'pending';
+  }
+
+  if (normalized === 'completed' || normalized === 'complete') {
+    return 'completed';
+  }
+
+  return 'new';
+};
 
 const Training = () => {
   const route = useRoute();
@@ -62,26 +75,40 @@ const Training = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchTrainingVideos = useCallback(async () => {
-    if (!role) {
+    if (activeTab !== 'Customer') {
       return;
     }
 
-    const apiRole = getTrainingApiRole(role);
+    const apiStatus = getTrainingVideoStatusParam(activeStatus);
 
     try {
-      const res = await Api.getTrainingVideos(apiRole);
+      console.log(
+        'Training Videos Request:',
+        JSON.stringify({ status: apiStatus }, null, 2),
+      );
+
+      const res = await Api.getTrainingVideos(apiStatus);
       const resJson = res?.data ?? {};
 
-      if (res?.status == 200) {
+      console.log(
+        'Training Videos Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (isApiSuccess(res)) {
         const mapped = mapTrainingVideos(resJson?.data ?? resJson);
 
         console.log(
-          'Training Videos Response:',
-          JSON.stringify(resJson, null, 2),
+          'Training Videos Mapped Response:',
+          JSON.stringify(mapped, null, 2),
         );
 
         setCustomerData(mapped.customer);
       } else {
+        console.log(
+          'Training Videos Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
         showApiMessageToast(res);
       }
     } catch (error) {
@@ -90,7 +117,7 @@ const Training = () => {
         JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
-  }, [role]);
+  }, [activeStatus, activeTab]);
 
   const fetchProductTraining = useCallback(async () => {
     if (!role) {
@@ -125,17 +152,6 @@ const Training = () => {
         }
       }
 
-      if (!products.length) {
-        const videoRes = await Api.getTrainingVideos(apiRole);
-        const videoJson = videoRes?.data ?? {};
-        const videoPayload = videoJson?.data ?? videoJson;
-        const fallbackItems = getProductTrainingItemsFromVideos(videoPayload);
-
-        if (fallbackItems.length) {
-          products = mapProductTraining({ data: fallbackItems }, apiRole);
-        }
-      }
-
       setProductData(products);
     } catch (error) {
       console.log(
@@ -147,6 +163,9 @@ const Training = () => {
 
   const fetchDisplayTraining = useCallback(async (category = activeCategory) => {
     const apiCategory = toDisplayApiCategory(category);
+
+    console.log('api categoty',apiCategory);
+    
 
     try {
       const res = await Api.getTrainingDisplay(apiCategory);
@@ -178,7 +197,9 @@ const Training = () => {
     setIsLoading(true);
 
     try {
-      await fetchTrainingVideos();
+      if (activeTab === 'Customer') {
+        await fetchTrainingVideos();
+      }
 
       if (activeTab === 'Product') {
         await fetchProductTraining();
@@ -194,6 +215,7 @@ const Training = () => {
     role,
     activeTab,
     activeCategory,
+    activeStatus,
     fetchTrainingVideos,
     fetchProductTraining,
     fetchDisplayTraining,
@@ -238,6 +260,67 @@ const Training = () => {
     if (!item?.videoUrl) {
       Toast.show('Video not available', Toast.LONG);
       return;
+    }
+
+    console.log(
+      'Training Video Clicked:',
+      JSON.stringify(
+        {
+          id: item?.id ?? null,
+          title: item?.title ?? '',
+          videoUrl: item?.videoUrl,
+        },
+        null,
+        2,
+      ),
+    );
+
+    if (item?.id) {
+      try {
+        const statusPayload = { status: 'complete' };
+
+        console.log(
+          'Training Video Status Request:',
+          JSON.stringify(
+            {
+              videoId: item.id,
+              ...statusPayload,
+            },
+            null,
+            2,
+          ),
+        );
+
+        const res = await Api.updateTrainingVideoStatus(item.id, statusPayload);
+        const resJson = res?.data ?? {};
+
+        console.log(
+          'Training Video Status Backend Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+
+        if (isApiSuccess(res)) {
+          setCustomerData(prev =>
+            prev.map(video =>
+              video.id === item.id ? { ...video, status: 'Completed' } : video,
+            ),
+          );
+        } else {
+          console.log(
+            'Training Video Status Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
+        }
+      } catch (error) {
+        console.log(
+          'Training Video Status API Error:',
+          JSON.stringify(
+            error?.response?.data ?? error?.message ?? error,
+            null,
+            2,
+          ),
+        );
+      }
     }
 
     if (isExternalVideoLink(item.videoUrl)) {

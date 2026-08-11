@@ -8,10 +8,15 @@ import { Fonts } from '../Constants/Fonts';
 import AllData from '../Components/AllData';
 import CompletedComponent from '../Components/CompletedComponent';
 import PendingComponent from '../Components/PendingComponent';
+import { getSurveyResponseStatusParam } from '../Utils/surveyHelpers';
 
 const Tab = createMaterialTopTabNavigator();
 
-const AllResponseComponent = () => {
+const AllResponseComponent = ({ onTabChange }) => {
+  const handleTabFocus = tabName => () => {
+    onTabChange?.(getSurveyResponseStatusParam(tabName));
+  };
+
   return (
     <Tab.Navigator
       style={styles.navigator}
@@ -26,9 +31,21 @@ const AllResponseComponent = () => {
         tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
-      <Tab.Screen name="All" component={AllData} />
-      <Tab.Screen name="Completed" component={CompletedComponent} />
-      <Tab.Screen name="Pending" component={PendingComponent} />
+      <Tab.Screen
+        name="All"
+        component={AllData}
+        listeners={{ focus: handleTabFocus('All') }}
+      />
+      <Tab.Screen
+        name="Completed"
+        component={CompletedComponent}
+        listeners={{ focus: handleTabFocus('Completed') }}
+      />
+      <Tab.Screen
+        name="Pending"
+        component={PendingComponent}
+        listeners={{ focus: handleTabFocus('Pending') }}
+      />
     </Tab.Navigator>
   );
 };

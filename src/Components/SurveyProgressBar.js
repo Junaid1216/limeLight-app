@@ -44,7 +44,8 @@ const SurveyProgressBar = props => {
             },
           ]}
         >
-          {isPercentageMode ? `${current}%` : `${current} of ${total}`}
+          {props?.progressLabel ||
+            (isPercentageMode ? `${current}%` : `${current} of ${total}`)}
         </Text>
       </View>
 

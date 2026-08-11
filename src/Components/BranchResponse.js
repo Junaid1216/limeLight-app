@@ -1,35 +1,80 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { Images } from '../Assets';
 import { hp, wp } from '../Assets/Responsive';
 import { Colors } from '../Constants/Colors';
-import { surveyReportBranchOptions } from '../Constants/DummyData';
 import { Fontsize } from '../Constants/Fontsize';
 import { Fonts } from '../Constants/Fonts';
 import { Strings } from '../Constants/Strings';
 
-const BranchResponse = () => {
-  const [branch, setBranch] = useState(' ');
+const BranchResponse = ({
+  showDropdown = false,
+  branches = [],
+  selectedBranchId,
+  branchName,
+  onBranchChange,
+}) => {
+  const dropdownData =
+    branches?.length > 0
+      ? branches
+      : selectedBranchId
+        ? [
+            {
+              label: branchName || String(selectedBranchId),
+              value: String(selectedBranchId),
+            },
+          ]
+        : [];
+
+  const [branch, setBranch] = useState(
+    selectedBranchId ? String(selectedBranchId) : '',
+  );
+
+  useEffect(() => {
+    if (selectedBranchId != null) {
+      setBranch(String(selectedBranchId));
+    }
+  }, [selectedBranchId]);
+
+  const displayBranchName =
+    branchName ||
+    dropdownData.find(item => String(item.value) === String(branch))?.label ||
+    '';
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{Strings.branchLabel}</Text>
 
-      <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        itemTextStyle={styles.itemTextStyle}
-        containerStyle={styles.dropdownContainer}
-        iconStyle={styles.dropdownIcon}
-        data={surveyReportBranchOptions}
-        labelField="label"
-        valueField="value"
-        placeholder={`Select ${Strings.branchLabel.toLowerCase()}`}
-        value={branch}
-        onChange={item => setBranch(item.value)}
-        renderLeftIcon={() => (
+      {showDropdown ? (
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          itemTextStyle={styles.itemTextStyle}
+          containerStyle={styles.dropdownContainer}
+          iconStyle={styles.dropdownIcon}
+          data={dropdownData}
+          labelField="label"
+          valueField="value"
+          placeholder={`Select ${Strings.branchLabel.toLowerCase()}`}
+          value={branch}
+          onChange={item => {
+            setBranch(item.value);
+            onBranchChange?.(item.value);
+          }}
+          renderLeftIcon={() => (
+            <View style={styles.iconWrap}>
+              <Image
+                source={Images.Branch}
+                style={styles.branchIcon}
+                resizeMode="contain"
+              />
+            </View>
+          )}
+        />
+      ) : (
+        <View style={styles.staticField}>
           <View style={styles.iconWrap}>
             <Image
               source={Images.Branch}
@@ -37,8 +82,11 @@ const BranchResponse = () => {
               resizeMode="contain"
             />
           </View>
-        )}
-      />
+          <Text style={styles.staticBranchText} numberOfLines={1}>
+            {displayBranchName}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -62,6 +110,23 @@ const styles = StyleSheet.create({
     borderRadius: wp(3.5),
     paddingHorizontal: wp(3),
     backgroundColor: Colors.white,
+  },
+  staticField: {
+    height: hp(6.5),
+    borderWidth: 1,
+    borderColor: Colors.fieldBorder,
+    borderRadius: wp(3.5),
+    paddingHorizontal: wp(3),
+    backgroundColor: Colors.white,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  staticBranchText: {
+    flex: 1,
+    fontSize: Fontsize.sm,
+    fontFamily: Fonts.poppinsSemiBold,
+    color: Colors.graphite,
+    marginLeft: wp(1),
   },
   placeholderStyle: {
     fontSize: Fontsize.xmm,

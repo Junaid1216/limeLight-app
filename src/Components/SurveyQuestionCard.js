@@ -13,6 +13,50 @@ const SurveyQuestionCard = props => {
   const option2 = props?.options?.[1];
   const option3 = props?.options?.[2];
 
+  const getOptionLabel = option =>
+    typeof option === 'string' ? option : option?.label ?? '';
+
+  const isOptionSelected = option => {
+    if (!option || props?.selected == null) {
+      return false;
+    }
+
+    if (typeof option === 'string') {
+      return props.selected === option;
+    }
+
+    return (
+      props.selected?.optionId === option?.id ||
+      props.selected?.label === option?.label
+    );
+  };
+
+  const renderOption = option => {
+    if (!option) {
+      return null;
+    }
+
+    const label = getOptionLabel(option);
+    const normalized = label.toLowerCase();
+    const icon = normalized.includes('high')
+      ? Images.HighImage
+      : normalized.includes('fair')
+        ? Images.FairImage
+        : normalized.includes('low')
+          ? Images.LowImage
+          : undefined;
+
+    return (
+      <SurveyOption
+        key={String(option?.id ?? label)}
+        label={label}
+        icon={icon}
+        selected={isOptionSelected(option)}
+        onPress={() => props?.onSelect?.(option)}
+      />
+    );
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -24,32 +68,9 @@ const SurveyQuestionCard = props => {
 
       <Text style={styles.questionText}>{props?.question}</Text>
 
-      {option1 ? (
-        <SurveyOption
-          label={option1}
-          icon={Images.HighImage}
-          selected={props?.selected === option1}
-          onPress={() => props?.onSelect?.(option1)}
-        />
-      ) : null}
-
-      {option2 ? (
-        <SurveyOption
-          label={option2}
-          icon={Images.FairImage}
-          selected={props?.selected === option2}
-          onPress={() => props?.onSelect?.(option2)}
-        />
-      ) : null}
-
-      {option3 ? (
-        <SurveyOption
-          label={option3}
-          icon={Images.LowImage}
-          selected={props?.selected === option3}
-          onPress={() => props?.onSelect?.(option3)}
-        />
-      ) : null}
+      {renderOption(option1)}
+      {renderOption(option2)}
+      {renderOption(option3)}
     </View>
   );
 };

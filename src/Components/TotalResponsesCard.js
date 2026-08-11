@@ -10,6 +10,8 @@ import { Strings } from '../Constants/Strings';
 import { Fontsize } from '../Constants/Fontsize';
 
 const TotalResponsesCard = ({
+  branchId,
+  surveyId,
   responses = surveyReportSummary.responses,
   total = surveyReportSummary.total,
   rate = surveyReportSummary.rate,
@@ -19,7 +21,12 @@ const TotalResponsesCard = ({
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      onPress={() => navigation.navigate('SurveyResponse')}
+      onPress={() =>
+        navigation.navigate('SurveyResponse', {
+          branchId,
+          surveyId,
+        })
+      }
     >
       <View style={styles.leftContent}>
         <Text style={styles.label}>{Strings.totalResponses}</Text>

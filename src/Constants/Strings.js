@@ -54,6 +54,7 @@ export const Strings = {
   optionLow: 'Low',
   active: 'ACTIVE',
   openSurvey: 'Open Survey',
+  surveySubmitted: 'Survey Submitted',
   submitSurvey: 'Submit Survey',
   feedbackHeader: 'Feedback',
   shareYourFeedback: 'Share Your Feedback',

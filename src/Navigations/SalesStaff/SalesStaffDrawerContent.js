@@ -22,6 +22,7 @@ import { Strings } from '../../Constants/Strings';
 import { useRole } from '../../Context/RoleContext';
 import UserAvatarImage from '../../Components/UserAvatarImage';
 import { REMOVE_USER_DATA } from '../../Redux/Slices/AuthSlice';
+import { selectHasPendingSurveys } from '../../Redux/Slices/SurveySlice';
 import Api, { setAuthToken } from '../../Services/Api_services';
 import Toast from 'react-native-simple-toast';
 import { useDispatch, useSelector } from 'react-redux';
@@ -36,6 +37,7 @@ const SalesStaffDrawerContent = ({ navigation }) => {
   const { role, setRole } = useRole();
 
   const userData = useSelector(state => state?.AUTH?.userData);
+  const hasPendingSurveys = useSelector(selectHasPendingSurveys);
 
   const employeeName =
     userData?.name ||
@@ -170,11 +172,22 @@ const SalesStaffDrawerContent = ({ navigation }) => {
           label={Strings.feedback}
           onPress={() => goToTabScreen('FeedBack')}
         />
-        <MenuItem
-          imageSource={Images.Note}
-          label={Strings.surveys}
-          onPress={() => goToTabScreen('Survey')}
-        />
+        {hasPendingSurveys ? (
+          <MenuItem
+            imageSource={Images.Note}
+            label={Strings.surveys}
+            onPress={() => goToTabScreen('Survey')}
+          />
+        ) : null}
+        {!hasPendingSurveys ? (
+          <MenuItem
+            iconName="file-text"
+            label={Strings.SurveyReport}
+            onPress={() =>
+              goToTabScreen('Survey', { screen: 'SurveyReport' })
+            }
+          />
+        ) : null}
 
         <View style={styles.logoutDivider} />
         <MenuItem

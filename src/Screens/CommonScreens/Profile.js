@@ -156,7 +156,6 @@ const Profile = () => {
     const formData = new FormData();
     formData.append('name', nextName);
     formData.append('role', role);
-    appendProfileImage(formData, serverImagePath, profile?.avatarUri);
 
     try {
       const res = await Api.updateProfile(formData);

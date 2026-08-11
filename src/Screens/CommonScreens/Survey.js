@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
 import {
+  FlatList,
   Image,
   StatusBar,
   StyleSheet,
@@ -11,166 +13,171 @@ import { Images } from '../../Assets';
 import Btn from '../../Components/Btn';
 import MainHeaderComponent from '../../Components/MainHeaderComponent';
 import ScreenLoader from '../../Components/ScreenLoader';
-import ScreenScrollView from '../../Components/ScreenScrollView';
 import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
 import { Strings } from '../../Constants/Strings';
 import { MyStyling } from '../../Constants/Styling';
-import { useRole } from '../../Context/RoleContext';
-import { getTrainingApiRole } from '../../Constants/roleConfig';
 import { navigateToSurveyProgress } from '../../Navigations/navigationHelpers';
-import Api from '../../Services/Api_services';
+import {
+  setActiveSurveyId,
+  setHasPendingSurveys,
+} from '../../Redux/Slices/SurveySlice';
+import Api, { isApiSuccess } from '../../Services/Api_services';
 import { showApiMessageToast } from '../../Utils/apiHelpers';
-
-const mapSurveyQuestions = data => {
-  const list = Array.isArray(data)
-    ? data
-    : data?.questions ?? data?.survey_questions ?? [];
-
-  const title = Array.isArray(data)
-    ? Strings.priceSatisfactionSurvey
-    : data?.title ?? data?.survey_title ?? Strings.priceSatisfactionSurvey;
-
-  const questions = list.map((item, index) => ({
-    id: String(item?.id ?? item?.question_id ?? index + 1),
-    question: item?.question ?? item?.question_text ?? '',
-    options: item?.options ??
-      item?.answer_options ?? [
-        Strings.optionHigh,
-        Strings.optionFair,
-        Strings.optionLow,
-      ],
-  }));
-
-  return { title, questions };
-};
+import { logSurveyEvent, mapSurveyListResponse } from '../../Utils/surveyHelpers';
 
 const Survey = () => {
   const navigation = useNavigation();
-  const { role } = useRole();
-  const [surveyTitle, setSurveyTitle] = useState(Strings.priceSatisfactionSurvey);
-  const [questions, setQuestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const [surveys, setSurveys] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
 
-  const fetchSurveyQuestions = useCallback(async () => {
-    if (!role) {
-      return;
-    }
-
-    const apiRole = getTrainingApiRole(role);
+  const fetchSurveys = useCallback(async () => {
     setIsLoading(true);
 
+    logSurveyEvent('[Survey API]', 'Request', {
+      endpoint: 'GET /api/surveys',
+    });
+
     try {
-      const res = await Api.getSurveyQuestions(apiRole);
+      const res = await Api.getSurveyQuestions();
       const resJson = res?.data ?? {};
+      console.log('survey response',JSON.stringify(resJson,null,2));
+      
+      if (isApiSuccess(res)) {
+        const mapped = mapSurveyListResponse(resJson);
 
-      console.log(
-        'Survey Questions Backend Response:',
-        JSON.stringify(resJson, null, 2),
-      );
+        logSurveyEvent('[Survey API]', 'Response', resJson);
+        logSurveyEvent('[Survey API]', 'Mapped surveys', {
+          count: mapped.surveys.length,
+          surveys: mapped.surveys,
+        });
 
-      if (res?.status == 200) {
-        console.log(
-          'Survey Questions Response:',
-          JSON.stringify(resJson, null, 2),
-        );
-
-        const { title, questions: mappedQuestions } = mapSurveyQuestions(
-          resJson?.data,
-        );
-
-        setSurveyTitle(title);
-        setQuestions(mappedQuestions);
+        setSurveys(mapped.surveys);
+        dispatch(setHasPendingSurveys(mapped.hasPendingSurveys));
       } else {
-        console.log(
-          'Survey Questions Error Response:',
-          JSON.stringify(resJson, null, 2),
-        );
+        logSurveyEvent('[Survey API]', 'Error response', resJson);
         showApiMessageToast(res);
-        setQuestions([]);
+        setSurveys([]);
+        dispatch(setHasPendingSurveys(false));
       }
     } catch (error) {
-      console.log(
-        'Survey Questions API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
-      );
-      setQuestions([]);
+      logSurveyEvent('[Survey API]', 'Error', {
+        message: error?.response?.data ?? error?.message ?? error,
+      });
+      setSurveys([]);
     } finally {
+      setHasFetched(true);
       setIsLoading(false);
     }
-  }, [role]);
+  }, [dispatch]);
 
   useFocusEffect(
     useCallback(() => {
-      fetchSurveyQuestions();
-    }, [fetchSurveyQuestions]),
+      console.log('asdfasdf');
+      
+      fetchSurveys();
+    },[fetchSurveys]),
   );
 
-  const questionsCountLabel = `${questions.length} Questions`;
+  const handleSurveyPress = survey => {
+    if (survey.isSubmitted) {
+      logSurveyEvent('[Survey API]', 'Open submitted survey report', {
+        survey_id: survey.id,
+      });
+      dispatch(setActiveSurveyId(survey.id));
+      navigation.navigate('SurveyReport', { surveyId: survey.id });
+      return;
+    }
+
+    logSurveyEvent('[Survey API]', 'Open survey progress', {
+      survey_id: survey.id,
+    });
+
+    dispatch(setActiveSurveyId(survey.id));
+    navigateToSurveyProgress(navigation, {
+      surveyId: survey.id,
+      surveyTitle: survey.title,
+    });
+  };
+
+  const renderSurveyCard = ({ item: survey }) => (
+    <View style={styles.card}>
+      <View style={styles.cardTopRow}>
+        <View style={styles.iconWrap}>
+          <Image
+            source={Images.Note}
+            style={styles.noteIcon}
+            resizeMode="contain"
+          />
+        </View>
+        <View style={styles.activeBadge}>
+          <Text style={styles.activeText} numberOfLines={1}>
+            {Strings.active}
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.surveyTitle} numberOfLines={2}>
+        {survey.title}
+      </Text>
+
+      <View style={styles.questionsRow}>
+        <Image
+          source={Images.Question}
+          style={styles.questionIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.questionsText} numberOfLines={1}>
+          {survey.questionsLabel}
+        </Text>
+      </View>
+
+      <Btn
+        title={
+          survey.isSubmitted ? Strings.surveySubmitted : Strings.openSurvey
+        }
+        onPress={() => handleSurveyPress(survey)}
+        style={styles.openSurveyBtn}
+      />
+    </View>
+  );
 
   return (
     <View style={MyStyling.container2}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
 
-      <ScreenScrollView contentContainerStyle={styles.content}>
-        <MainHeaderComponent
-          title={Strings.surveyHeader}
-          notificationCount={5}
-        />
-
-        {isLoading ? (
+      {isLoading || !hasFetched ? (
+        <View style={styles.loaderWrap}>
+          <MainHeaderComponent
+            title={Strings.surveyHeader}
+            notificationCount={5}
+          />
           <ScreenLoader />
-        ) : questions.length > 0 ? (
-          <View style={styles.card}>
-            <View style={styles.cardTopRow}>
-              <View style={styles.iconWrap}>
-                <Image
-                  source={Images.Note}
-                  style={styles.noteIcon}
-                  resizeMode="contain"
-                />
-              </View>
-              <View style={styles.activeBadge}>
-                <Text style={styles.activeText} numberOfLines={1}>
-                  {Strings.active}
-                </Text>
-              </View>
-            </View>
-
-            <Text style={styles.surveyTitle} numberOfLines={2}>
-              {surveyTitle}
-            </Text>
-
-            <View style={styles.questionsRow}>
-              <Image
-                source={Images.Question}
-                style={styles.questionIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.questionsText} numberOfLines={1}>
-                {questionsCountLabel}
-              </Text>
-            </View>
-
-            <Btn
-              title={Strings.openSurvey}
-              onPress={() =>
-                navigateToSurveyProgress(navigation, {
-                  surveyTitle,
-                  questions,
-                })
-              }
-              style={styles.openSurveyBtn}
+        </View>
+      ) : (
+        <FlatList
+          data={surveys}
+          keyExtractor={item => `survey-${item.id}`}
+          renderItem={renderSurveyCard}
+          ListHeaderComponent={
+            <MainHeaderComponent
+              title={Strings.surveyHeader}
+              notificationCount={5}
             />
-          </View>
-        ) : (
-          <Text style={styles.emptyText}>
-            No survey questions available right now.
-          </Text>
-        )}
-      </ScreenScrollView>
+          }
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              No survey questions available right now.
+            </Text>
+          }
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 };
@@ -179,7 +186,13 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: wp(6),
     paddingTop: hp(3),
-    paddingBottom: hp(4),
+    paddingBottom: hp(6),
+    flexGrow: 1,
+  },
+  loaderWrap: {
+    flex: 1,
+    paddingHorizontal: wp(6),
+    paddingTop: hp(3),
   },
   loader: {
     marginTop: hp(4),
@@ -192,6 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(5),
     paddingVertical: hp(2.5),
     elevation: wp(0.5),
+    marginBottom: hp(2),
   },
   cardTopRow: {
     flexDirection: 'row',

@@ -630,13 +630,13 @@ export const managerAccessoriesPerformance = {
 export const surveyReportDetail = {
   reportTitle: 'Price Satisfaction Survey',
   title: 'Monthly Employee Satisfaction Survey',
-  questions: 2,
-  responseRate: '75%',
-  responses: '8 responses',
+  questions: 0,
+  responseRate: '0%',
+  responses: '0 responses',
   breakdown: [
-    { label: 'High', value: 25, color: '#2F6FED' },
-    { label: 'Fair', value: 60, color: '#2BC48A' },
-    { label: 'Low', value: 15, color: '#F4A11A' },
+    { label: 'High', value: 0, color: '#2F6FED' },
+    { label: 'Fair', value: 0, color: '#2BC48A' },
+    { label: 'Low', value: 0, color: '#F4A11A' },
   ],
 };
 

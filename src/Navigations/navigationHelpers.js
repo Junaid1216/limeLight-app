@@ -139,12 +139,14 @@ export const navigateToSurveyTab = navigation => {
 
   const tabNav = findNavigatorWithRoute(navigation, 'Survey');
 
+  const params = { screen: 'SurveyMain' };
+
   if (tabNav) {
-    tabNav.navigate('Survey', { screen: 'SurveyMain' });
+    tabNav.navigate('Survey', params);
     return;
   }
 
-  navigation.navigate('Survey', { screen: 'SurveyMain' });
+  navigation.navigate('Survey', params);
 };
 
 export const navigateToSurveyProgress = (navigation, params = {}) => {

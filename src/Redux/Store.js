@@ -3,16 +3,18 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { persistReducer, persistStore } from 'redux-persist';
 import AuthSlice from './Slices/AuthSlice';
 import RoleSlice from './Slices/RoleSlice';
+import SurveySlice from './Slices/SurveySlice';
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['AUTH', 'ROLE'],
+  whitelist: ['AUTH', 'ROLE', 'SURVEY'],
 };
 
 const rootReducer = combineReducers({
   AUTH: AuthSlice,
   ROLE: RoleSlice,
+  SURVEY: SurveySlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
