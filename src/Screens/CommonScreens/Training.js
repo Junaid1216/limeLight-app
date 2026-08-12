@@ -38,14 +38,6 @@ import TrainingVideoModal from '../../Components/TrainingVideoModal';
 import ScreenLoader from '../../Components/ScreenLoader';
 import { useSelector } from 'react-redux';
 
-const filterByStatus = (items, status) =>
-  items.filter(
-    item =>
-      !item?.status ||
-      item.status === status ||
-      item.status?.toLowerCase() === status.toLowerCase(),
-  );
-
 const getTrainingVideoStatusParam = status => {
   const normalized = String(status ?? 'New').trim().toLowerCase();
 
@@ -409,11 +401,7 @@ const Training = () => {
 
     updateTrainingItemStatus(item.id, () => {
       setDisplayData(prev =>
-        prev.map(displayItem =>
-          displayItem.id === item.id
-            ? { ...displayItem, status: 'Completed' }
-            : displayItem,
-        ),
+        prev.filter(displayItem => displayItem.id !== item.id),
       );
     });
   };
@@ -439,11 +427,7 @@ const Training = () => {
 
     if (item?.id) {
       await updateTrainingItemStatus(item.id, () => {
-        setCustomerData(prev =>
-          prev.map(video =>
-            video.id === item.id ? { ...video, status: 'Completed' } : video,
-          ),
-        );
+        setCustomerData(prev => prev.filter(video => video.id !== item.id));
       });
     }
 
@@ -459,16 +443,12 @@ const Training = () => {
     setActiveVideo(item);
   };
 
-  const filteredCustomer = filterByStatus(customerData, activeStatus);
-  const filteredProduct = filterByStatus(productData, activeStatus);
-  const filteredDisplay = filterByStatus(displayData, activeStatus);
-
   const activeList =
     activeTab === 'Customer'
-      ? filteredCustomer
+      ? customerData
       : activeTab === 'Product'
-        ? filteredProduct
-        : filteredDisplay;
+        ? productData
+        : displayData;
 
   const emptyMessage =
     activeTab === 'Product'
@@ -508,7 +488,7 @@ const Training = () => {
             <TrainingStatusChips active={activeStatus} onChange={setActiveStatus} />
 
             {activeTab === 'Customer' &&
-              filteredCustomer.map(item => (
+              customerData.map(item => (
                 <TrainingCustomerCard
                   key={item.id}
                   item={item}
@@ -517,7 +497,7 @@ const Training = () => {
               ))}
 
             {activeTab === 'Product' &&
-              filteredProduct.map(item => (
+              productData.map(item => (
                 <TrainingProductCard
                   key={item.id}
                   item={item}
@@ -526,7 +506,7 @@ const Training = () => {
               ))}
 
             {activeTab === 'Display' &&
-              filteredDisplay.map(item => (
+              displayData.map(item => (
                 <TrainingDisplayCard
                   key={item.id}
                   item={item}

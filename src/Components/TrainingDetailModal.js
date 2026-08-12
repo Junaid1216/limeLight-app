@@ -68,6 +68,9 @@ const TrainingDetailModal = ({ visible, product, onClose, onMarkCompleted }) => 
   const hasAudio = Boolean(detail?.audioUrl ?? product?.audioUrl);
   const audioUrl = detail?.audioUrl ?? product?.audioUrl;
   const modalTags = detail?.detailTags ?? [];
+  const isProductCompleted = /complete/i.test(
+    String(product?.status ?? product?.raw?.status ?? ''),
+  );
 
   const handleMarkCompleted = () => {
     if (onMarkCompleted) {
@@ -244,13 +247,15 @@ const TrainingDetailModal = ({ visible, product, onClose, onMarkCompleted }) => 
           ) : null}
         </ScrollView>
 
-        <TouchableOpacity
-          style={styles.completeBtn}
-          activeOpacity={0.9}
-          onPress={handleMarkCompleted}
-        >
-          <Text style={styles.completeBtnText}>Mark as Completed</Text>
-        </TouchableOpacity>
+        {!isProductCompleted ? (
+          <TouchableOpacity
+            style={styles.completeBtn}
+            activeOpacity={0.9}
+            onPress={handleMarkCompleted}
+          >
+            <Text style={styles.completeBtnText}>Mark as Completed</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </Modal>
   );
