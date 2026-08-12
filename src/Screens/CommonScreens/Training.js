@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ScrollView,
   StatusBar,
@@ -14,7 +14,18 @@ import { hp, wp } from '../../Assets/Responsive';
 import { Colors } from '../../Constants/Colors';
 import { Fontsize } from '../../Constants/Fontsize';
 import { Fonts } from '../../Constants/Fonts';
-import { getTrainingApiRole, getProductTrainingRoleCandidates } from '../../Constants/roleConfig';
+import { useRole } from '../../Context/RoleContext';
+import Api, { isApiSuccess } from '../../Services/Api_services';
+import { showApiMessageToast } from '../../Utils/apiHelpers';
+import {
+  isExternalVideoLink,
+  mapDisplayCategoriesResponse,
+  mapProductTraining,
+  mapTrainingDisplay,
+  mapTrainingVideos,
+  toDisplayApiCategory,
+} from '../../Utils/trainingMappers';
+import { trainingDisplayCategories } from '../../Constants/DummyData';
 import TrainingCustomerCard from '../../Components/TrainingCustomerCard';
 import TrainingDetailModal from '../../Components/TrainingDetailModal';
 import TrainingDisplayCard from '../../Components/TrainingDisplayCard';
@@ -25,16 +36,7 @@ import TrainingStatusChips from '../../Components/TrainingStatusChips';
 import TrainingTabs from '../../Components/TrainingTabs';
 import TrainingVideoModal from '../../Components/TrainingVideoModal';
 import ScreenLoader from '../../Components/ScreenLoader';
-import { useRole } from '../../Context/RoleContext';
-import Api, { isApiSuccess } from '../../Services/Api_services';
-import { showApiMessageToast } from '../../Utils/apiHelpers';
-import {
-  isExternalVideoLink,
-  mapProductTraining,
-  mapTrainingDisplay,
-  mapTrainingVideos,
-  toDisplayApiCategory,
-} from '../../Utils/trainingMappers';
+import { useSelector } from 'react-redux';
 
 const filterByStatus = (items, status) =>
   items.filter(
@@ -58,6 +60,16 @@ const getTrainingVideoStatusParam = status => {
   return 'new';
 };
 
+const resolveDisplayCategoryValue = (categoryLabel, categories = []) => {
+  const matched = categories.find(item => item.label === categoryLabel);
+
+  if (matched?.value) {
+    return matched.value;
+  }
+
+  return toDisplayApiCategory(categoryLabel);
+};
+
 const Training = () => {
   const route = useRoute();
   const { role } = useRole();
@@ -71,8 +83,119 @@ const Training = () => {
   const [customerData, setCustomerData] = useState([]);
   const [productData, setProductData] = useState([]);
   const [displayData, setDisplayData] = useState([]);
+  const [displayCategories, setDisplayCategories] = useState([]);
   const [activeVideo, setActiveVideo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const displayCategoriesRef = useRef([]);
+  const displayCategoriesLoadedRef = useRef(false);
+    const userData = useSelector(state => state?.AUTH?.userData);
+
+  console.log('userdata@@@',JSON.stringify(userData,null,2));
+
+  const updateTrainingItemStatus = useCallback(async (itemId, onSuccess) => {
+    if (itemId == null || itemId === '') {
+      return false;
+    }
+
+    const statusPayload = { status: 'complete' };
+
+    console.log(
+      'Training Video Status Request:',
+      JSON.stringify(
+        {
+          videoId: itemId,
+          ...statusPayload,
+        },
+        null,
+        2,
+      ),
+    );
+
+    try {
+      const res = await Api.updateTrainingVideoStatus(itemId, statusPayload);
+      const resJson = res?.data ?? {};
+
+      console.log(
+        'Training Video Status Backend Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (isApiSuccess(res)) {
+        onSuccess?.();
+        return true;
+      }
+
+      console.log(
+        'Training Video Status Error Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+    } catch (error) {
+      console.log(
+        'Training Video Status API Error:',
+        JSON.stringify(
+          error?.response?.data ?? error?.message ?? error,
+          null,
+          2,
+        ),
+      );
+    }
+
+    return false;
+  }, []);
+
+  const displayCategoryLabels =
+    displayCategories.length > 0
+      ? displayCategories.map(item => item.label)
+      : trainingDisplayCategories;
+
+  const fetchDisplayCategories = useCallback(async () => {
+    if (displayCategoriesLoadedRef.current) {
+      return displayCategoriesRef.current;
+    }
+
+    try {
+      console.log(
+        'Display Categories Request:',
+        JSON.stringify({ endpoint: 'GET /api/display-categories' }, null, 2),
+      );
+
+      const res = await Api.getDisplayCategories();
+      const resJson = res?.data ?? {};
+
+      console.log(
+        'Display Categories Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+
+      if (isApiSuccess(res)) {
+        const mapped = mapDisplayCategoriesResponse(resJson);
+
+        console.log(
+          'Display Categories Mapped Response:',
+          JSON.stringify(mapped, null, 2),
+        );
+
+        displayCategoriesLoadedRef.current = true;
+        displayCategoriesRef.current = mapped;
+        setDisplayCategories(mapped);
+
+        return mapped;
+      }
+
+      console.log(
+        'Display Categories Error Response:',
+        JSON.stringify(resJson, null, 2),
+      );
+      showApiMessageToast(res);
+    } catch (error) {
+      console.log(
+        'Display Categories API Error:',
+        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+      );
+    }
+
+    return displayCategoriesRef.current;
+  }, []);
 
   const fetchTrainingVideos = useCallback(async () => {
     if (activeTab !== 'Customer') {
@@ -120,74 +243,84 @@ const Training = () => {
   }, [activeStatus, activeTab]);
 
   const fetchProductTraining = useCallback(async () => {
-    if (!role) {
+    if (activeTab !== 'Product') {
       return;
     }
 
-    const apiRole = getTrainingApiRole(role);
-    const roleCandidates = getProductTrainingRoleCandidates(role);
+    const apiStatus = getTrainingVideoStatusParam(activeStatus);
 
     try {
-      let products = [];
-      let hasLoggedResponse = false;
+      console.log(
+        'Product Training Request:',
+        JSON.stringify({ status: apiStatus }, null, 2),
+      );
 
-      for (const candidate of roleCandidates) {
-        const res = await Api.getProductTraining(candidate);
-        const resJson = res?.data ?? {};
+      const res = await Api.getProductTraining(apiStatus);
+      const resJson = res?.data ?? {};
 
-        if (res?.status == 200) {
-          if (!hasLoggedResponse) {
-            console.log(
-              'Product Training Response:',
-              JSON.stringify(resJson, null, 2),
-            );
-            hasLoggedResponse = true;
-          }
+      if (isApiSuccess(res)) {
+        console.log(
+          'Product Training Response:',
+          JSON.stringify(resJson, null, 2),
+        );
 
-          products = mapProductTraining(resJson, candidate || apiRole);
-
-          if (products.length) {
-            break;
-          }
-        }
+        setProductData(mapProductTraining(resJson));
+      } else {
+        console.log(
+          'Product Training Error Response:',
+          JSON.stringify(resJson, null, 2),
+        );
+        showApiMessageToast(res);
       }
-
-      setProductData(products);
     } catch (error) {
       console.log(
         'Product Training API Error:',
         JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
       );
     }
-  }, [role]);
+  }, [activeStatus, activeTab]);
 
-  const fetchDisplayTraining = useCallback(async (category = activeCategory) => {
-    const apiCategory = toDisplayApiCategory(category);
+  const fetchDisplayTraining = useCallback(
+    async (categoryLabel, categories = displayCategoriesRef.current) => {
+      if (activeTab !== 'Display') {
+        return;
+      }
 
-    console.log('api categoty',apiCategory);
-    
+      const apiCategory = resolveDisplayCategoryValue(categoryLabel, categories);
+      const apiStatus = getTrainingVideoStatusParam(activeStatus);
 
-    try {
-      const res = await Api.getTrainingDisplay(apiCategory);
-      const resJson = res?.data ?? {};
-
-      if (res?.status == 200) {
+      try {
         console.log(
-          'Training Display Response:',
-          JSON.stringify(resJson, null, 2),
+          'Training Display Request:',
+          JSON.stringify({ category: apiCategory, status: apiStatus }, null, 2),
         );
 
-        setDisplayData(mapTrainingDisplay(resJson, category));
-      } else {
-        showApiMessageToast(res);
+        const res = await Api.getTrainingDisplay(apiCategory, apiStatus);
+        const resJson = res?.data ?? {};
+
+        if (isApiSuccess(res)) {
+          console.log(
+            'Training Display Response:',
+            JSON.stringify(resJson, null, 2),
+          );
+
+          setDisplayData(mapTrainingDisplay(resJson, categoryLabel));
+        } else {
+          console.log(
+            'Training Display Error Response:',
+            JSON.stringify(resJson, null, 2),
+          );
+          showApiMessageToast(res);
+        }
+      } catch (error) {
+        console.log(
+          'Training Display API Error:',
+          JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
+        );
       }
-    } catch (error) {
-      console.log(
-        'Training Display API Error:',
-        JSON.stringify(error?.response?.data ?? error?.message ?? error, null, 2),
-      );
-    }
-  }, [activeCategory]);
+    },
+    [activeStatus, activeTab],
+  );
 
   const loadTrainingData = useCallback(async () => {
     if (!role) {
@@ -206,7 +339,17 @@ const Training = () => {
       }
 
       if (activeTab === 'Display') {
-        await fetchDisplayTraining(activeCategory);
+        const categories = await fetchDisplayCategories();
+
+        if (
+          categories.length &&
+          !categories.some(item => item.label === activeCategory)
+        ) {
+          setActiveCategory(categories[0].label);
+          return;
+        }
+
+        await fetchDisplayTraining(activeCategory, categories);
       }
     } finally {
       setIsLoading(false);
@@ -216,6 +359,7 @@ const Training = () => {
     activeTab,
     activeCategory,
     activeStatus,
+    fetchDisplayCategories,
     fetchTrainingVideos,
     fetchProductTraining,
     fetchDisplayTraining,
@@ -241,19 +385,37 @@ const Training = () => {
     setModalVisible(true);
   };
 
-  const handleMarkCompleted = product => {
+  const handleMarkCompleted = async product => {
     if (product?.id) {
-      setProductData(prev =>
-        prev.map(item =>
-          item.id === product.id ? { ...item, status: 'Completed' } : item,
-        ),
-      );
+      await updateTrainingItemStatus(product.id, () => {
+        setProductData(prev =>
+          prev.map(item =>
+            item.id === product.id ? { ...item, status: 'Completed' } : item,
+          ),
+        );
+      });
     }
 
     setModalVisible(false);
     setSelectedProduct(null);
     setActiveTab('Product');
     setActiveStatus('Completed');
+  };
+
+  const handleDisplayAudioPlay = item => {
+    if (!item?.id) {
+      return;
+    }
+
+    updateTrainingItemStatus(item.id, () => {
+      setDisplayData(prev =>
+        prev.map(displayItem =>
+          displayItem.id === item.id
+            ? { ...displayItem, status: 'Completed' }
+            : displayItem,
+        ),
+      );
+    });
   };
 
   const handlePlayVideo = async item => {
@@ -276,51 +438,13 @@ const Training = () => {
     );
 
     if (item?.id) {
-      try {
-        const statusPayload = { status: 'complete' };
-
-        console.log(
-          'Training Video Status Request:',
-          JSON.stringify(
-            {
-              videoId: item.id,
-              ...statusPayload,
-            },
-            null,
-            2,
+      await updateTrainingItemStatus(item.id, () => {
+        setCustomerData(prev =>
+          prev.map(video =>
+            video.id === item.id ? { ...video, status: 'Completed' } : video,
           ),
         );
-
-        const res = await Api.updateTrainingVideoStatus(item.id, statusPayload);
-        const resJson = res?.data ?? {};
-
-        console.log(
-          'Training Video Status Backend Response:',
-          JSON.stringify(resJson, null, 2),
-        );
-
-        if (isApiSuccess(res)) {
-          setCustomerData(prev =>
-            prev.map(video =>
-              video.id === item.id ? { ...video, status: 'Completed' } : video,
-            ),
-          );
-        } else {
-          console.log(
-            'Training Video Status Error Response:',
-            JSON.stringify(resJson, null, 2),
-          );
-        }
-      } catch (error) {
-        console.log(
-          'Training Video Status API Error:',
-          JSON.stringify(
-            error?.response?.data ?? error?.message ?? error,
-            null,
-            2,
-          ),
-        );
-      }
+      });
     }
 
     if (isExternalVideoLink(item.videoUrl)) {
@@ -377,6 +501,7 @@ const Training = () => {
               <TrainingDisplayCategories
                 active={activeCategory}
                 onChange={setActiveCategory}
+                categories={displayCategoryLabels}
               />
             )}
 
@@ -402,7 +527,11 @@ const Training = () => {
 
             {activeTab === 'Display' &&
               filteredDisplay.map(item => (
-                <TrainingDisplayCard key={item.id} item={item} />
+                <TrainingDisplayCard
+                  key={item.id}
+                  item={item}
+                  onAudioPlay={handleDisplayAudioPlay}
+                />
               ))}
 
             {!activeList.length ? (

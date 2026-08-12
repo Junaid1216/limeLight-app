@@ -22,7 +22,7 @@ const formatTime = seconds => {
   return `${mins}:${String(secs).padStart(2, '0')}`;
 };
 
-const DisplayAudioPlayer = ({ audioUrl, apiDuration }) => {
+const DisplayAudioPlayer = ({ audioUrl, apiDuration, onAudioPlay }) => {
   const playerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -74,6 +74,9 @@ const DisplayAudioPlayer = ({ audioUrl, apiDuration }) => {
           activeOpacity={0.9}
           onPress={() => {
             if (source) {
+              if (!isPlaying) {
+                onAudioPlay?.();
+              }
               setIsPlaying(current => !current);
             }
           }}
@@ -101,7 +104,7 @@ const DisplayAudioPlayer = ({ audioUrl, apiDuration }) => {
   );
 };
 
-const TrainingDisplayCard = ({ item }) => {
+const TrainingDisplayCard = ({ item, onAudioPlay }) => {
   const hasLocation = Boolean(item?.location);
   const hasCategory = Boolean(item?.category);
   const hasDescription = Boolean(item?.description);
@@ -138,6 +141,7 @@ const TrainingDisplayCard = ({ item }) => {
           <DisplayAudioPlayer
             audioUrl={item.audioUrl}
             apiDuration={item.duration}
+            onAudioPlay={() => onAudioPlay?.(item)}
           />
         ) : null}
       </View>

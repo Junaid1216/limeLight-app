@@ -15,18 +15,26 @@ const TotalResponsesCard = ({
   responses = surveyReportSummary.responses,
   total = surveyReportSummary.total,
   rate = surveyReportSummary.rate,
+  disableNavigation = false,
 }) => {
   const navigation = useNavigation();
 
+  const handlePress = () => {
+    if (disableNavigation) {
+      return;
+    }
+
+    navigation.navigate('SurveyResponse', {
+      branchId,
+      surveyId,
+    });
+  };
+
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      onPress={() =>
-        navigation.navigate('SurveyResponse', {
-          branchId,
-          surveyId,
-        })
-      }
+      style={({ pressed }) => [styles.card, pressed && !disableNavigation && styles.cardPressed]}
+      onPress={handlePress}
+      disabled={disableNavigation}
     >
       <View style={styles.leftContent}>
         <Text style={styles.label}>{Strings.totalResponses}</Text>

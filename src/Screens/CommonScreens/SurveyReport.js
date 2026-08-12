@@ -31,6 +31,7 @@ const SurveyReport = () => {
   const userData = useSelector(state => state?.AUTH?.userData);
   const activeSurveyId = useSelector(selectActiveSurveyId);
   const isAsm = role === ROLES.ASM;
+  const isStaff = role === ROLES.STAFF;
   const [reportData, setReportData] = useState(null);
   const [branchId, setBranchId] = useState(null);
   const [branchName, setBranchName] = useState('');
@@ -269,6 +270,7 @@ const SurveyReport = () => {
             responses={reportData?.totalResponses ?? 0}
             total={reportData?.totalStaff ?? 0}
             rate={reportData?.responseRate ?? '0%'}
+            disableNavigation={isStaff}
           />
           <SatisficationSurveyComponent
             reportTitle={reportData?.reportTitle}

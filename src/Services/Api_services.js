@@ -142,18 +142,13 @@ const Api = {
     requests.get(`training-videos?status=${encodeURIComponent(status)}`),
   updateTrainingVideoStatus: (id, data) =>
     requests.post(`training-videos/${id}/status`, data),
-  getProductTraining: role => {
-    const query = role ? `?role=${encodeURIComponent(role)}` : '';
-
-    return requests.get(`product-training${query}`);
-  },
-  getTrainingDisplay: category => {
-    const query = category
-      ? `?category=${encodeURIComponent(category)}`
-      : '';
-
-    return requests.get(`training-display${query}`);
-  },
+  getDisplayCategories: () => requests.get('display-categories'),
+  getProductTraining: status =>
+    requests.get(`product-training?status=${encodeURIComponent(status)}`),
+  getTrainingDisplay: (category, status) =>
+    requests.get(
+      `training-display?category=${encodeURIComponent(category)}&status=${encodeURIComponent(status)}`,
+    ),
   getAnnouncements: category => {
     const query = category ? `?category=${encodeURIComponent(category)}` : '';
 

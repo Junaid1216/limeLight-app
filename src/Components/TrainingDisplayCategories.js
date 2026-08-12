@@ -6,13 +6,13 @@ import { Fonts } from '../Constants/Fonts';
 import { Fontsize } from '../Constants/Fontsize';
 import { trainingDisplayCategories } from '../Constants/DummyData';
 
-const TrainingDisplayCategories = ({ active, onChange }) => (
+const TrainingDisplayCategories = ({ active, onChange, categories = trainingDisplayCategories }) => (
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
     contentContainerStyle={styles.categoryRow}
   >
-    {trainingDisplayCategories.map(cat => {
+    {categories.map(cat => {
       const isActive = active === cat;
       return (
         <TouchableOpacity

@@ -1206,6 +1206,37 @@ const mapProductTrainingItem = (item, index) => {
   };
 };
 
+export const mapDisplayCategoriesResponse = (responseBody = {}) => {
+  const list = Array.isArray(responseBody?.data)
+    ? responseBody.data
+    : Array.isArray(responseBody)
+      ? responseBody
+      : responseBody?.categories ?? [];
+
+  return (Array.isArray(list) ? list : [])
+    .map(item => {
+      if (typeof item === 'string') {
+        return {
+          label: item,
+          value: toDisplayApiCategory(item),
+        };
+      }
+
+      const label = item?.name ?? item?.label ?? item?.title ?? '';
+
+      return {
+        label,
+        value: String(
+          item?.slug ??
+            item?.value ??
+            item?.category ??
+            toDisplayApiCategory(label),
+        ),
+      };
+    })
+    .filter(item => item.label);
+};
+
 export const mapProductTraining = (responseData, apiRole = '') =>
   getProductTrainingList(responseData, apiRole).map(mapProductTrainingItem);
 
